@@ -31,7 +31,23 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Verify compliance with [constitution principles](../.specify/memory/constitution.md):
+
+- [ ] **Domain Layer Purity**: No infrastructure dependencies in domain layer (Principle I)
+- [ ] **Layered Architecture**: Proper separation of Domain/Application/Infrastructure (Principle II)
+- [ ] **Aggregate Design**: Aggregates designed around transaction boundaries (Principle III)
+- [ ] **Value Objects**: Domain concepts modeled as Value Objects, not primitives (Principle IV)
+- [ ] **TDD**: Tests written before implementation (Principle V)
+- [ ] **Anti-Corruption Layer**: External integration uses gateways (Principle VI)
+- [ ] **Intention-Revealing Design**: Ubiquitous language used throughout (Principle VII)
+- [ ] **Atomic Commits**: Conventional Commits specification followed (Principle VIII)
+
+**Quality Gates**:
+- [ ] Linting configured and passing
+- [ ] Formatting configured
+- [ ] Test framework configured (Jest)
+- [ ] TypeScript strict mode enabled
+- [ ] Build pipeline functional
 
 ## Project Structure
 
