@@ -115,6 +115,25 @@ export class ShoppingCart {
   }
 
   /**
+   * Removes an item from the cart
+   * @param productId - Product identifier to remove
+   * @throws Error if cart is converted
+   * @throws Error if product is not in cart
+   */
+  removeItem(productId: ProductId): void {
+    this.ensureNotConverted();
+
+    const productKey = productId.getValue();
+    const existingItem = this.items.get(productKey);
+
+    if (!existingItem) {
+      throw new Error(`Product ${productKey} is not in the cart`);
+    }
+
+    this.items.delete(productKey);
+  }
+
+  /**
    * Marks cart as converted to order
    * Once converted, cart becomes immutable
    */

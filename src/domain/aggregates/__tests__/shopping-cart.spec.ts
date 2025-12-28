@@ -317,4 +317,65 @@ describe('ShoppingCart', () => {
       );
     });
   });
+
+  describe('removeItem - US3', () => {
+    it('should remove existing item from cart', () => {
+      const cart = ShoppingCart.create(
+        CartId.create(),
+        CustomerId.fromString('customer-1'),
+      );
+      const productId = ProductId.fromString('product-1');
+      cart.addItem(productId, Quantity.of(3));
+
+      expect(cart.getItemCount()).toBe(1);
+
+      cart.removeItem(productId);
+
+      expect(cart.getItemCount()).toBe(0);
+      expect(cart.getItems()).toHaveLength(0);
+    });
+
+    it('should make cart empty when removing last item', () => {
+      const cart = ShoppingCart.create(
+        CartId.create(),
+        CustomerId.fromString('customer-1'),
+      );
+      const productId = ProductId.fromString('product-1');
+      cart.addItem(productId, Quantity.of(5));
+
+      expect(cart.getItemCount()).toBe(1);
+
+      cart.removeItem(productId);
+
+      expect(cart.getItemCount()).toBe(0);
+      expect(cart.getItems()).toHaveLength(0);
+    });
+
+    it('should throw error for non-existent product', () => {
+      const cart = ShoppingCart.create(
+        CartId.create(),
+        CustomerId.fromString('customer-1'),
+      );
+      cart.addItem(ProductId.fromString('product-1'), Quantity.of(3));
+
+      expect(() =>
+        cart.removeItem(ProductId.fromString('product-2')),
+      ).toThrow('Product product-2 is not in the cart');
+    });
+
+    it('should reject removal on converted cart', () => {
+      const cart = ShoppingCart.create(
+        CartId.create(),
+        CustomerId.fromString('customer-1'),
+      );
+      const productId = ProductId.fromString('product-1');
+      cart.addItem(productId, Quantity.of(3));
+
+      cart.markAsConverted();
+
+      expect(() => cart.removeItem(productId)).toThrow(
+        'has already been converted and cannot be modified',
+      );
+    });
+  });
 });

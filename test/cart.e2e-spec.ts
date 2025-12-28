@@ -390,7 +390,9 @@ describe('CartController (e2e)', () => {
         .expect(400)
         .expect((res) => {
           const body = res.body as ErrorResponse;
-          expect(body.message).toContain('Product product-2 is not in the cart');
+          expect(body.message).toContain(
+            'Product product-2 is not in the cart',
+          );
         });
     });
 
