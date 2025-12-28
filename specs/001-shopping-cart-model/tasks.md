@@ -281,50 +281,50 @@ This document provides a complete task breakdown for implementing the Shopping C
 
 **User Story**: US4
 
-- [ ] T132 [US4] Write test for ShoppingCart.markAsConverted() marks cart as converted in test/unit/shopping-cart.spec.ts
-- [ ] T133 [US4] Write test for ShoppingCart.markAsConverted() throws EmptyCartError when cart is empty in test/unit/shopping-cart.spec.ts
-- [ ] T134 [US4] Write test for ShoppingCart.isConverted() returns true after conversion in test/unit/shopping-cart.spec.ts
-- [ ] T135 [US4] Write test for ShoppingCart.addItem() throws CartAlreadyConvertedError on converted cart in test/unit/shopping-cart.spec.ts
-- [ ] T136 [US4] Implement ShoppingCart.markAsConverted() method in src/domain/aggregates/shopping-cart.ts
-- [ ] T137 [US4] Implement ensureNotConverted() private guard method in src/domain/aggregates/shopping-cart.ts
-- [ ] T138 [US4] Add ensureNotConverted() check to addItem() method in src/domain/aggregates/shopping-cart.ts
-- [ ] T139 [US4] Run tests and verify ShoppingCart US4 behaviors pass
-- [ ] T140 [US4] Commit ShoppingCart US4 tests with message "test(US4): add cart conversion immutability tests"
-- [ ] T141 [US4] Commit ShoppingCart US4 implementation with message "feat(US4): implement cart conversion with immutability enforcement"
+- [X] T132 [US4] Write test for ShoppingCart.markAsConverted() marks cart as converted in test/unit/shopping-cart.spec.ts
+- [X] T133 [US4] Write test for ShoppingCart.markAsConverted() throws EmptyCartError when cart is empty in test/unit/shopping-cart.spec.ts
+- [X] T134 [US4] Write test for ShoppingCart.isConverted() returns true after conversion in test/unit/shopping-cart.spec.ts
+- [X] T135 [US4] Write test for ShoppingCart.addItem() throws CartAlreadyConvertedError on converted cart in test/unit/shopping-cart.spec.ts
+- [X] T136 [US4] Implement ShoppingCart.markAsConverted() method in src/domain/aggregates/shopping-cart.ts
+- [X] T137 [US4] Implement ensureNotConverted() private guard method in src/domain/aggregates/shopping-cart.ts
+- [X] T138 [US4] Add ensureNotConverted() check to addItem() method in src/domain/aggregates/shopping-cart.ts
+- [X] T139 [US4] Run tests and verify ShoppingCart US4 behaviors pass
+- [X] T140 [US4] Commit ShoppingCart US4 tests with message "test(US4): add cart conversion immutability tests"
+- [X] T141 [US4] Commit ShoppingCart US4 implementation with message "feat(US4): implement cart conversion with immutability enforcement"
 
 ### Application Layer (US4)
 
 **User Story**: US4
 
-- [ ] T142 [US4] Write integration test for CartService.markAsConverted() in test/integration/cart.service.spec.ts
-- [ ] T143 [US4] Write integration test for CartService.addItem() rejection after conversion in test/integration/cart.service.spec.ts
-- [ ] T144 [US4] Implement CartService.markAsConverted() orchestration in src/application/services/cart.service.ts
-- [ ] T145 [US4] Run integration tests and verify CartService US4 passes
-- [ ] T146 [US4] Commit CartService US4 tests with message "test(US4): add CartService conversion tests"
-- [ ] T147 [US4] Commit CartService US4 implementation with message "feat(US4): implement CartService conversion method"
+- [X] T142 [US4] Write integration test for CartService.markAsConverted() in test/integration/cart.service.spec.ts
+- [X] T143 [US4] Write integration test for CartService.addItem() rejection after conversion in test/integration/cart.service.spec.ts
+- [X] T144 [US4] Implement CartService.markAsConverted() orchestration in src/application/services/cart.service.ts
+- [X] T145 [US4] Run integration tests and verify CartService US4 passes
+- [X] T146 [US4] Commit CartService US4 tests with message "test(US4): add CartService conversion tests"
+- [X] T147 [US4] Commit CartService US4 implementation with message "feat(US4): implement CartService conversion method"
 
 ### Infrastructure Layer (US4)
 
 **User Story**: US4
 
-- [ ] T148 [US4] Write e2e test for POST /carts/:id/convert in test/e2e/cart.e2e-spec.ts
-- [ ] T149 [US4] Write e2e test for POST /carts/:id/convert rejecting empty cart in test/e2e/cart.e2e-spec.ts
-- [ ] T150 [US4] Write e2e test for POST /carts/:id/items rejecting after conversion in test/e2e/cart.e2e-spec.ts
-- [ ] T151 [US4] Implement CartController.markAsConverted() endpoint in src/infrastructure/controllers/cart.controller.ts
-- [ ] T152 [US4] Run e2e tests and verify US4 endpoints pass
-- [ ] T153 [US4] Commit e2e tests with message "test(US4): add e2e tests for cart conversion"
-- [ ] T154 [US4] Commit controller with message "feat(US4): implement cart conversion endpoint"
+- [X] T148 [US4] Write e2e test for POST /carts/:id/convert in test/e2e/cart.e2e-spec.ts
+- [X] T149 [US4] Write e2e test for POST /carts/:id/convert rejecting empty cart in test/e2e/cart.e2e-spec.ts
+- [X] T150 [US4] Write e2e test for POST /carts/:id/items rejecting after conversion in test/e2e/cart.e2e-spec.ts
+- [X] T151 [US4] Implement CartController.markAsConverted() endpoint in src/infrastructure/controllers/cart.controller.ts
+- [X] T152 [US4] Run e2e tests and verify US4 endpoints pass
+- [X] T153 [US4] Commit e2e tests with message "test(US4): add e2e tests for cart conversion"
+- [X] T154 [US4] Commit controller with message "feat(US4): implement cart conversion endpoint"
 
 ### US4 Validation
 
 **User Story**: US4
 
-- [ ] T155 [US4] Run full test suite and verify all US4 tests pass
-- [ ] T156 [US4] Manually test: Convert cart with items → Verify success
-- [ ] T157 [US4] Manually test: Convert empty cart → Verify rejection
-- [ ] T158 [US4] Manually test: Add item to converted cart → Verify rejection
-- [ ] T159 [US4] Run quality gates (lint, format, build)
-- [ ] T160 [US4] Commit final integration with message "feat(US4): complete cart conversion immutability feature"
+- [X] T155 [US4] Run full test suite and verify all US4 tests pass
+- [X] T156 [US4] Manually test: Convert cart with items → Verify success
+- [X] T157 [US4] Manually test: Convert empty cart → Verify rejection
+- [X] T158 [US4] Manually test: Add item to converted cart → Verify rejection
+- [X] T159 [US4] Run quality gates (lint, format, build)
+- [X] T160 [US4] Commit final integration with message "feat(US4): complete cart conversion immutability feature"
 
 ---
 
