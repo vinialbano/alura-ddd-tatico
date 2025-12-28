@@ -297,4 +297,148 @@ describe('CartController (e2e)', () => {
         });
     });
   });
+
+  describe('PUT /carts/:id/items/:productId', () => {
+    it('should update quantity of existing item', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 3 });
+
+      return request(app.getHttpServer())
+        .put(`/carts/${cartId}/items/product-1`)
+        .send({ quantity: 7 })
+        .expect(200)
+        .expect((res) => {
+          const body = res.body as CartResponseDto;
+          expect(body.items).toHaveLength(1);
+          expect(body.items[0].productId).toBe('product-1');
+          expect(body.items[0].quantity).toBe(7);
+        });
+    });
+
+    it('should allow increasing quantity', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 2 });
+
+      return request(app.getHttpServer())
+        .put(`/carts/${cartId}/items/product-1`)
+        .send({ quantity: 9 })
+        .expect(200)
+        .expect((res) => {
+          const body = res.body as CartResponseDto;
+          expect(body.items[0].quantity).toBe(9);
+        });
+    });
+
+    it('should allow decreasing quantity', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 8 });
+
+      return request(app.getHttpServer())
+        .put(`/carts/${cartId}/items/product-1`)
+        .send({ quantity: 3 })
+        .expect(200)
+        .expect((res) => {
+          const body = res.body as CartResponseDto;
+          expect(body.items[0].quantity).toBe(3);
+        });
+    });
+
+    it('should return 404 for non-existent cart', () => {
+      const nonExistentId = '00000000-0000-0000-0000-000000000000';
+
+      return request(app.getHttpServer())
+        .put(`/carts/${nonExistentId}/items/product-1`)
+        .send({ quantity: 5 })
+        .expect(404);
+    });
+
+    it('should return 400 for non-existent product', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 3 });
+
+      return request(app.getHttpServer())
+        .put(`/carts/${cartId}/items/product-2`)
+        .send({ quantity: 5 })
+        .expect(400)
+        .expect((res) => {
+          const body = res.body as ErrorResponse;
+          expect(body.message).toContain('Product product-2 is not in the cart');
+        });
+    });
+
+    it('should reject invalid quantity', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 3 });
+
+      await request(app.getHttpServer())
+        .put(`/carts/${cartId}/items/product-1`)
+        .send({ quantity: 0 })
+        .expect(400);
+
+      return request(app.getHttpServer())
+        .put(`/carts/${cartId}/items/product-1`)
+        .send({ quantity: 11 })
+        .expect(400);
+    });
+
+    it('should reject update on converted cart', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 3 });
+
+      await request(app.getHttpServer()).post(`/carts/${cartId}/convert`);
+
+      return request(app.getHttpServer())
+        .put(`/carts/${cartId}/items/product-1`)
+        .send({ quantity: 5 })
+        .expect(400)
+        .expect((res) => {
+          const body = res.body as ErrorResponse;
+          expect(body.message).toContain(
+            'has already been converted and cannot be modified',
+          );
+        });
+    });
+  });
 });

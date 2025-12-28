@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Put,
   Body,
   Param,
   HttpCode,
@@ -12,6 +13,7 @@ import {
 import { CartService } from '../../application/services/cart.service';
 import { CreateCartDto } from '../../application/dtos/create-cart.dto';
 import { AddItemDto } from '../../application/dtos/add-item.dto';
+import { UpdateQuantityDto } from '../../application/dtos/update-quantity.dto';
 import { CartResponseDto } from '../../application/dtos/cart-response.dto';
 
 /**
@@ -87,6 +89,32 @@ export class CartController {
   async convertCart(@Param('id') cartId: string): Promise<CartResponseDto> {
     try {
       return await this.cartService.convertCart(cartId);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message === 'Cart not found') {
+        throw new NotFoundException(message);
+      }
+      throw new BadRequestException(message);
+    }
+  }
+
+  /**
+   * PUT /carts/:id/items/:productId
+   * Updates quantity of an item in the cart
+   */
+  @Put(':id/items/:productId')
+  @HttpCode(HttpStatus.OK)
+  async updateItemQuantity(
+    @Param('id') cartId: string,
+    @Param('productId') productId: string,
+    @Body() updateQuantityDto: UpdateQuantityDto,
+  ): Promise<CartResponseDto> {
+    try {
+      return await this.cartService.updateItemQuantity(
+        cartId,
+        productId,
+        updateQuantityDto,
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message === 'Cart not found') {
