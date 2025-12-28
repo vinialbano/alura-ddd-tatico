@@ -194,67 +194,67 @@ This document provides a complete task breakdown for implementing the Shopping C
 
 **User Story**: US1
 
-- [ ] T089 [US1] Define ShoppingCartRepository interface in src/domain/repositories/shopping-cart.repository.interface.ts
-- [ ] T090 [US1] Commit repository interface with message "feat(US1): define ShoppingCartRepository interface"
+- [X] T089 [US1] Define ShoppingCartRepository interface in src/domain/repositories/shopping-cart.repository.interface.ts
+- [X] T090 [US1] Commit repository interface with message "feat(US1): define ShoppingCartRepository interface"
 
 ### Application Layer (US1)
 
 **User Story**: US1
 
-- [ ] T091 [P] [US1] Create AddItemDto in src/application/dtos/add-item.dto.ts
-- [ ] T092 [P] [US1] Create CreateCartDto in src/application/dtos/create-cart.dto.ts
-- [ ] T093 [P] [US1] Create CartResponseDto in src/application/dtos/cart-response.dto.ts
-- [ ] T094 [P] [US1] Create CartItemResponseDto in src/application/dtos/cart-response.dto.ts
-- [ ] T095 [US1] Commit DTOs with message "feat(US1): create DTOs for cart creation and adding items"
+- [X] T091 [P] [US1] Create AddItemDto in src/application/dtos/add-item.dto.ts
+- [X] T092 [P] [US1] Create CreateCartDto in src/application/dtos/create-cart.dto.ts
+- [X] T093 [P] [US1] Create CartResponseDto in src/application/dtos/cart-response.dto.ts
+- [X] T094 [P] [US1] Create CartItemResponseDto in src/application/dtos/cart-response.dto.ts
+- [X] T095 [US1] Commit DTOs with message "feat(US1): create DTOs for cart creation and adding items"
 
-- [ ] T096 [US1] Write integration test for CartService.createCart() in test/integration/cart.service.spec.ts
-- [ ] T097 [US1] Write integration test for CartService.addItem() in test/integration/cart.service.spec.ts
-- [ ] T098 [US1] Write integration test for CartService.addItem() with consolidation in test/integration/cart.service.spec.ts
-- [ ] T099 [US1] Write integration test for CartService.getCart() in test/integration/cart.service.spec.ts
-- [ ] T100 [US1] Implement CartService with createCart() method in src/application/services/cart.service.ts
-- [ ] T101 [US1] Implement CartService.addItem() orchestration in src/application/services/cart.service.ts
-- [ ] T102 [US1] Implement CartService.getCart() query in src/application/services/cart.service.ts
-- [ ] T103 [US1] Implement DTO mapping helpers in CartService in src/application/services/cart.service.ts
-- [ ] T104 [US1] Run integration tests and verify CartService US1 passes
-- [ ] T105 [US1] Commit CartService tests with message "test(US1): add CartService integration tests"
-- [ ] T106 [US1] Commit CartService implementation with message "feat(US1): implement CartService with cart creation and item addition"
+- [X] T096 [US1] Write integration test for CartService.createCart() in test/integration/cart.service.spec.ts
+- [X] T097 [US1] Write integration test for CartService.addItem() in test/integration/cart.service.spec.ts
+- [X] T098 [US1] Write integration test for CartService.addItem() with consolidation in test/integration/cart.service.spec.ts
+- [X] T099 [US1] Write integration test for CartService.getCart() in test/integration/cart.service.spec.ts
+- [X] T100 [US1] Implement CartService with createCart() method in src/application/services/cart.service.ts
+- [X] T101 [US1] Implement CartService.addItem() orchestration in src/application/services/cart.service.ts
+- [X] T102 [US1] Implement CartService.getCart() query in src/application/services/cart.service.ts
+- [X] T103 [US1] Implement DTO mapping helpers in CartService in src/application/services/cart.service.ts
+- [X] T104 [US1] Run integration tests and verify CartService US1 passes
+- [X] T105 [US1] Commit CartService tests with message "test(US1): add CartService integration tests"
+- [X] T106 [US1] Commit CartService implementation with message "feat(US1): implement CartService with cart creation and item addition"
 
 ### Infrastructure Layer (US1)
 
 **User Story**: US1
 
-- [ ] T107 [US1] Implement InMemoryShoppingCartRepository.save() in src/infrastructure/repositories/in-memory-shopping-cart.repository.ts
-- [ ] T108 [US1] Implement InMemoryShoppingCartRepository.findById() in src/infrastructure/repositories/in-memory-shopping-cart.repository.ts
-- [ ] T109 [US1] Implement InMemoryShoppingCartRepository.findByCustomerId() in src/infrastructure/repositories/in-memory-shopping-cart.repository.ts
-- [ ] T110 [US1] Commit repository implementation with message "feat(US1): implement InMemoryShoppingCartRepository"
+- [X] T107 [US1] Implement InMemoryShoppingCartRepository.save() in src/infrastructure/repositories/in-memory-shopping-cart.repository.ts
+- [X] T108 [US1] Implement InMemoryShoppingCartRepository.findById() in src/infrastructure/repositories/in-memory-shopping-cart.repository.ts
+- [X] T109 [US1] Implement InMemoryShoppingCartRepository.findByCustomerId() in src/infrastructure/repositories/in-memory-shopping-cart.repository.ts
+- [X] T110 [US1] Commit repository implementation with message "feat(US1): implement InMemoryShoppingCartRepository"
 
-- [ ] T111 [US1] Write e2e test for POST /carts (create cart) in test/e2e/cart.e2e-spec.ts
-- [ ] T112 [US1] Write e2e test for POST /carts/:id/items (add item) in test/e2e/cart.e2e-spec.ts
-- [ ] T113 [US1] Write e2e test for POST /carts/:id/items with duplicate product in test/e2e/cart.e2e-spec.ts
-- [ ] T114 [US1] Write e2e test for GET /carts/:id in test/e2e/cart.e2e-spec.ts
-- [ ] T115 [US1] Write e2e test for POST /carts/:id/items rejecting 21st product in test/e2e/cart.e2e-spec.ts
-- [ ] T116 [US1] Implement CartController.createCart() endpoint in src/infrastructure/controllers/cart.controller.ts
-- [ ] T117 [US1] Implement CartController.addItem() endpoint in src/infrastructure/controllers/cart.controller.ts
-- [ ] T118 [US1] Implement CartController.getCart() endpoint in src/infrastructure/controllers/cart.controller.ts
-- [ ] T119 [US1] Run e2e tests and verify US1 endpoints pass
-- [ ] T120 [US1] Commit e2e tests with message "test(US1): add e2e tests for cart creation and item addition"
-- [ ] T121 [US1] Commit controller with message "feat(US1): implement CartController with cart creation and item endpoints"
+- [X] T111 [US1] Write e2e test for POST /carts (create cart) in test/e2e/cart.e2e-spec.ts
+- [X] T112 [US1] Write e2e test for POST /carts/:id/items (add item) in test/e2e/cart.e2e-spec.ts
+- [X] T113 [US1] Write e2e test for POST /carts/:id/items with duplicate product in test/e2e/cart.e2e-spec.ts
+- [X] T114 [US1] Write e2e test for GET /carts/:id in test/e2e/cart.e2e-spec.ts
+- [X] T115 [US1] Write e2e test for POST /carts/:id/items rejecting 21st product in test/e2e/cart.e2e-spec.ts
+- [X] T116 [US1] Implement CartController.createCart() endpoint in src/infrastructure/controllers/cart.controller.ts
+- [X] T117 [US1] Implement CartController.addItem() endpoint in src/infrastructure/controllers/cart.controller.ts
+- [X] T118 [US1] Implement CartController.getCart() endpoint in src/infrastructure/controllers/cart.controller.ts
+- [X] T119 [US1] Run e2e tests and verify US1 endpoints pass
+- [X] T120 [US1] Commit e2e tests with message "test(US1): add e2e tests for cart creation and item addition"
+- [X] T121 [US1] Commit controller with message "feat(US1): implement CartController with cart creation and item endpoints"
 
-- [ ] T122 [US1] Create CartModule wiring Controller, Service, Repository in src/infrastructure/modules/cart.module.ts
-- [ ] T123 [US1] Register CartModule in app.module.ts
-- [ ] T124 [US1] Commit module with message "feat(US1): wire CartModule dependencies"
+- [X] T122 [US1] Create CartModule wiring Controller, Service, Repository in src/infrastructure/modules/cart.module.ts
+- [X] T123 [US1] Register CartModule in app.module.ts
+- [X] T124 [US1] Commit module with message "feat(US1): wire CartModule dependencies"
 
 ### US1 Validation
 
 **User Story**: US1
 
-- [ ] T125 [US1] Run full test suite (npm test) and verify all US1 tests pass
-- [ ] T126 [US1] Run e2e tests (npm run test:e2e) and verify US1 endpoints work
-- [ ] T127 [US1] Manually test: Create cart → Add item → Verify response
-- [ ] T128 [US1] Manually test: Add duplicate product → Verify consolidation
-- [ ] T129 [US1] Manually test: Add 21 products → Verify rejection
-- [ ] T130 [US1] Run quality gates (lint, format, build)
-- [ ] T131 [US1] Commit final integration with message "feat(US1): complete add products to cart feature"
+- [X] T125 [US1] Run full test suite (npm test) and verify all US1 tests pass
+- [X] T126 [US1] Run e2e tests (npm run test:e2e) and verify US1 endpoints work
+- [X] T127 [US1] Manually test: Create cart → Add item → Verify response
+- [X] T128 [US1] Manually test: Add duplicate product → Verify consolidation
+- [X] T129 [US1] Manually test: Add 21 products → Verify rejection
+- [X] T130 [US1] Run quality gates (lint, format, build)
+- [X] T131 [US1] Commit final integration with message "feat(US1): complete add products to cart feature"
 
 ---
 
