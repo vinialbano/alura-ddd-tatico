@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Put,
+  Delete,
   Body,
   Param,
   HttpCode,
@@ -115,6 +116,27 @@ export class CartController {
         productId,
         updateQuantityDto,
       );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message === 'Cart not found') {
+        throw new NotFoundException(message);
+      }
+      throw new BadRequestException(message);
+    }
+  }
+
+  /**
+   * DELETE /carts/:id/items/:productId
+   * Removes an item from the cart
+   */
+  @Delete(':id/items/:productId')
+  @HttpCode(HttpStatus.OK)
+  async removeItem(
+    @Param('id') cartId: string,
+    @Param('productId') productId: string,
+  ): Promise<CartResponseDto> {
+    try {
+      return await this.cartService.removeItem(cartId, productId);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message === 'Cart not found') {

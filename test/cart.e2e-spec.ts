@@ -443,4 +443,100 @@ describe('CartController (e2e)', () => {
         });
     });
   });
+
+  describe('DELETE /carts/:id/items/:productId', () => {
+    it('should remove existing item from cart', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 3 });
+
+      return request(app.getHttpServer())
+        .delete(`/carts/${cartId}/items/product-1`)
+        .expect(200)
+        .expect((res) => {
+          const body = res.body as CartResponseDto;
+          expect(body.items).toHaveLength(0);
+          expect(body.itemCount).toBe(0);
+        });
+    });
+
+    it('should make cart empty when removing last item', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 5 });
+
+      return request(app.getHttpServer())
+        .delete(`/carts/${cartId}/items/product-1`)
+        .expect(200)
+        .expect((res) => {
+          const body = res.body as CartResponseDto;
+          expect(body.items).toHaveLength(0);
+          expect(body.itemCount).toBe(0);
+        });
+    });
+
+    it('should return 404 for non-existent cart', () => {
+      const nonExistentId = '00000000-0000-0000-0000-000000000000';
+
+      return request(app.getHttpServer())
+        .delete(`/carts/${nonExistentId}/items/product-1`)
+        .expect(404);
+    });
+
+    it('should return 400 for non-existent product', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 3 });
+
+      return request(app.getHttpServer())
+        .delete(`/carts/${cartId}/items/product-2`)
+        .expect(400)
+        .expect((res) => {
+          const body = res.body as ErrorResponse;
+          expect(body.message).toContain('Product product-2 is not in the cart');
+        });
+    });
+
+    it('should reject removal on converted cart', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 3 });
+
+      await request(app.getHttpServer()).post(`/carts/${cartId}/convert`);
+
+      return request(app.getHttpServer())
+        .delete(`/carts/${cartId}/items/product-1`)
+        .expect(400)
+        .expect((res) => {
+          const body = res.body as ErrorResponse;
+          expect(body.message).toContain(
+            'has already been converted and cannot be modified',
+          );
+        });
+    });
+  });
 });
