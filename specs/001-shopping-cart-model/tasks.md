@@ -351,53 +351,53 @@ This document provides a complete task breakdown for implementing the Shopping C
 
 **User Story**: US2
 
-- [ ] T161 [P] [US2] Write test for ShoppingCart.updateItemQuantity() updates existing item in test/unit/shopping-cart.spec.ts
-- [ ] T162 [P] [US2] Write test for ShoppingCart.updateItemQuantity() throws ProductNotInCartError for non-existent product in test/unit/shopping-cart.spec.ts
-- [ ] T163 [P] [US2] Write test for ShoppingCart.updateItemQuantity() throws CartAlreadyConvertedError on converted cart in test/unit/shopping-cart.spec.ts
-- [ ] T164 [P] [US2] Write test for ShoppingCart.updateItemQuantity() rejects invalid quantity in test/unit/shopping-cart.spec.ts
-- [ ] T165 [US2] Implement ShoppingCart.updateItemQuantity() method in src/domain/aggregates/shopping-cart.ts
-- [ ] T166 [US2] Run tests and verify ShoppingCart US2 behaviors pass
-- [ ] T167 [US2] Commit ShoppingCart US2 tests with message "test(US2): add update item quantity tests"
-- [ ] T168 [US2] Commit ShoppingCart US2 implementation with message "feat(US2): implement update item quantity"
+- [X] T161 [P] [US2] Write test for ShoppingCart.updateItemQuantity() updates existing item in test/unit/shopping-cart.spec.ts
+- [X] T162 [P] [US2] Write test for ShoppingCart.updateItemQuantity() throws ProductNotInCartError for non-existent product in test/unit/shopping-cart.spec.ts
+- [X] T163 [P] [US2] Write test for ShoppingCart.updateItemQuantity() throws CartAlreadyConvertedError on converted cart in test/unit/shopping-cart.spec.ts
+- [X] T164 [P] [US2] Write test for ShoppingCart.updateItemQuantity() rejects invalid quantity in test/unit/shopping-cart.spec.ts
+- [X] T165 [US2] Implement ShoppingCart.updateItemQuantity() method in src/domain/aggregates/shopping-cart.ts
+- [X] T166 [US2] Run tests and verify ShoppingCart US2 behaviors pass
+- [X] T167 [US2] Commit ShoppingCart US2 tests with message "test(US2): add update item quantity tests"
+- [X] T168 [US2] Commit ShoppingCart US2 implementation with message "feat(US2): implement update item quantity"
 
 ### Application Layer (US2)
 
 **User Story**: US2
 
-- [ ] T169 [P] [US2] Create UpdateQuantityDto in src/application/dtos/update-quantity.dto.ts
-- [ ] T170 [US2] Commit DTO with message "feat(US2): create UpdateQuantityDto"
+- [X] T169 [P] [US2] Create UpdateQuantityDto in src/application/dtos/update-quantity.dto.ts
+- [X] T170 [US2] Commit DTO with message "feat(US2): create UpdateQuantityDto"
 
-- [ ] T171 [US2] Write integration test for CartService.updateItemQuantity() in test/integration/cart.service.spec.ts
-- [ ] T172 [US2] Write integration test for CartService.updateItemQuantity() rejection scenarios in test/integration/cart.service.spec.ts
-- [ ] T173 [US2] Implement CartService.updateItemQuantity() orchestration in src/application/services/cart.service.ts
-- [ ] T174 [US2] Run integration tests and verify CartService US2 passes
-- [ ] T175 [US2] Commit CartService US2 tests with message "test(US2): add CartService update quantity tests"
-- [ ] T176 [US2] Commit CartService US2 implementation with message "feat(US2): implement CartService update quantity method"
+- [X] T171 [US2] Write integration test for CartService.updateItemQuantity() in test/integration/cart.service.spec.ts
+- [X] T172 [US2] Write integration test for CartService.updateItemQuantity() rejection scenarios in test/integration/cart.service.spec.ts
+- [X] T173 [US2] Implement CartService.updateItemQuantity() orchestration in src/application/services/cart.service.ts
+- [X] T174 [US2] Run integration tests and verify CartService US2 passes
+- [X] T175 [US2] Commit CartService US2 tests with message "test(US2): add CartService update quantity tests"
+- [X] T176 [US2] Commit CartService US2 implementation with message "feat(US2): implement CartService update quantity method"
 
 ### Infrastructure Layer (US2)
 
 **User Story**: US2
 
-- [ ] T177 [US2] Write e2e test for PUT /carts/:id/items/:productId in test/e2e/cart.e2e-spec.ts
-- [ ] T178 [US2] Write e2e test for PUT rejecting non-existent product in test/e2e/cart.e2e-spec.ts
-- [ ] T179 [US2] Write e2e test for PUT rejecting invalid quantity in test/e2e/cart.e2e-spec.ts
-- [ ] T180 [US2] Write e2e test for PUT rejecting on converted cart in test/e2e/cart.e2e-spec.ts
-- [ ] T181 [US2] Implement CartController.updateItemQuantity() endpoint in src/infrastructure/controllers/cart.controller.ts
-- [ ] T182 [US2] Run e2e tests and verify US2 endpoints pass
-- [ ] T183 [US2] Commit e2e tests with message "test(US2): add e2e tests for update quantity"
-- [ ] T184 [US2] Commit controller with message "feat(US2): implement update item quantity endpoint"
+- [X] T177 [US2] Write e2e test for PUT /carts/:id/items/:productId in test/e2e/cart.e2e-spec.ts
+- [X] T178 [US2] Write e2e test for PUT rejecting non-existent product in test/e2e/cart.e2e-spec.ts
+- [X] T179 [US2] Write e2e test for PUT rejecting invalid quantity in test/e2e/cart.e2e-spec.ts
+- [X] T180 [US2] Write e2e test for PUT rejecting on converted cart in test/e2e/cart.e2e-spec.ts
+- [X] T181 [US2] Implement CartController.updateItemQuantity() endpoint in src/infrastructure/controllers/cart.controller.ts
+- [X] T182 [US2] Run e2e tests and verify US2 endpoints pass
+- [X] T183 [US2] Commit e2e tests with message "test(US2): add e2e tests for update quantity"
+- [X] T184 [US2] Commit controller with message "feat(US2): implement update item quantity endpoint"
 
 ### US2 Validation
 
 **User Story**: US2
 
-- [ ] T185 [US2] Run full test suite and verify all US2 tests pass
-- [ ] T186 [US2] Manually test: Update item quantity → Verify change persists
-- [ ] T187 [US2] Manually test: Update non-existent product → Verify rejection
-- [ ] T188 [US2] Manually test: Update to invalid quantity → Verify rejection
-- [ ] T189 [US2] Manually test: Update on converted cart → Verify rejection
-- [ ] T190 [US2] Run quality gates (lint, format, build)
-- [ ] T191 [US2] Commit final integration with message "feat(US2): complete update item quantities feature"
+- [X] T185 [US2] Run full test suite and verify all US2 tests pass
+- [X] T186 [US2] Manually test: Update item quantity → Verify change persists
+- [X] T187 [US2] Manually test: Update non-existent product → Verify rejection
+- [X] T188 [US2] Manually test: Update to invalid quantity → Verify rejection
+- [X] T189 [US2] Manually test: Update on converted cart → Verify rejection
+- [X] T190 [US2] Run quality gates (lint, format, build)
+- [X] T191 [US2] Commit final integration with message "feat(US2): complete update item quantities feature"
 
 ---
 
