@@ -37,28 +37,28 @@ This document provides a complete task breakdown for implementing the Shopping C
 
 **Tasks**:
 
-- [ ] T001 Create domain layer directory structure in src/domain/
-- [ ] T002 Create domain/value-objects directory in src/domain/value-objects/
-- [ ] T003 Create domain/entities directory in src/domain/entities/
-- [ ] T004 Create domain/aggregates directory in src/domain/aggregates/
-- [ ] T005 Create domain/repositories directory in src/domain/repositories/
-- [ ] T006 Create application layer directory structure in src/application/
-- [ ] T007 Create application/dtos directory in src/application/dtos/
-- [ ] T008 Create application/services directory in src/application/services/
-- [ ] T009 Create infrastructure layer directory structure in src/infrastructure/
-- [ ] T010 Create infrastructure/modules directory in src/infrastructure/modules/
-- [ ] T011 Create infrastructure/controllers directory in src/infrastructure/controllers/
-- [ ] T012 Create infrastructure/repositories directory in src/infrastructure/repositories/
-- [ ] T013 Create test directory structure in test/unit/
-- [ ] T014 Create test/unit/value-objects directory in test/unit/value-objects/
-- [ ] T015 Create test/integration directory in test/integration/
-- [ ] T016 Create test/e2e directory in test/e2e/
-- [ ] T017 Verify Jest configuration in package.json for test paths
-- [ ] T018 Verify TypeScript configuration enables strict mode in tsconfig.json
-- [ ] T019 Run npm install to verify dependencies
-- [ ] T020 Run npm test to verify test framework works
-- [ ] T021 Run npm run build to verify TypeScript compilation works
-- [ ] T022 Run npm run lint to verify ESLint configuration
+- [X] T001 Create domain layer directory structure in src/domain/
+- [X] T002 Create domain/value-objects directory in src/domain/value-objects/
+- [X] T003 Create domain/entities directory in src/domain/entities/
+- [X] T004 Create domain/aggregates directory in src/domain/aggregates/
+- [X] T005 Create domain/repositories directory in src/domain/repositories/
+- [X] T006 Create application layer directory structure in src/application/
+- [X] T007 Create application/dtos directory in src/application/dtos/
+- [X] T008 Create application/services directory in src/application/services/
+- [X] T009 Create infrastructure layer directory structure in src/infrastructure/
+- [X] T010 Create infrastructure/modules directory in src/infrastructure/modules/
+- [X] T011 Create infrastructure/controllers directory in src/infrastructure/controllers/
+- [X] T012 Create infrastructure/repositories directory in src/infrastructure/repositories/
+- [X] T013 Create test directory structure in test/unit/
+- [X] T014 Create test/unit/value-objects directory in test/unit/value-objects/
+- [X] T015 Create test/integration directory in test/integration/
+- [X] T016 Create test/e2e directory in test/e2e/
+- [X] T017 Verify Jest configuration in package.json for test paths
+- [X] T018 Verify TypeScript configuration enables strict mode in tsconfig.json
+- [X] T019 Run npm install to verify dependencies
+- [X] T020 Run npm test to verify test framework works
+- [X] T021 Run npm run build to verify TypeScript compilation works
+- [X] T022 Run npm run lint to verify ESLint configuration
 
 ---
 
@@ -76,76 +76,76 @@ This document provides a complete task breakdown for implementing the Shopping C
 
 **User Story**: N/A (Foundational)
 
-- [ ] T023 [P] Write test for CartId.create() generates unique UUID in test/unit/value-objects/cart-id.spec.ts
-- [ ] T024 [P] Write test for CartId.fromString() accepts valid UUID in test/unit/value-objects/cart-id.spec.ts
-- [ ] T025 [P] Write test for CartId.fromString() rejects empty string in test/unit/value-objects/cart-id.spec.ts
-- [ ] T026 [P] Write test for CartId.fromString() rejects invalid UUID format in test/unit/value-objects/cart-id.spec.ts
-- [ ] T027 [P] Write test for CartId.equals() returns true for same UUID in test/unit/value-objects/cart-id.spec.ts
-- [ ] T028 [P] Write test for CartId.equals() returns false for different UUIDs in test/unit/value-objects/cart-id.spec.ts
-- [ ] T029 Implement CartId value object with UUID validation in src/domain/value-objects/cart-id.ts
-- [ ] T030 Run tests and verify CartId passes all test cases
-- [ ] T031 Commit CartId tests with message "test: add CartId value object tests"
-- [ ] T032 Commit CartId implementation with message "feat: implement CartId value object"
+- [X] T023 [P] Write test for CartId.create() generates unique UUID in test/unit/value-objects/cart-id.spec.ts
+- [X] T024 [P] Write test for CartId.fromString() accepts valid UUID in test/unit/value-objects/cart-id.spec.ts
+- [X] T025 [P] Write test for CartId.fromString() rejects empty string in test/unit/value-objects/cart-id.spec.ts
+- [X] T026 [P] Write test for CartId.fromString() rejects invalid UUID format in test/unit/value-objects/cart-id.spec.ts
+- [X] T027 [P] Write test for CartId.equals() returns true for same UUID in test/unit/value-objects/cart-id.spec.ts
+- [X] T028 [P] Write test for CartId.equals() returns false for different UUIDs in test/unit/value-objects/cart-id.spec.ts
+- [X] T029 Implement CartId value object with UUID validation in src/domain/value-objects/cart-id.ts
+- [X] T030 Run tests and verify CartId passes all test cases
+- [X] T031 Commit CartId tests with message "test: add CartId value object tests"
+- [X] T032 Commit CartId implementation with message "feat: implement CartId value object"
 
 ### Value Object: CustomerId
 
 **User Story**: N/A (Foundational)
 
-- [ ] T033 [P] Write test for CustomerId.fromString() accepts non-empty string in test/unit/value-objects/customer-id.spec.ts
-- [ ] T034 [P] Write test for CustomerId.fromString() rejects empty string in test/unit/value-objects/customer-id.spec.ts
-- [ ] T035 [P] Write test for CustomerId.fromString() rejects whitespace-only string in test/unit/value-objects/customer-id.spec.ts
-- [ ] T036 [P] Write test for CustomerId.fromString() trims whitespace in test/unit/value-objects/customer-id.spec.ts
-- [ ] T037 [P] Write test for CustomerId.equals() compares values correctly in test/unit/value-objects/customer-id.spec.ts
-- [ ] T038 Implement CustomerId value object with validation in src/domain/value-objects/customer-id.ts
-- [ ] T039 Run tests and verify CustomerId passes all test cases
-- [ ] T040 Commit CustomerId tests with message "test: add CustomerId value object tests"
-- [ ] T041 Commit CustomerId implementation with message "feat: implement CustomerId value object"
+- [X] T033 [P] Write test for CustomerId.fromString() accepts non-empty string in test/unit/value-objects/customer-id.spec.ts
+- [X] T034 [P] Write test for CustomerId.fromString() rejects empty string in test/unit/value-objects/customer-id.spec.ts
+- [X] T035 [P] Write test for CustomerId.fromString() rejects whitespace-only string in test/unit/value-objects/customer-id.spec.ts
+- [X] T036 [P] Write test for CustomerId.fromString() trims whitespace in test/unit/value-objects/customer-id.spec.ts
+- [X] T037 [P] Write test for CustomerId.equals() compares values correctly in test/unit/value-objects/customer-id.spec.ts
+- [X] T038 Implement CustomerId value object with validation in src/domain/value-objects/customer-id.ts
+- [X] T039 Run tests and verify CustomerId passes all test cases
+- [X] T040 Commit CustomerId tests with message "test: add CustomerId value object tests"
+- [X] T041 Commit CustomerId implementation with message "feat: implement CustomerId value object"
 
 ### Value Object: ProductId
 
 **User Story**: N/A (Foundational)
 
-- [ ] T042 [P] Write test for ProductId.fromString() accepts non-empty string in test/unit/value-objects/product-id.spec.ts
-- [ ] T043 [P] Write test for ProductId.fromString() rejects empty string in test/unit/value-objects/product-id.spec.ts
-- [ ] T044 [P] Write test for ProductId.fromString() rejects whitespace-only string in test/unit/value-objects/product-id.spec.ts
-- [ ] T045 [P] Write test for ProductId.fromString() trims whitespace in test/unit/value-objects/product-id.spec.ts
-- [ ] T046 [P] Write test for ProductId.equals() compares values correctly in test/unit/value-objects/product-id.spec.ts
-- [ ] T047 Implement ProductId value object with validation in src/domain/value-objects/product-id.ts
-- [ ] T048 Run tests and verify ProductId passes all test cases
-- [ ] T049 Commit ProductId tests with message "test: add ProductId value object tests"
-- [ ] T050 Commit ProductId implementation with message "feat: implement ProductId value object"
+- [X] T042 [P] Write test for ProductId.fromString() accepts non-empty string in test/unit/value-objects/product-id.spec.ts
+- [X] T043 [P] Write test for ProductId.fromString() rejects empty string in test/unit/value-objects/product-id.spec.ts
+- [X] T044 [P] Write test for ProductId.fromString() rejects whitespace-only string in test/unit/value-objects/product-id.spec.ts
+- [X] T045 [P] Write test for ProductId.fromString() trims whitespace in test/unit/value-objects/product-id.spec.ts
+- [X] T046 [P] Write test for ProductId.equals() compares values correctly in test/unit/value-objects/product-id.spec.ts
+- [X] T047 Implement ProductId value object with validation in src/domain/value-objects/product-id.ts
+- [X] T048 Run tests and verify ProductId passes all test cases
+- [X] T049 Commit ProductId tests with message "test: add ProductId value object tests"
+- [X] T050 Commit ProductId implementation with message "feat: implement ProductId value object"
 
 ### Value Object: Quantity
 
 **User Story**: N/A (Foundational)
 
-- [ ] T051 [P] Write test for Quantity.of() accepts values 1-10 in test/unit/value-objects/quantity.spec.ts
-- [ ] T052 [P] Write test for Quantity.of() rejects value 0 in test/unit/value-objects/quantity.spec.ts
-- [ ] T053 [P] Write test for Quantity.of() rejects negative values in test/unit/value-objects/quantity.spec.ts
-- [ ] T054 [P] Write test for Quantity.of() rejects value 11 in test/unit/value-objects/quantity.spec.ts
-- [ ] T055 [P] Write test for Quantity.of() rejects fractional values in test/unit/value-objects/quantity.spec.ts
-- [ ] T056 [P] Write test for Quantity.add() returns new Quantity with sum in test/unit/value-objects/quantity.spec.ts
-- [ ] T057 [P] Write test for Quantity.add() throws when sum exceeds 10 in test/unit/value-objects/quantity.spec.ts
-- [ ] T058 [P] Write test for Quantity.equals() compares values correctly in test/unit/value-objects/quantity.spec.ts
-- [ ] T059 Implement Quantity value object with range validation in src/domain/value-objects/quantity.ts
-- [ ] T060 Run tests and verify Quantity passes all test cases
-- [ ] T061 Commit Quantity tests with message "test: add Quantity value object tests"
-- [ ] T062 Commit Quantity implementation with message "feat: implement Quantity value object"
+- [X] T051 [P] Write test for Quantity.of() accepts values 1-10 in test/unit/value-objects/quantity.spec.ts
+- [X] T052 [P] Write test for Quantity.of() rejects value 0 in test/unit/value-objects/quantity.spec.ts
+- [X] T053 [P] Write test for Quantity.of() rejects negative values in test/unit/value-objects/quantity.spec.ts
+- [X] T054 [P] Write test for Quantity.of() rejects value 11 in test/unit/value-objects/quantity.spec.ts
+- [X] T055 [P] Write test for Quantity.of() rejects fractional values in test/unit/value-objects/quantity.spec.ts
+- [X] T056 [P] Write test for Quantity.add() returns new Quantity with sum in test/unit/value-objects/quantity.spec.ts
+- [X] T057 [P] Write test for Quantity.add() throws when sum exceeds 10 in test/unit/value-objects/quantity.spec.ts
+- [X] T058 [P] Write test for Quantity.equals() compares values correctly in test/unit/value-objects/quantity.spec.ts
+- [X] T059 Implement Quantity value object with range validation in src/domain/value-objects/quantity.ts
+- [X] T060 Run tests and verify Quantity passes all test cases
+- [X] T061 Commit Quantity tests with message "test: add Quantity value object tests"
+- [X] T062 Commit Quantity implementation with message "feat: implement Quantity value object"
 
 ### Entity: CartItem
 
 **User Story**: N/A (Foundational)
 
-- [ ] T063 [P] Write test for CartItem.create() creates item with ProductId and Quantity in test/unit/cart-item.spec.ts
-- [ ] T064 [P] Write test for CartItem.getProductId() returns correct ProductId in test/unit/cart-item.spec.ts
-- [ ] T065 [P] Write test for CartItem.getQuantity() returns correct Quantity in test/unit/cart-item.spec.ts
-- [ ] T066 [P] Write test for CartItem.updateQuantity() replaces quantity in test/unit/cart-item.spec.ts
-- [ ] T067 [P] Write test for CartItem.addQuantity() adds to existing quantity in test/unit/cart-item.spec.ts
-- [ ] T068 [P] Write test for CartItem.addQuantity() throws when result exceeds 10 in test/unit/cart-item.spec.ts
-- [ ] T069 Implement CartItem entity in src/domain/entities/cart-item.ts
-- [ ] T070 Run tests and verify CartItem passes all test cases
-- [ ] T071 Commit CartItem tests with message "test: add CartItem entity tests"
-- [ ] T072 Commit CartItem implementation with message "feat: implement CartItem entity"
+- [X] T063 [P] Write test for CartItem.create() creates item with ProductId and Quantity in test/unit/cart-item.spec.ts
+- [X] T064 [P] Write test for CartItem.getProductId() returns correct ProductId in test/unit/cart-item.spec.ts
+- [X] T065 [P] Write test for CartItem.getQuantity() returns correct Quantity in test/unit/cart-item.spec.ts
+- [X] T066 [P] Write test for CartItem.updateQuantity() replaces quantity in test/unit/cart-item.spec.ts
+- [X] T067 [P] Write test for CartItem.addQuantity() adds to existing quantity in test/unit/cart-item.spec.ts
+- [X] T068 [P] Write test for CartItem.addQuantity() throws when result exceeds 10 in test/unit/cart-item.spec.ts
+- [X] T069 Implement CartItem entity in src/domain/entities/cart-item.ts
+- [X] T070 Run tests and verify CartItem passes all test cases
+- [X] T071 Commit CartItem tests with message "test: add CartItem entity tests"
+- [X] T072 Commit CartItem implementation with message "feat: implement CartItem entity"
 
 ---
 
@@ -173,22 +173,22 @@ This document provides a complete task breakdown for implementing the Shopping C
 
 **User Story**: US1
 
-- [ ] T073 [US1] Write test for ShoppingCart.create() creates empty active cart in test/unit/shopping-cart.spec.ts
-- [ ] T074 [US1] Write test for ShoppingCart.create() requires CustomerId in test/unit/shopping-cart.spec.ts
-- [ ] T075 [US1] Write test for ShoppingCart.addItem() adds new product to empty cart in test/unit/shopping-cart.spec.ts
-- [ ] T076 [US1] Write test for ShoppingCart.addItem() consolidates quantity for duplicate product in test/unit/shopping-cart.spec.ts
-- [ ] T077 [US1] Write test for ShoppingCart.addItem() creates separate line for different product in test/unit/shopping-cart.spec.ts
-- [ ] T078 [US1] Write test for ShoppingCart.addItem() rejects invalid quantity in test/unit/shopping-cart.spec.ts
-- [ ] T079 [US1] Write test for ShoppingCart.addItem() throws MaxProductsExceededError when adding 21st product in test/unit/shopping-cart.spec.ts
-- [ ] T080 [US1] Write test for ShoppingCart.addItem() throws InvalidQuantityError when consolidation exceeds 10 in test/unit/shopping-cart.spec.ts
-- [ ] T081 [US1] Write test for ShoppingCart.getItems() returns defensive copy as array in test/unit/shopping-cart.spec.ts
-- [ ] T082 [US1] Write test for ShoppingCart.getItemCount() returns correct count in test/unit/shopping-cart.spec.ts
-- [ ] T083 [US1] Implement ShoppingCart aggregate with addItem() method in src/domain/aggregates/shopping-cart.ts
-- [ ] T084 [US1] Implement ensureWithinProductLimit() private method for max products check in src/domain/aggregates/shopping-cart.ts
-- [ ] T085 [US1] Implement quantity consolidation logic in addItem() in src/domain/aggregates/shopping-cart.ts
-- [ ] T086 [US1] Run tests and verify ShoppingCart US1 behaviors pass
-- [ ] T087 [US1] Commit ShoppingCart US1 tests with message "test(US1): add ShoppingCart addItem tests"
-- [ ] T088 [US1] Commit ShoppingCart US1 implementation with message "feat(US1): implement ShoppingCart addItem with consolidation"
+- [X] T073 [US1] Write test for ShoppingCart.create() creates empty active cart in test/unit/shopping-cart.spec.ts
+- [X] T074 [US1] Write test for ShoppingCart.create() requires CustomerId in test/unit/shopping-cart.spec.ts
+- [X] T075 [US1] Write test for ShoppingCart.addItem() adds new product to empty cart in test/unit/shopping-cart.spec.ts
+- [X] T076 [US1] Write test for ShoppingCart.addItem() consolidates quantity for duplicate product in test/unit/shopping-cart.spec.ts
+- [X] T077 [US1] Write test for ShoppingCart.addItem() creates separate line for different product in test/unit/shopping-cart.spec.ts
+- [X] T078 [US1] Write test for ShoppingCart.addItem() rejects invalid quantity in test/unit/shopping-cart.spec.ts
+- [X] T079 [US1] Write test for ShoppingCart.addItem() throws MaxProductsExceededError when adding 21st product in test/unit/shopping-cart.spec.ts
+- [X] T080 [US1] Write test for ShoppingCart.addItem() throws InvalidQuantityError when consolidation exceeds 10 in test/unit/shopping-cart.spec.ts
+- [X] T081 [US1] Write test for ShoppingCart.getItems() returns defensive copy as array in test/unit/shopping-cart.spec.ts
+- [X] T082 [US1] Write test for ShoppingCart.getItemCount() returns correct count in test/unit/shopping-cart.spec.ts
+- [X] T083 [US1] Implement ShoppingCart aggregate with addItem() method in src/domain/aggregates/shopping-cart.ts
+- [X] T084 [US1] Implement ensureWithinProductLimit() private method for max products check in src/domain/aggregates/shopping-cart.ts
+- [X] T085 [US1] Implement quantity consolidation logic in addItem() in src/domain/aggregates/shopping-cart.ts
+- [X] T086 [US1] Run tests and verify ShoppingCart US1 behaviors pass
+- [X] T087 [US1] Commit ShoppingCart US1 tests with message "test(US1): add ShoppingCart addItem tests"
+- [X] T088 [US1] Commit ShoppingCart US1 implementation with message "feat(US1): implement ShoppingCart addItem with consolidation"
 
 ### Repository Interface
 
