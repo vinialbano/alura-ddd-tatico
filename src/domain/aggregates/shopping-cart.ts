@@ -5,9 +5,9 @@ import { ProductId } from '../value-objects/product-id';
 import { Quantity } from '../value-objects/quantity';
 
 /**
- * Parameters for restoring a ShoppingCart aggregate from persistence
+ * Parameters for constructing a ShoppingCart aggregate
  */
-export type RestoreShoppingCartParams = {
+export type ShoppingCartParams = {
   cartId: CartId;
   customerId: CustomerId;
   items: Map<string, CartItem>;
@@ -28,11 +28,12 @@ export class ShoppingCart {
   private readonly items: Map<string, CartItem>;
   private conversionStatus: 'active' | 'converted';
 
-  private constructor(params: RestoreShoppingCartParams) {
+  constructor(params: ShoppingCartParams) {
     this.cartId = params.cartId;
     this.customerId = params.customerId;
     this.items = params.items;
     this.conversionStatus = params.conversionStatus;
+    this.validate();
   }
 
   /**
@@ -47,17 +48,6 @@ export class ShoppingCart {
       items: new Map(),
       conversionStatus: 'active',
     });
-  }
-
-  /**
-   * Restores an existing shopping cart from persistence
-   * Used by repository layer to reconstitute aggregates
-   *
-   * @param params - Parameters containing cart state to restore
-   * @returns Restored ShoppingCart aggregate
-   */
-  static restore(params: RestoreShoppingCartParams): ShoppingCart {
-    return new ShoppingCart(params);
   }
 
   /**
@@ -183,5 +173,48 @@ export class ShoppingCart {
     if (this.items.size >= ShoppingCart.MAX_PRODUCTS) {
       throw new Error('Cart cannot contain more than 20 unique products');
     }
+  }
+
+  /**
+   * Ensures empty carts cannot be restored with converted status
+   * @throws Error if cart is empty and status is converted
+   */
+  private ensureConvertedCartNotEmpty(): void {
+    if (this.conversionStatus === 'converted' && this.items.size === 0) {
+      throw new Error('Cannot restore empty cart with converted status');
+    }
+  }
+
+  /**
+   * Ensures conversionStatus is a valid enum value
+   * @throws Error if status is not 'active' or 'converted'
+   */
+  private ensureValidConversionStatus(): void {
+    const validStatuses: Array<'active' | 'converted'> = [
+      'active',
+      'converted',
+    ];
+    if (!validStatuses.includes(this.conversionStatus)) {
+      throw new Error(
+        `Invalid conversionStatus: ${String(this.conversionStatus)}. Must be 'active' or 'converted'`,
+      );
+    }
+  }
+
+  /**
+   * Validates all domain invariants for the aggregate
+   * Called during construction to ensure aggregate is always in a valid state
+   *
+   * Delegates to specific validation methods:
+   * - ensureWithinProductLimit: Maximum 20 unique products
+   * - ensureConvertedCartNotEmpty: No empty converted carts
+   * - ensureValidConversionStatus: Valid status enum value
+   *
+   * @throws Error if any invariant is violated
+   */
+  private validate(): void {
+    this.ensureWithinProductLimit();
+    this.ensureConvertedCartNotEmpty();
+    this.ensureValidConversionStatus();
   }
 }

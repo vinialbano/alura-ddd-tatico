@@ -9,14 +9,14 @@
 
 ### Aggregate Reconstitution
 
-When loading aggregates from persistence, use the `restore()` factory method pattern to reconstitute aggregates with their full state:
+When loading aggregates from persistence, use direct construction with the parameter object pattern to reconstitute aggregates with their full state:
 
 ```typescript
 // Creating new aggregate (empty state, active status)
 const cart = ShoppingCart.create(cartId, customerId);
 
-// Restoring from persistence (with existing items and status)
-const cart = ShoppingCart.restore({
+// Reconstituting from persistence (with existing items and status)
+const cart = new ShoppingCart({
   cartId,
   customerId,
   items,
@@ -24,17 +24,31 @@ const cart = ShoppingCart.restore({
 });
 ```
 
+**Validation During Construction**:
+
+The constructor enforces all domain invariants to ensure aggregates are always in a valid state:
+
+- **MAX_PRODUCTS limit**: Cannot construct cart with more than 20 unique products
+- **Quantity boundaries**: All items must have quantities between 1-10 (enforced by Quantity value object)
+- **Business rules**: Cannot construct empty cart with converted status
+- **Type safety**: conversionStatus must be 'active' or 'converted'
+
+If any invariant is violated, the constructor throws a descriptive error. This ensures:
+1. Domain integrity is maintained even with corrupted persistence data
+2. Invalid states fail early at the persistence boundary
+3. Application layer can handle construction failures consistently
+
 **Key differences**:
-- `create()`: Initializes new aggregate with default state (2 parameters)
-- `restore()`: Reconstitutes aggregate from persistence with arbitrary state (parameter object)
+- `ShoppingCart.create(cartId, customerId)`: Factory method for common case - creates new empty active cart (2 parameters)
+- `new ShoppingCart(params)`: Direct construction for general case - handles any valid state including restoration (parameter object)
 
 **Benefits of Parameter Object Pattern**:
 - **Named parameters**: Clear intent at call site with property names
 - **Extensibility**: Easy to add optional parameters in future without breaking changes
 - **Type safety**: TypeScript ensures all required properties are provided
-- **Self-documenting**: The `RestoreShoppingCartParams` type documents the structure
+- **Self-documenting**: The `ShoppingCartParams` type documents the structure
 
-The `restore()` method bypasses initialization logic and accepts full aggregate state, enabling seamless persistence layer integration without exposing aggregate internals.
+The constructor accepts full aggregate state for persistence layer integration, but validates all invariants to prevent invalid states from entering the domain.
 
 ## ShoppingCart (Aggregate Root)
 

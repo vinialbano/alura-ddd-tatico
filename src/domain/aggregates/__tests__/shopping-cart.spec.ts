@@ -39,7 +39,7 @@ describe('ShoppingCart', () => {
       const item = CartItem.create(productId, Quantity.of(5));
       items.set(productId.getValue(), item);
 
-      const cart = ShoppingCart.restore({
+      const cart = new ShoppingCart({
         cartId,
         customerId,
         items,
@@ -61,7 +61,7 @@ describe('ShoppingCart', () => {
       const item = CartItem.create(productId, Quantity.of(3));
       items.set(productId.getValue(), item);
 
-      const cart = ShoppingCart.restore({
+      const cart = new ShoppingCart({
         cartId,
         customerId,
         items,
@@ -77,7 +77,7 @@ describe('ShoppingCart', () => {
       const customerId = CustomerId.fromString('customer-1');
       const items = new Map<string, CartItem>();
 
-      const cart = ShoppingCart.restore({
+      const cart = new ShoppingCart({
         cartId,
         customerId,
         items,
@@ -100,7 +100,7 @@ describe('ShoppingCart', () => {
       items.set(product1.getValue(), item1);
       items.set(product2.getValue(), item2);
 
-      const cart = ShoppingCart.restore({
+      const cart = new ShoppingCart({
         cartId,
         customerId,
         items,
@@ -109,6 +109,87 @@ describe('ShoppingCart', () => {
 
       expect(cart.getItemCount()).toBe(2);
       expect(cart.getItems()).toHaveLength(2);
+    });
+  });
+
+  describe('restore - invariant validation', () => {
+    it('should reject restoring cart with more than 20 products', () => {
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-1');
+      const items = new Map<string, CartItem>();
+
+      // Add 21 products
+      for (let i = 1; i <= 21; i++) {
+        const productId = ProductId.fromString(`product-${i}`);
+        const item = CartItem.create(productId, Quantity.of(1));
+        items.set(productId.getValue(), item);
+      }
+
+      expect(
+        () =>
+          new ShoppingCart({
+            cartId,
+            customerId,
+            items,
+            conversionStatus: 'active',
+          }),
+      ).toThrow('Cart cannot contain more than 20 unique products');
+    });
+
+    it('should reject restoring empty cart with converted status', () => {
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-1');
+      const items = new Map<string, CartItem>();
+
+      expect(
+        () =>
+          new ShoppingCart({
+            cartId,
+            customerId,
+            items,
+            conversionStatus: 'converted',
+          }),
+      ).toThrow('Cannot restore empty cart with converted status');
+    });
+
+    it('should reject restoring cart with invalid conversionStatus', () => {
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-1');
+      const items = new Map<string, CartItem>();
+      const productId = ProductId.fromString('product-1');
+      const item = CartItem.create(productId, Quantity.of(3));
+      items.set(productId.getValue(), item);
+
+      expect(
+        () =>
+          new ShoppingCart({
+            cartId,
+            customerId,
+            items,
+            conversionStatus: 'invalid-status' as never,
+          }),
+      ).toThrow(
+        "Invalid conversionStatus: invalid-status. Must be 'active' or 'converted'",
+      );
+    });
+
+    it('should allow restoring converted cart with items', () => {
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-1');
+      const items = new Map<string, CartItem>();
+      const productId = ProductId.fromString('product-1');
+      const item = CartItem.create(productId, Quantity.of(5));
+      items.set(productId.getValue(), item);
+
+      const cart = new ShoppingCart({
+        cartId,
+        customerId,
+        items,
+        conversionStatus: 'converted',
+      });
+
+      expect(cart.isConverted()).toBe(true);
+      expect(cart.getItemCount()).toBe(1);
     });
   });
 
