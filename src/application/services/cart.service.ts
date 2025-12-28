@@ -116,6 +116,34 @@ export class CartService {
   }
 
   /**
+   * Removes an item from the cart
+   * @param cartIdStr - Cart identifier as string
+   * @param productIdStr - Product identifier as string
+   * @returns CartResponseDto with updated cart
+   * @throws Error if cart not found
+   * @throws Error if product not in cart
+   */
+  async removeItem(
+    cartIdStr: string,
+    productIdStr: string,
+  ): Promise<CartResponseDto> {
+    const cartId = CartId.fromString(cartIdStr);
+    const cart = await this.repository.findById(cartId);
+
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+
+    const productId = ProductId.fromString(productIdStr);
+
+    cart.removeItem(productId);
+
+    await this.repository.save(cart);
+
+    return this.mapToDto(cart);
+  }
+
+  /**
    * Converts cart to order (marks as converted)
    * Once converted, cart becomes immutable
    * @param cartIdStr - Cart identifier as string

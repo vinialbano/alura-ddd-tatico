@@ -373,4 +373,81 @@ describe('CartService (Integration)', () => {
       ).rejects.toThrow('has already been converted and cannot be modified');
     });
   });
+
+  describe('removeItem - US3', () => {
+    it('should remove existing item from cart', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 3,
+      });
+
+      expect(cartResponse.itemCount).toBe(0);
+
+      const updatedCart = await service.removeItem(
+        cartResponse.cartId,
+        'product-1',
+      );
+
+      expect(updatedCart.items).toHaveLength(0);
+      expect(updatedCart.itemCount).toBe(0);
+    });
+
+    it('should make cart empty when removing last item', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 5,
+      });
+
+      const cartWithItems = await service.getCart(cartResponse.cartId);
+      expect(cartWithItems.itemCount).toBe(1);
+
+      const updatedCart = await service.removeItem(
+        cartResponse.cartId,
+        'product-1',
+      );
+
+      expect(updatedCart.items).toHaveLength(0);
+      expect(updatedCart.itemCount).toBe(0);
+    });
+
+    it('should throw error when cart not found', async () => {
+      const nonExistentCartId = '00000000-0000-0000-0000-000000000000';
+
+      await expect(
+        service.removeItem(nonExistentCartId, 'product-1'),
+      ).rejects.toThrow('Cart not found');
+    });
+
+    it('should throw error for non-existent product', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 3,
+      });
+
+      await expect(
+        service.removeItem(cartResponse.cartId, 'product-2'),
+      ).rejects.toThrow('Product product-2 is not in the cart');
+    });
+
+    it('should throw error when removing from converted cart', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 3,
+      });
+
+      await service.convertCart(cartResponse.cartId);
+
+      await expect(
+        service.removeItem(cartResponse.cartId, 'product-1'),
+      ).rejects.toThrow('has already been converted and cannot be modified');
+    });
+  });
 });
