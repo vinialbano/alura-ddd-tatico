@@ -2,6 +2,7 @@ import { CartService } from '../cart.service';
 import { InMemoryShoppingCartRepository } from '../../../infrastructure/repositories/in-memory-shopping-cart.repository';
 import { CreateCartDto } from '../../dtos/create-cart.dto';
 import { AddItemDto } from '../../dtos/add-item.dto';
+import { CartNotFoundException } from '../../exceptions/cart-not-found.exception';
 
 describe('CartService (Integration)', () => {
   let service: CartService;
@@ -96,7 +97,7 @@ describe('CartService (Integration)', () => {
 
       await expect(
         service.addItem(nonExistentCartId, addItemDto),
-      ).rejects.toThrow('Cart not found');
+      ).rejects.toThrow(CartNotFoundException);
     });
 
     it('should throw error for invalid quantity', async () => {
@@ -165,7 +166,7 @@ describe('CartService (Integration)', () => {
       const nonExistentCartId = '00000000-0000-0000-0000-000000000000';
 
       await expect(service.getCart(nonExistentCartId)).rejects.toThrow(
-        'Cart not found',
+        CartNotFoundException,
       );
     });
 
@@ -222,7 +223,7 @@ describe('CartService (Integration)', () => {
       const nonExistentCartId = '00000000-0000-0000-0000-000000000000';
 
       await expect(service.convertCart(nonExistentCartId)).rejects.toThrow(
-        'Cart not found',
+        CartNotFoundException,
       );
     });
 
@@ -320,7 +321,7 @@ describe('CartService (Integration)', () => {
         service.updateItemQuantity(nonExistentCartId, 'product-1', {
           quantity: 5,
         }),
-      ).rejects.toThrow('Cart not found');
+      ).rejects.toThrow(CartNotFoundException);
     });
 
     it('should throw error for non-existent product', async () => {
@@ -422,7 +423,7 @@ describe('CartService (Integration)', () => {
 
       await expect(
         service.removeItem(nonExistentCartId, 'product-1'),
-      ).rejects.toThrow('Cart not found');
+      ).rejects.toThrow(CartNotFoundException);
     });
 
     it('should throw error for non-existent product', async () => {

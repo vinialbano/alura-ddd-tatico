@@ -12,6 +12,7 @@ import {
 } from '../dtos/cart-response.dto';
 import { CreateCartDto } from '../dtos/create-cart.dto';
 import { UpdateQuantityDto } from '../dtos/update-quantity.dto';
+import { CartNotFoundException } from '../exceptions/cart-not-found.exception';
 
 /**
  * CartService
@@ -47,14 +48,14 @@ export class CartService {
    * @param cartIdStr - Cart identifier as string
    * @param dto - AddItemDto with product ID and quantity
    * @returns CartResponseDto with updated cart
-   * @throws Error if cart not found
+   * @throws CartNotFoundException if cart not found
    */
   async addItem(cartIdStr: string, dto: AddItemDto): Promise<CartResponseDto> {
     const cartId = CartId.fromString(cartIdStr);
     const cart = await this.repository.findById(cartId);
 
     if (!cart) {
-      throw new Error('Cart not found');
+      throw new CartNotFoundException(cartId);
     }
 
     const productId = ProductId.fromString(dto.productId);
@@ -71,14 +72,14 @@ export class CartService {
    * Retrieves a cart by ID
    * @param cartIdStr - Cart identifier as string
    * @returns CartResponseDto with cart details
-   * @throws Error if cart not found
+   * @throws CartNotFoundException if cart not found
    */
   async getCart(cartIdStr: string): Promise<CartResponseDto> {
     const cartId = CartId.fromString(cartIdStr);
     const cart = await this.repository.findById(cartId);
 
     if (!cart) {
-      throw new Error('Cart not found');
+      throw new CartNotFoundException(cartId);
     }
 
     return this.mapToDto(cart);
@@ -90,8 +91,8 @@ export class CartService {
    * @param productIdStr - Product identifier as string
    * @param dto - UpdateQuantityDto with new quantity
    * @returns CartResponseDto with updated cart
-   * @throws Error if cart not found
-   * @throws Error if product not in cart
+   * @throws CartNotFoundException if cart not found
+   * @throws ProductNotInCartError if product not in cart
    */
   async updateItemQuantity(
     cartIdStr: string,
@@ -102,7 +103,7 @@ export class CartService {
     const cart = await this.repository.findById(cartId);
 
     if (!cart) {
-      throw new Error('Cart not found');
+      throw new CartNotFoundException(cartId);
     }
 
     const productId = ProductId.fromString(productIdStr);
@@ -120,8 +121,8 @@ export class CartService {
    * @param cartIdStr - Cart identifier as string
    * @param productIdStr - Product identifier as string
    * @returns CartResponseDto with updated cart
-   * @throws Error if cart not found
-   * @throws Error if product not in cart
+   * @throws CartNotFoundException if cart not found
+   * @throws ProductNotInCartError if product not in cart
    */
   async removeItem(
     cartIdStr: string,
@@ -131,7 +132,7 @@ export class CartService {
     const cart = await this.repository.findById(cartId);
 
     if (!cart) {
-      throw new Error('Cart not found');
+      throw new CartNotFoundException(cartId);
     }
 
     const productId = ProductId.fromString(productIdStr);
@@ -148,14 +149,14 @@ export class CartService {
    * Once converted, cart becomes immutable
    * @param cartIdStr - Cart identifier as string
    * @returns CartResponseDto with converted cart
-   * @throws Error if cart not found
+   * @throws CartNotFoundException if cart not found
    */
   async convertCart(cartIdStr: string): Promise<CartResponseDto> {
     const cartId = CartId.fromString(cartIdStr);
     const cart = await this.repository.findById(cartId);
 
     if (!cart) {
-      throw new Error('Cart not found');
+      throw new CartNotFoundException(cartId);
     }
 
     cart.markAsConverted();

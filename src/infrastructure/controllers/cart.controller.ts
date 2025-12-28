@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   Post,
   Put,
@@ -51,9 +50,7 @@ export class CartController {
     @Param('id') cartId: string,
     @Body() addItemDto: AddItemDto,
   ): Promise<CartResponseDto> {
-    return await this.handleCartNotFound(() =>
-      this.cartService.addItem(cartId, addItemDto),
-    );
+    return await this.cartService.addItem(cartId, addItemDto);
   }
 
   /**
@@ -62,9 +59,7 @@ export class CartController {
    */
   @Get(':id')
   async getCart(@Param('id') cartId: string): Promise<CartResponseDto> {
-    return await this.handleCartNotFound(() =>
-      this.cartService.getCart(cartId),
-    );
+    return await this.cartService.getCart(cartId);
   }
 
   /**
@@ -74,9 +69,7 @@ export class CartController {
   @Post(':id/convert')
   @HttpCode(HttpStatus.OK)
   async convertCart(@Param('id') cartId: string): Promise<CartResponseDto> {
-    return await this.handleCartNotFound(() =>
-      this.cartService.convertCart(cartId),
-    );
+    return await this.cartService.convertCart(cartId);
   }
 
   /**
@@ -90,8 +83,10 @@ export class CartController {
     @Param('productId') productId: string,
     @Body() updateQuantityDto: UpdateQuantityDto,
   ): Promise<CartResponseDto> {
-    return await this.handleCartNotFound(() =>
-      this.cartService.updateItemQuantity(cartId, productId, updateQuantityDto),
+    return await this.cartService.updateItemQuantity(
+      cartId,
+      productId,
+      updateQuantityDto,
     );
   }
 
@@ -105,25 +100,6 @@ export class CartController {
     @Param('id') cartId: string,
     @Param('productId') productId: string,
   ): Promise<CartResponseDto> {
-    return await this.handleCartNotFound(() =>
-      this.cartService.removeItem(cartId, productId),
-    );
-  }
-
-  /**
-   * Helper method to handle "Cart not found" errors
-   * Domain exceptions are handled by DomainExceptionFilter and re-thrown
-   * @private
-   */
-  private async handleCartNotFound<T>(operation: () => Promise<T>): Promise<T> {
-    try {
-      return await operation();
-    } catch (error) {
-      if (error instanceof Error && error.message === 'Cart not found') {
-        throw new NotFoundException(error.message);
-      }
-      // Re-throw domain exceptions - they'll be caught by DomainExceptionFilter
-      throw error;
-    }
+    return await this.cartService.removeItem(cartId, productId);
   }
 }

@@ -5,6 +5,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { CartNotFoundException } from '../../application/exceptions/cart-not-found.exception';
 import { CartAlreadyConvertedError } from '../../domain/exceptions/cart-already-converted.error';
 import { MaxProductsExceededError } from '../../domain/exceptions/max-products-exceeded.error';
 import { InvalidQuantityError } from '../../domain/exceptions/invalid-quantity.error';
@@ -12,10 +13,12 @@ import { ProductNotInCartError } from '../../domain/exceptions/product-not-in-ca
 import { EmptyCartError } from '../../domain/exceptions/empty-cart.error';
 
 /**
- * Exception filter for domain exceptions
- * Maps domain-level business rule violations to appropriate HTTP status codes
+ * Exception filter for domain and application exceptions
+ * Maps domain-level business rule violations and application-level exceptions
+ * to appropriate HTTP status codes
  */
 @Catch(
+  CartNotFoundException,
   CartAlreadyConvertedError,
   MaxProductsExceededError,
   InvalidQuantityError,
@@ -41,6 +44,14 @@ export class DomainExceptionFilter implements ExceptionFilter {
     status: number;
     error: string;
   } {
+    // 404 Not Found - Resource doesn't exist
+    if (exception instanceof CartNotFoundException) {
+      return {
+        status: HttpStatus.NOT_FOUND,
+        error: 'Not Found',
+      };
+    }
+
     // 409 Conflict - Attempting operation on incompatible state
     if (exception instanceof CartAlreadyConvertedError) {
       return {
