@@ -18,11 +18,16 @@ export class ShoppingCart {
   private readonly items: Map<string, CartItem>;
   private conversionStatus: 'active' | 'converted';
 
-  private constructor(cartId: CartId, customerId: CustomerId) {
+  private constructor(
+    cartId: CartId,
+    customerId: CustomerId,
+    items: Map<string, CartItem>,
+    conversionStatus: 'active' | 'converted',
+  ) {
     this.cartId = cartId;
     this.customerId = customerId;
-    this.items = new Map();
-    this.conversionStatus = 'active';
+    this.items = items;
+    this.conversionStatus = conversionStatus;
   }
 
   /**
@@ -31,7 +36,26 @@ export class ShoppingCart {
    * @param customerId - Customer identifier (required)
    */
   static create(cartId: CartId, customerId: CustomerId): ShoppingCart {
-    return new ShoppingCart(cartId, customerId);
+    return new ShoppingCart(cartId, customerId, new Map(), 'active');
+  }
+
+  /**
+   * Restores an existing shopping cart from persistence
+   * Used by repository layer to reconstitute aggregates
+   *
+   * @param cartId - Cart identifier
+   * @param customerId - Customer identifier
+   * @param items - Map of cart items (productId -> CartItem)
+   * @param conversionStatus - Current conversion status
+   * @returns Restored ShoppingCart aggregate
+   */
+  static restore(
+    cartId: CartId,
+    customerId: CustomerId,
+    items: Map<string, CartItem>,
+    conversionStatus: 'active' | 'converted',
+  ): ShoppingCart {
+    return new ShoppingCart(cartId, customerId, items, conversionStatus);
   }
 
   /**
@@ -136,8 +160,12 @@ export class ShoppingCart {
   /**
    * Marks cart as converted to order
    * Once converted, cart becomes immutable
+   * @throws Error if cart is empty
    */
   markAsConverted(): void {
+    if (this.items.size === 0) {
+      throw new Error('Cannot convert empty cart');
+    }
     this.conversionStatus = 'converted';
   }
 

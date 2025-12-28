@@ -7,6 +7,24 @@
 - Enforce invariants within aggregate boundaries
 - Use repository pattern to persist/retrieve entire aggregates
 
+### Aggregate Reconstitution
+
+When loading aggregates from persistence, use the `restore()` factory method pattern to reconstitute aggregates with their full state:
+
+```typescript
+// Creating new aggregate (empty state, active status)
+const cart = ShoppingCart.create(cartId, customerId);
+
+// Restoring from persistence (with existing items and status)
+const cart = ShoppingCart.restore(cartId, customerId, items, conversionStatus);
+```
+
+**Key differences**:
+- `create()`: Initializes new aggregate with default state
+- `restore()`: Reconstitutes aggregate from persistence with arbitrary state
+
+The `restore()` method bypasses initialization logic and accepts full aggregate state, enabling seamless persistence layer integration without exposing aggregate internals.
+
 ## ShoppingCart (Aggregate Root)
 
 **Internal entity**: `CartItem`

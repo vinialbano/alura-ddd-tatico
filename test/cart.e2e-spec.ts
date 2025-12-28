@@ -229,7 +229,7 @@ describe('CartController (e2e)', () => {
         });
     });
 
-    it('should allow converting empty cart', async () => {
+    it('should reject converting empty cart', async () => {
       const createResponse = await request(app.getHttpServer())
         .post('/carts')
         .send({ customerId: 'customer-1' });
@@ -238,11 +238,11 @@ describe('CartController (e2e)', () => {
 
       return request(app.getHttpServer())
         .post(`/carts/${cartId}/convert`)
-        .expect(200)
+        .expect(400)
         .expect((res) => {
-          const body = res.body as CartResponseDto;
-          expect(body.isConverted).toBe(true);
-          expect(body.itemCount).toBe(0);
+          expect((res.body as { message: string }).message).toContain(
+            'Cannot convert empty cart',
+          );
         });
     });
 
@@ -285,6 +285,10 @@ describe('CartController (e2e)', () => {
         .send({ customerId: 'customer-1' });
 
       const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 3 });
 
       await request(app.getHttpServer()).post(`/carts/${cartId}/convert`);
 
@@ -511,7 +515,9 @@ describe('CartController (e2e)', () => {
         .expect(400)
         .expect((res) => {
           const body = res.body as ErrorResponse;
-          expect(body.message).toContain('Product product-2 is not in the cart');
+          expect(body.message).toContain(
+            'Product product-2 is not in the cart',
+          );
         });
     });
 

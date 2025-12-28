@@ -207,16 +207,15 @@ describe('CartService (Integration)', () => {
       expect(convertedCart.items).toHaveLength(1);
     });
 
-    it('should allow converting empty cart', async () => {
+    it('should reject converting empty cart', async () => {
       const createDto: CreateCartDto = { customerId: 'customer-1' };
       const cartResponse = await service.createCart(createDto);
 
       expect(cartResponse.itemCount).toBe(0);
 
-      const convertedCart = await service.convertCart(cartResponse.cartId);
-
-      expect(convertedCart.isConverted).toBe(true);
-      expect(convertedCart.itemCount).toBe(0);
+      await expect(service.convertCart(cartResponse.cartId)).rejects.toThrow(
+        'Cannot convert empty cart',
+      );
     });
 
     it('should throw error when cart not found', async () => {
@@ -230,6 +229,10 @@ describe('CartService (Integration)', () => {
     it('should be idempotent - allow converting already converted cart', async () => {
       const createDto: CreateCartDto = { customerId: 'customer-1' };
       const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 3,
+      });
 
       await service.convertCart(cartResponse.cartId);
       const secondConversion = await service.convertCart(cartResponse.cartId);

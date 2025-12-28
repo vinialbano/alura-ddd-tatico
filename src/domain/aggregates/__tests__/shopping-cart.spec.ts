@@ -1,4 +1,5 @@
 import { ShoppingCart } from '../shopping-cart';
+import { CartItem } from '../../entities/cart-item';
 import { CartId } from '../../value-objects/cart-id';
 import { CustomerId } from '../../value-objects/customer-id';
 import { ProductId } from '../../value-objects/product-id';
@@ -26,6 +27,68 @@ describe('ShoppingCart', () => {
       const cart = ShoppingCart.create(cartId, customerId);
 
       expect(cart.getCustomerId()).toBe(customerId);
+    });
+  });
+
+  describe('restore', () => {
+    it('should restore cart with items and active status', () => {
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-1');
+      const items = new Map<string, CartItem>();
+      const productId = ProductId.fromString('product-1');
+      const item = CartItem.create(productId, Quantity.of(5));
+      items.set(productId.getValue(), item);
+
+      const cart = ShoppingCart.restore(cartId, customerId, items, 'active');
+
+      expect(cart.getCartId()).toBe(cartId);
+      expect(cart.getCustomerId()).toBe(customerId);
+      expect(cart.getItems()).toHaveLength(1);
+      expect(cart.getItemCount()).toBe(1);
+      expect(cart.isConverted()).toBe(false);
+    });
+
+    it('should restore cart with converted status', () => {
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-1');
+      const items = new Map<string, CartItem>();
+      const productId = ProductId.fromString('product-1');
+      const item = CartItem.create(productId, Quantity.of(3));
+      items.set(productId.getValue(), item);
+
+      const cart = ShoppingCart.restore(cartId, customerId, items, 'converted');
+
+      expect(cart.isConverted()).toBe(true);
+      expect(cart.getItems()).toHaveLength(1);
+    });
+
+    it('should restore empty active cart', () => {
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-1');
+      const items = new Map<string, CartItem>();
+
+      const cart = ShoppingCart.restore(cartId, customerId, items, 'active');
+
+      expect(cart.getItemCount()).toBe(0);
+      expect(cart.isConverted()).toBe(false);
+    });
+
+    it('should restore cart with multiple items', () => {
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-1');
+      const items = new Map<string, CartItem>();
+
+      const product1 = ProductId.fromString('product-1');
+      const product2 = ProductId.fromString('product-2');
+      const item1 = CartItem.create(product1, Quantity.of(3));
+      const item2 = CartItem.create(product2, Quantity.of(5));
+      items.set(product1.getValue(), item1);
+      items.set(product2.getValue(), item2);
+
+      const cart = ShoppingCart.restore(cartId, customerId, items, 'active');
+
+      expect(cart.getItemCount()).toBe(2);
+      expect(cart.getItems()).toHaveLength(2);
     });
   });
 
@@ -173,7 +236,7 @@ describe('ShoppingCart', () => {
       expect(cart.isConverted()).toBe(true);
     });
 
-    it('should allow marking empty cart as converted', () => {
+    it('should reject converting empty cart', () => {
       const cart = ShoppingCart.create(
         CartId.create(),
         CustomerId.fromString('customer-1'),
@@ -181,9 +244,8 @@ describe('ShoppingCart', () => {
 
       expect(cart.getItemCount()).toBe(0);
 
-      cart.markAsConverted();
-
-      expect(cart.isConverted()).toBe(true);
+      expect(() => cart.markAsConverted()).toThrow('Cannot convert empty cart');
+      expect(cart.isConverted()).toBe(false);
     });
 
     it('should be idempotent - allow marking already converted cart', () => {
@@ -191,6 +253,7 @@ describe('ShoppingCart', () => {
         CartId.create(),
         CustomerId.fromString('customer-1'),
       );
+      cart.addItem(ProductId.fromString('product-1'), Quantity.of(3));
 
       cart.markAsConverted();
       expect(cart.isConverted()).toBe(true);
@@ -358,9 +421,9 @@ describe('ShoppingCart', () => {
       );
       cart.addItem(ProductId.fromString('product-1'), Quantity.of(3));
 
-      expect(() =>
-        cart.removeItem(ProductId.fromString('product-2')),
-      ).toThrow('Product product-2 is not in the cart');
+      expect(() => cart.removeItem(ProductId.fromString('product-2'))).toThrow(
+        'Product product-2 is not in the cart',
+      );
     });
 
     it('should reject removal on converted cart', () => {
