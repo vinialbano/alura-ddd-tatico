@@ -9,12 +9,18 @@ describe('CustomerId', () => {
     });
 
     it('should throw error for empty string', () => {
-      expect(() => CustomerId.fromString('')).toThrow('CustomerId cannot be empty');
+      expect(() => CustomerId.fromString('')).toThrow(
+        'CustomerId cannot be empty',
+      );
     });
 
     it('should throw error for whitespace-only string', () => {
-      expect(() => CustomerId.fromString('   ')).toThrow('CustomerId cannot be empty');
-      expect(() => CustomerId.fromString('\t\n')).toThrow('CustomerId cannot be empty');
+      expect(() => CustomerId.fromString('   ')).toThrow(
+        'CustomerId cannot be empty',
+      );
+      expect(() => CustomerId.fromString('\t\n')).toThrow(
+        'CustomerId cannot be empty',
+      );
     });
 
     it('should trim whitespace from input', () => {

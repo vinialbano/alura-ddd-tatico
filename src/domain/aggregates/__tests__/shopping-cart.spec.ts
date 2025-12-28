@@ -33,7 +33,7 @@ describe('ShoppingCart', () => {
     it('should add new product to empty cart', () => {
       const cart = ShoppingCart.create(
         CartId.create(),
-        CustomerId.fromString('customer-1')
+        CustomerId.fromString('customer-1'),
       );
       const productId = ProductId.fromString('product-1');
       const quantity = Quantity.of(3);
@@ -50,7 +50,7 @@ describe('ShoppingCart', () => {
     it('should consolidate quantity for duplicate product', () => {
       const cart = ShoppingCart.create(
         CartId.create(),
-        CustomerId.fromString('customer-1')
+        CustomerId.fromString('customer-1'),
       );
       const productId = ProductId.fromString('product-1');
 
@@ -65,7 +65,7 @@ describe('ShoppingCart', () => {
     it('should create separate line for different product', () => {
       const cart = ShoppingCart.create(
         CartId.create(),
-        CustomerId.fromString('customer-1')
+        CustomerId.fromString('customer-1'),
       );
       const product1 = ProductId.fromString('product-1');
       const product2 = ProductId.fromString('product-2');
@@ -80,7 +80,7 @@ describe('ShoppingCart', () => {
     it('should reject invalid quantity', () => {
       const cart = ShoppingCart.create(
         CartId.create(),
-        CustomerId.fromString('customer-1')
+        CustomerId.fromString('customer-1'),
       );
       const productId = ProductId.fromString('product-1');
 
@@ -93,7 +93,7 @@ describe('ShoppingCart', () => {
     it('should throw MaxProductsExceededError when adding 21st product', () => {
       const cart = ShoppingCart.create(
         CartId.create(),
-        CustomerId.fromString('customer-1')
+        CustomerId.fromString('customer-1'),
       );
 
       // Add 20 unique products
@@ -105,14 +105,14 @@ describe('ShoppingCart', () => {
 
       // Attempt to add 21st product
       expect(() =>
-        cart.addItem(ProductId.fromString('product-21'), Quantity.of(1))
+        cart.addItem(ProductId.fromString('product-21'), Quantity.of(1)),
       ).toThrow('Cart cannot contain more than 20 unique products');
     });
 
     it('should throw when consolidation exceeds 10', () => {
       const cart = ShoppingCart.create(
         CartId.create(),
-        CustomerId.fromString('customer-1')
+        CustomerId.fromString('customer-1'),
       );
       const productId = ProductId.fromString('product-1');
 
@@ -120,7 +120,7 @@ describe('ShoppingCart', () => {
 
       // Attempt to add more, which would exceed 10
       expect(() => cart.addItem(productId, Quantity.of(4))).toThrow(
-        'Quantity must be an integer between 1 and 10'
+        'Quantity must be an integer between 1 and 10',
       );
     });
   });
@@ -129,7 +129,7 @@ describe('ShoppingCart', () => {
     it('should return defensive copy as array', () => {
       const cart = ShoppingCart.create(
         CartId.create(),
-        CustomerId.fromString('customer-1')
+        CustomerId.fromString('customer-1'),
       );
       cart.addItem(ProductId.fromString('product-1'), Quantity.of(3));
 
@@ -147,7 +147,7 @@ describe('ShoppingCart', () => {
     it('should return correct count', () => {
       const cart = ShoppingCart.create(
         CartId.create(),
-        CustomerId.fromString('customer-1')
+        CustomerId.fromString('customer-1'),
       );
 
       expect(cart.getItemCount()).toBe(0);

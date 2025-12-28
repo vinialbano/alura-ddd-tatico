@@ -13,27 +13,45 @@ describe('Quantity', () => {
     });
 
     it('should reject value 0', () => {
-      expect(() => Quantity.of(0)).toThrow('Quantity must be an integer between 1 and 10');
+      expect(() => Quantity.of(0)).toThrow(
+        'Quantity must be an integer between 1 and 10',
+      );
     });
 
     it('should reject negative values', () => {
-      expect(() => Quantity.of(-1)).toThrow('Quantity must be an integer between 1 and 10');
-      expect(() => Quantity.of(-5)).toThrow('Quantity must be an integer between 1 and 10');
+      expect(() => Quantity.of(-1)).toThrow(
+        'Quantity must be an integer between 1 and 10',
+      );
+      expect(() => Quantity.of(-5)).toThrow(
+        'Quantity must be an integer between 1 and 10',
+      );
     });
 
     it('should reject value 11', () => {
-      expect(() => Quantity.of(11)).toThrow('Quantity must be an integer between 1 and 10');
+      expect(() => Quantity.of(11)).toThrow(
+        'Quantity must be an integer between 1 and 10',
+      );
     });
 
     it('should reject values greater than 11', () => {
-      expect(() => Quantity.of(15)).toThrow('Quantity must be an integer between 1 and 10');
-      expect(() => Quantity.of(100)).toThrow('Quantity must be an integer between 1 and 10');
+      expect(() => Quantity.of(15)).toThrow(
+        'Quantity must be an integer between 1 and 10',
+      );
+      expect(() => Quantity.of(100)).toThrow(
+        'Quantity must be an integer between 1 and 10',
+      );
     });
 
     it('should reject fractional values', () => {
-      expect(() => Quantity.of(1.5)).toThrow('Quantity must be an integer between 1 and 10');
-      expect(() => Quantity.of(5.2)).toThrow('Quantity must be an integer between 1 and 10');
-      expect(() => Quantity.of(9.99)).toThrow('Quantity must be an integer between 1 and 10');
+      expect(() => Quantity.of(1.5)).toThrow(
+        'Quantity must be an integer between 1 and 10',
+      );
+      expect(() => Quantity.of(5.2)).toThrow(
+        'Quantity must be an integer between 1 and 10',
+      );
+      expect(() => Quantity.of(9.99)).toThrow(
+        'Quantity must be an integer between 1 and 10',
+      );
     });
   });
 
@@ -61,14 +79,18 @@ describe('Quantity', () => {
       const qty1 = Quantity.of(6);
       const qty2 = Quantity.of(5);
 
-      expect(() => qty1.add(qty2)).toThrow('Quantity must be an integer between 1 and 10');
+      expect(() => qty1.add(qty2)).toThrow(
+        'Quantity must be an integer between 1 and 10',
+      );
     });
 
     it('should throw when sum equals 11', () => {
       const qty1 = Quantity.of(7);
       const qty2 = Quantity.of(4);
 
-      expect(() => qty1.add(qty2)).toThrow('Quantity must be an integer between 1 and 10');
+      expect(() => qty1.add(qty2)).toThrow(
+        'Quantity must be an integer between 1 and 10',
+      );
     });
   });
 

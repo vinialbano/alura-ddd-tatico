@@ -97,7 +97,7 @@ export class ShoppingCart {
   private ensureNotConverted(): void {
     if (this.isConverted()) {
       throw new Error(
-        `Cart ${this.cartId.getValue()} has already been converted and cannot be modified`
+        `Cart ${this.cartId.getValue()} has already been converted and cannot be modified`,
       );
     }
   }

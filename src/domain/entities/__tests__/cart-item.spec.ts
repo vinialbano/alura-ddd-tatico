@@ -85,7 +85,7 @@ describe('CartItem', () => {
       const cartItem = CartItem.create(productId, Quantity.of(7));
 
       expect(() => cartItem.addQuantity(Quantity.of(4))).toThrow(
-        'Quantity must be an integer between 1 and 10'
+        'Quantity must be an integer between 1 and 10',
       );
     });
 

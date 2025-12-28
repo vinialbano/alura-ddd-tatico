@@ -29,7 +29,9 @@ export class CartController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createCart(@Body() createCartDto: CreateCartDto): Promise<CartResponseDto> {
+  async createCart(
+    @Body() createCartDto: CreateCartDto,
+  ): Promise<CartResponseDto> {
     try {
       return await this.cartService.createCart(createCartDto);
     } catch (error) {

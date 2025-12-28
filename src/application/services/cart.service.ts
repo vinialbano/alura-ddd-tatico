@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { ShoppingCartRepository } from '../../domain/repositories/shopping-cart.repository.interface';
+import { Injectable, Inject } from '@nestjs/common';
+import type { ShoppingCartRepository } from '../../domain/repositories/shopping-cart.repository.interface';
 import { ShoppingCart } from '../../domain/aggregates/shopping-cart';
 import { CartId } from '../../domain/value-objects/cart-id';
 import { CustomerId } from '../../domain/value-objects/customer-id';
@@ -7,7 +7,10 @@ import { ProductId } from '../../domain/value-objects/product-id';
 import { Quantity } from '../../domain/value-objects/quantity';
 import { CreateCartDto } from '../dtos/create-cart.dto';
 import { AddItemDto } from '../dtos/add-item.dto';
-import { CartResponseDto, CartItemResponseDto } from '../dtos/cart-response.dto';
+import {
+  CartResponseDto,
+  CartItemResponseDto,
+} from '../dtos/cart-response.dto';
 
 /**
  * CartService
@@ -17,7 +20,10 @@ import { CartResponseDto, CartItemResponseDto } from '../dtos/cart-response.dto'
  */
 @Injectable()
 export class CartService {
-  constructor(private readonly repository: ShoppingCartRepository) {}
+  constructor(
+    @Inject('ShoppingCartRepository')
+    private readonly repository: ShoppingCartRepository,
+  ) {}
 
   /**
    * Creates a new shopping cart for a customer

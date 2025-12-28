@@ -44,7 +44,10 @@ describe('CartService (Integration)', () => {
       const cartResponse = await service.createCart(createDto);
 
       const addItemDto: AddItemDto = { productId: 'product-1', quantity: 3 };
-      const updatedCart = await service.addItem(cartResponse.cartId, addItemDto);
+      const updatedCart = await service.addItem(
+        cartResponse.cartId,
+        addItemDto,
+      );
 
       expect(updatedCart.items).toHaveLength(1);
       expect(updatedCart.items[0].productId).toBe('product-1');
@@ -92,7 +95,7 @@ describe('CartService (Integration)', () => {
       const nonExistentCartId = '00000000-0000-0000-0000-000000000000';
 
       await expect(
-        service.addItem(nonExistentCartId, addItemDto)
+        service.addItem(nonExistentCartId, addItemDto),
       ).rejects.toThrow('Cart not found');
     });
 
@@ -103,7 +106,7 @@ describe('CartService (Integration)', () => {
       const addItemDto: AddItemDto = { productId: 'product-1', quantity: 0 };
 
       await expect(
-        service.addItem(cartResponse.cartId, addItemDto)
+        service.addItem(cartResponse.cartId, addItemDto),
       ).rejects.toThrow();
     });
 
@@ -124,7 +127,7 @@ describe('CartService (Integration)', () => {
         service.addItem(cartResponse.cartId, {
           productId: 'product-21',
           quantity: 1,
-        })
+        }),
       ).rejects.toThrow('Cart cannot contain more than 20 unique products');
     });
 
@@ -141,7 +144,7 @@ describe('CartService (Integration)', () => {
         service.addItem(cartResponse.cartId, {
           productId: 'product-1',
           quantity: 4,
-        })
+        }),
       ).rejects.toThrow('Quantity must be an integer between 1 and 10');
     });
   });
@@ -162,7 +165,7 @@ describe('CartService (Integration)', () => {
       const nonExistentCartId = '00000000-0000-0000-0000-000000000000';
 
       await expect(service.getCart(nonExistentCartId)).rejects.toThrow(
-        'Cart not found'
+        'Cart not found',
       );
     });
 

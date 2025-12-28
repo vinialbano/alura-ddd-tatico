@@ -14,7 +14,8 @@ describe('CartId', () => {
 
     it('should generate valid UUID format', () => {
       const cartId = CartId.create();
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
       expect(cartId.getValue()).toMatch(uuidRegex);
     });
