@@ -424,49 +424,49 @@ This document provides a complete task breakdown for implementing the Shopping C
 
 **User Story**: US3
 
-- [ ] T192 [P] [US3] Write test for ShoppingCart.removeItem() removes existing item in test/unit/shopping-cart.spec.ts
-- [ ] T193 [P] [US3] Write test for ShoppingCart.removeItem() makes cart empty when removing last item in test/unit/shopping-cart.spec.ts
-- [ ] T194 [P] [US3] Write test for ShoppingCart.removeItem() throws ProductNotInCartError for non-existent product in test/unit/shopping-cart.spec.ts
-- [ ] T195 [P] [US3] Write test for ShoppingCart.removeItem() throws CartAlreadyConvertedError on converted cart in test/unit/shopping-cart.spec.ts
-- [ ] T196 [US3] Implement ShoppingCart.removeItem() method in src/domain/aggregates/shopping-cart.ts
-- [ ] T197 [US3] Run tests and verify ShoppingCart US3 behaviors pass
-- [ ] T198 [US3] Commit ShoppingCart US3 tests with message "test(US3): add remove item tests"
-- [ ] T199 [US3] Commit ShoppingCart US3 implementation with message "feat(US3): implement remove item"
+- [X] T192 [P] [US3] Write test for ShoppingCart.removeItem() removes existing item in test/unit/shopping-cart.spec.ts
+- [X] T193 [P] [US3] Write test for ShoppingCart.removeItem() makes cart empty when removing last item in test/unit/shopping-cart.spec.ts
+- [X] T194 [P] [US3] Write test for ShoppingCart.removeItem() throws ProductNotInCartError for non-existent product in test/unit/shopping-cart.spec.ts
+- [X] T195 [P] [US3] Write test for ShoppingCart.removeItem() throws CartAlreadyConvertedError on converted cart in test/unit/shopping-cart.spec.ts
+- [X] T196 [US3] Implement ShoppingCart.removeItem() method in src/domain/aggregates/shopping-cart.ts
+- [X] T197 [US3] Run tests and verify ShoppingCart US3 behaviors pass
+- [X] T198 [US3] Commit ShoppingCart US3 tests with message "test(US3): add remove item tests"
+- [X] T199 [US3] Commit ShoppingCart US3 implementation with message "feat(US3): implement remove item"
 
 ### Application Layer (US3)
 
 **User Story**: US3
 
-- [ ] T200 [US3] Write integration test for CartService.removeItem() in test/integration/cart.service.spec.ts
-- [ ] T201 [US3] Write integration test for CartService.removeItem() rejection scenarios in test/integration/cart.service.spec.ts
-- [ ] T202 [US3] Implement CartService.removeItem() orchestration in src/application/services/cart.service.ts
-- [ ] T203 [US3] Run integration tests and verify CartService US3 passes
-- [ ] T204 [US3] Commit CartService US3 tests with message "test(US3): add CartService remove item tests"
-- [ ] T205 [US3] Commit CartService US3 implementation with message "feat(US3): implement CartService remove item method"
+- [X] T200 [US3] Write integration test for CartService.removeItem() in test/integration/cart.service.spec.ts
+- [X] T201 [US3] Write integration test for CartService.removeItem() rejection scenarios in test/integration/cart.service.spec.ts
+- [X] T202 [US3] Implement CartService.removeItem() orchestration in src/application/services/cart.service.ts
+- [X] T203 [US3] Run integration tests and verify CartService US3 passes
+- [X] T204 [US3] Commit CartService US3 tests with message "test(US3): add CartService remove item tests"
+- [X] T205 [US3] Commit CartService US3 implementation with message "feat(US3): implement CartService remove item method"
 
 ### Infrastructure Layer (US3)
 
 **User Story**: US3
 
-- [ ] T206 [US3] Write e2e test for DELETE /carts/:id/items/:productId in test/e2e/cart.e2e-spec.ts
-- [ ] T207 [US3] Write e2e test for DELETE rejecting non-existent product in test/e2e/cart.e2e-spec.ts
-- [ ] T208 [US3] Write e2e test for DELETE rejecting on converted cart in test/e2e/cart.e2e-spec.ts
-- [ ] T209 [US3] Implement CartController.removeItem() endpoint in src/infrastructure/controllers/cart.controller.ts
-- [ ] T210 [US3] Run e2e tests and verify US3 endpoints pass
-- [ ] T211 [US3] Commit e2e tests with message "test(US3): add e2e tests for remove item"
-- [ ] T212 [US3] Commit controller with message "feat(US3): implement remove item endpoint"
+- [X] T206 [US3] Write e2e test for DELETE /carts/:id/items/:productId in test/e2e/cart.e2e-spec.ts
+- [X] T207 [US3] Write e2e test for DELETE rejecting non-existent product in test/e2e/cart.e2e-spec.ts
+- [X] T208 [US3] Write e2e test for DELETE rejecting on converted cart in test/e2e/cart.e2e-spec.ts
+- [X] T209 [US3] Implement CartController.removeItem() endpoint in src/infrastructure/controllers/cart.controller.ts
+- [X] T210 [US3] Run e2e tests and verify US3 endpoints pass
+- [X] T211 [US3] Commit e2e tests with message "test(US3): add e2e tests for remove item"
+- [X] T212 [US3] Commit controller with message "feat(US3): implement remove item endpoint"
 
 ### US3 Validation
 
 **User Story**: US3
 
-- [ ] T213 [US3] Run full test suite and verify all US3 tests pass
-- [ ] T214 [US3] Manually test: Remove item from cart → Verify removal
-- [ ] T215 [US3] Manually test: Remove last item → Verify cart becomes empty
-- [ ] T216 [US3] Manually test: Remove non-existent product → Verify rejection
-- [ ] T217 [US3] Manually test: Remove from converted cart → Verify rejection
-- [ ] T218 [US3] Run quality gates (lint, format, build)
-- [ ] T219 [US3] Commit final integration with message "feat(US3): complete remove items feature"
+- [X] T213 [US3] Run full test suite and verify all US3 tests pass
+- [X] T214 [US3] Manually test: Remove item from cart → Verify removal
+- [X] T215 [US3] Manually test: Remove last item → Verify cart becomes empty
+- [X] T216 [US3] Manually test: Remove non-existent product → Verify rejection
+- [X] T217 [US3] Manually test: Remove from converted cart → Verify rejection
+- [X] T218 [US3] Run quality gates (lint, format, build)
+- [X] T219 [US3] Commit final integration with message "feat(US3): complete remove items feature"
 
 ---
 
