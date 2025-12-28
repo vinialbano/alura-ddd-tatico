@@ -270,7 +270,7 @@ describe('CartController (e2e)', () => {
       return request(app.getHttpServer())
         .post(`/carts/${cartId}/items`)
         .send({ productId: 'product-2', quantity: 5 })
-        .expect(400)
+        .expect(409)
         .expect((res) => {
           const body = res.body as ErrorResponse;
           expect(body.message).toContain(
@@ -438,7 +438,7 @@ describe('CartController (e2e)', () => {
       return request(app.getHttpServer())
         .put(`/carts/${cartId}/items/product-1`)
         .send({ quantity: 5 })
-        .expect(400)
+        .expect(409)
         .expect((res) => {
           const body = res.body as ErrorResponse;
           expect(body.message).toContain(
@@ -536,7 +536,7 @@ describe('CartController (e2e)', () => {
 
       return request(app.getHttpServer())
         .delete(`/carts/${cartId}/items/product-1`)
-        .expect(400)
+        .expect(409)
         .expect((res) => {
           const body = res.body as ErrorResponse;
           expect(body.message).toContain(

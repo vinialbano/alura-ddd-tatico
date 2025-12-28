@@ -1,22 +1,21 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Put,
-  Delete,
   Body,
-  Param,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
   NotFoundException,
-  BadRequestException,
+  Param,
+  Post,
+  Put,
   UseFilters,
 } from '@nestjs/common';
-import { CartService } from '../../application/services/cart.service';
-import { CreateCartDto } from '../../application/dtos/create-cart.dto';
 import { AddItemDto } from '../../application/dtos/add-item.dto';
-import { UpdateQuantityDto } from '../../application/dtos/update-quantity.dto';
 import { CartResponseDto } from '../../application/dtos/cart-response.dto';
+import { CreateCartDto } from '../../application/dtos/create-cart.dto';
+import { UpdateQuantityDto } from '../../application/dtos/update-quantity.dto';
+import { CartService } from '../../application/services/cart.service';
 import { DomainExceptionFilter } from '../filters/domain-exception.filter';
 
 /**
@@ -39,12 +38,7 @@ export class CartController {
   async createCart(
     @Body() createCartDto: CreateCartDto,
   ): Promise<CartResponseDto> {
-    try {
-      return await this.cartService.createCart(createCartDto);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      throw new BadRequestException(message);
-    }
+    return await this.cartService.createCart(createCartDto);
   }
 
   /**
@@ -57,15 +51,9 @@ export class CartController {
     @Param('id') cartId: string,
     @Body() addItemDto: AddItemDto,
   ): Promise<CartResponseDto> {
-    try {
-      return await this.cartService.addItem(cartId, addItemDto);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message === 'Cart not found') {
-        throw new NotFoundException(message);
-      }
-      throw new BadRequestException(message);
-    }
+    return await this.handleCartNotFound(() =>
+      this.cartService.addItem(cartId, addItemDto),
+    );
   }
 
   /**
@@ -74,15 +62,9 @@ export class CartController {
    */
   @Get(':id')
   async getCart(@Param('id') cartId: string): Promise<CartResponseDto> {
-    try {
-      return await this.cartService.getCart(cartId);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message === 'Cart not found') {
-        throw new NotFoundException(message);
-      }
-      throw new BadRequestException(message);
-    }
+    return await this.handleCartNotFound(() =>
+      this.cartService.getCart(cartId),
+    );
   }
 
   /**
@@ -92,15 +74,9 @@ export class CartController {
   @Post(':id/convert')
   @HttpCode(HttpStatus.OK)
   async convertCart(@Param('id') cartId: string): Promise<CartResponseDto> {
-    try {
-      return await this.cartService.convertCart(cartId);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message === 'Cart not found') {
-        throw new NotFoundException(message);
-      }
-      throw new BadRequestException(message);
-    }
+    return await this.handleCartNotFound(() =>
+      this.cartService.convertCart(cartId),
+    );
   }
 
   /**
@@ -114,19 +90,9 @@ export class CartController {
     @Param('productId') productId: string,
     @Body() updateQuantityDto: UpdateQuantityDto,
   ): Promise<CartResponseDto> {
-    try {
-      return await this.cartService.updateItemQuantity(
-        cartId,
-        productId,
-        updateQuantityDto,
-      );
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message === 'Cart not found') {
-        throw new NotFoundException(message);
-      }
-      throw new BadRequestException(message);
-    }
+    return await this.handleCartNotFound(() =>
+      this.cartService.updateItemQuantity(cartId, productId, updateQuantityDto),
+    );
   }
 
   /**
@@ -139,14 +105,25 @@ export class CartController {
     @Param('id') cartId: string,
     @Param('productId') productId: string,
   ): Promise<CartResponseDto> {
+    return await this.handleCartNotFound(() =>
+      this.cartService.removeItem(cartId, productId),
+    );
+  }
+
+  /**
+   * Helper method to handle "Cart not found" errors
+   * Domain exceptions are handled by DomainExceptionFilter and re-thrown
+   * @private
+   */
+  private async handleCartNotFound<T>(operation: () => Promise<T>): Promise<T> {
     try {
-      return await this.cartService.removeItem(cartId, productId);
+      return await operation();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      if (message === 'Cart not found') {
-        throw new NotFoundException(message);
+      if (error instanceof Error && error.message === 'Cart not found') {
+        throw new NotFoundException(error.message);
       }
-      throw new BadRequestException(message);
+      // Re-throw domain exceptions - they'll be caught by DomainExceptionFilter
+      throw error;
     }
   }
 }
