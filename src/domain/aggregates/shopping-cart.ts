@@ -3,6 +3,10 @@ import { CartId } from '../value-objects/cart-id';
 import { CustomerId } from '../value-objects/customer-id';
 import { ProductId } from '../value-objects/product-id';
 import { Quantity } from '../value-objects/quantity';
+import { CartAlreadyConvertedError } from '../exceptions/cart-already-converted.error';
+import { MaxProductsExceededError } from '../exceptions/max-products-exceeded.error';
+import { ProductNotInCartError } from '../exceptions/product-not-in-cart.error';
+import { EmptyCartError } from '../exceptions/empty-cart.error';
 
 /**
  * Parameters for constructing a ShoppingCart aggregate
@@ -54,9 +58,9 @@ export class ShoppingCart {
    * Adds new item or consolidates quantity if product exists
    * @param productId - Product to add
    * @param quantity - Quantity to add
-   * @throws Error if cart is converted
-   * @throws Error if adding would exceed 20 products
-   * @throws Error if consolidation exceeds 10
+   * @throws CartAlreadyConvertedError if cart is converted
+   * @throws MaxProductsExceededError if adding would exceed 20 products
+   * @throws InvalidQuantityError if consolidation exceeds 10
    */
   addItem(productId: ProductId, quantity: Quantity): void {
     this.ensureNotConverted();
@@ -114,8 +118,8 @@ export class ShoppingCart {
    * Updates quantity of an existing item in the cart
    * @param productId - Product identifier
    * @param quantity - New quantity (replaces current quantity)
-   * @throws Error if cart is converted
-   * @throws Error if product is not in cart
+   * @throws CartAlreadyConvertedError if cart is converted
+   * @throws ProductNotInCartError if product is not in cart
    */
   updateItemQuantity(productId: ProductId, quantity: Quantity): void {
     this.ensureNotConverted();
@@ -124,7 +128,7 @@ export class ShoppingCart {
     const existingItem = this.items.get(productKey);
 
     if (!existingItem) {
-      throw new Error(`Product ${productKey} is not in the cart`);
+      throw new ProductNotInCartError(productId);
     }
 
     existingItem.updateQuantity(quantity);
@@ -133,8 +137,8 @@ export class ShoppingCart {
   /**
    * Removes an item from the cart
    * @param productId - Product identifier to remove
-   * @throws Error if cart is converted
-   * @throws Error if product is not in cart
+   * @throws CartAlreadyConvertedError if cart is converted
+   * @throws ProductNotInCartError if product is not in cart
    */
   removeItem(productId: ProductId): void {
     this.ensureNotConverted();
@@ -143,7 +147,7 @@ export class ShoppingCart {
     const existingItem = this.items.get(productKey);
 
     if (!existingItem) {
-      throw new Error(`Product ${productKey} is not in the cart`);
+      throw new ProductNotInCartError(productId);
     }
 
     this.items.delete(productKey);
@@ -152,26 +156,24 @@ export class ShoppingCart {
   /**
    * Marks cart as converted to order
    * Once converted, cart becomes immutable
-   * @throws Error if cart is empty
+   * @throws EmptyCartError if cart is empty
    */
   markAsConverted(): void {
     if (this.items.size === 0) {
-      throw new Error('Cannot convert empty cart');
+      throw new EmptyCartError();
     }
     this.conversionStatus = 'converted';
   }
 
   private ensureNotConverted(): void {
     if (this.isConverted()) {
-      throw new Error(
-        `Cart ${this.cartId.getValue()} has already been converted and cannot be modified`,
-      );
+      throw new CartAlreadyConvertedError(this.cartId);
     }
   }
 
   private ensureWithinProductLimit(): void {
     if (this.items.size >= ShoppingCart.MAX_PRODUCTS) {
-      throw new Error('Cart cannot contain more than 20 unique products');
+      throw new MaxProductsExceededError();
     }
   }
 

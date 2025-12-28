@@ -51,7 +51,7 @@ export class CartItem {
   /**
    * Adds to existing quantity
    * @param additionalQuantity - Quantity to add
-   * @throws Error if result exceeds maximum quantity (10)
+   * @throws InvalidQuantityError if result exceeds maximum quantity (10)
    */
   addQuantity(additionalQuantity: Quantity): void {
     this.quantity = this.quantity.add(additionalQuantity);
