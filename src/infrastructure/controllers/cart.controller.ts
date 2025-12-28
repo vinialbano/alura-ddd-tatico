@@ -77,4 +77,22 @@ export class CartController {
       throw new BadRequestException(message);
     }
   }
+
+  /**
+   * POST /carts/:id/convert
+   * Converts cart to order (marks as immutable)
+   */
+  @Post(':id/convert')
+  @HttpCode(HttpStatus.OK)
+  async convertCart(@Param('id') cartId: string): Promise<CartResponseDto> {
+    try {
+      return await this.cartService.convertCart(cartId);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message === 'Cart not found') {
+        throw new NotFoundException(message);
+      }
+      throw new BadRequestException(message);
+    }
+  }
 }

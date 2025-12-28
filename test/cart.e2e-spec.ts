@@ -205,4 +205,96 @@ describe('CartController (e2e)', () => {
         });
     });
   });
+
+  describe('POST /carts/:id/convert', () => {
+    it('should convert cart to order', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 3 });
+
+      return request(app.getHttpServer())
+        .post(`/carts/${cartId}/convert`)
+        .expect(200)
+        .expect((res) => {
+          const body = res.body as CartResponseDto;
+          expect(body.isConverted).toBe(true);
+          expect(body.cartId).toBe(cartId);
+          expect(body.items).toHaveLength(1);
+        });
+    });
+
+    it('should allow converting empty cart', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      return request(app.getHttpServer())
+        .post(`/carts/${cartId}/convert`)
+        .expect(200)
+        .expect((res) => {
+          const body = res.body as CartResponseDto;
+          expect(body.isConverted).toBe(true);
+          expect(body.itemCount).toBe(0);
+        });
+    });
+
+    it('should return 404 for non-existent cart', () => {
+      const nonExistentId = '00000000-0000-0000-0000-000000000000';
+
+      return request(app.getHttpServer())
+        .post(`/carts/${nonExistentId}/convert`)
+        .expect(404);
+    });
+
+    it('should prevent adding items after conversion', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 3 });
+
+      await request(app.getHttpServer()).post(`/carts/${cartId}/convert`);
+
+      return request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-2', quantity: 5 })
+        .expect(400)
+        .expect((res) => {
+          const body = res.body as ErrorResponse;
+          expect(body.message).toContain(
+            'has already been converted and cannot be modified',
+          );
+        });
+    });
+
+    it('should be idempotent - allow converting already converted cart', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer()).post(`/carts/${cartId}/convert`);
+
+      return request(app.getHttpServer())
+        .post(`/carts/${cartId}/convert`)
+        .expect(200)
+        .expect((res) => {
+          const body = res.body as CartResponseDto;
+          expect(body.isConverted).toBe(true);
+        });
+    });
+  });
 });
