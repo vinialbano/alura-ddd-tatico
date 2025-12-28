@@ -255,4 +255,122 @@ describe('CartService (Integration)', () => {
       ).rejects.toThrow('has already been converted and cannot be modified');
     });
   });
+
+  describe('updateItemQuantity - US2', () => {
+    it('should update quantity of existing item', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 3,
+      });
+
+      const updatedCart = await service.updateItemQuantity(
+        cartResponse.cartId,
+        'product-1',
+        { quantity: 7 },
+      );
+
+      expect(updatedCart.items).toHaveLength(1);
+      expect(updatedCart.items[0].productId).toBe('product-1');
+      expect(updatedCart.items[0].quantity).toBe(7);
+    });
+
+    it('should allow increasing quantity', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 2,
+      });
+
+      const updatedCart = await service.updateItemQuantity(
+        cartResponse.cartId,
+        'product-1',
+        { quantity: 9 },
+      );
+
+      expect(updatedCart.items[0].quantity).toBe(9);
+    });
+
+    it('should allow decreasing quantity', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 8,
+      });
+
+      const updatedCart = await service.updateItemQuantity(
+        cartResponse.cartId,
+        'product-1',
+        { quantity: 3 },
+      );
+
+      expect(updatedCart.items[0].quantity).toBe(3);
+    });
+
+    it('should throw error when cart not found', async () => {
+      const nonExistentCartId = '00000000-0000-0000-0000-000000000000';
+
+      await expect(
+        service.updateItemQuantity(nonExistentCartId, 'product-1', {
+          quantity: 5,
+        }),
+      ).rejects.toThrow('Cart not found');
+    });
+
+    it('should throw error for non-existent product', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 3,
+      });
+
+      await expect(
+        service.updateItemQuantity(cartResponse.cartId, 'product-2', {
+          quantity: 5,
+        }),
+      ).rejects.toThrow('Product product-2 is not in the cart');
+    });
+
+    it('should throw error for invalid quantity', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 3,
+      });
+
+      await expect(
+        service.updateItemQuantity(cartResponse.cartId, 'product-1', {
+          quantity: 0,
+        }),
+      ).rejects.toThrow();
+
+      await expect(
+        service.updateItemQuantity(cartResponse.cartId, 'product-1', {
+          quantity: 11,
+        }),
+      ).rejects.toThrow();
+    });
+
+    it('should throw error when updating converted cart', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 3,
+      });
+
+      await service.convertCart(cartResponse.cartId);
+
+      await expect(
+        service.updateItemQuantity(cartResponse.cartId, 'product-1', {
+          quantity: 5,
+        }),
+      ).rejects.toThrow('has already been converted and cannot be modified');
+    });
+  });
 });

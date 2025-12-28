@@ -1,16 +1,17 @@
-import { Injectable, Inject } from '@nestjs/common';
-import type { ShoppingCartRepository } from '../../domain/repositories/shopping-cart.repository.interface';
+import { Inject, Injectable } from '@nestjs/common';
 import { ShoppingCart } from '../../domain/aggregates/shopping-cart';
+import type { ShoppingCartRepository } from '../../domain/repositories/shopping-cart.repository.interface';
 import { CartId } from '../../domain/value-objects/cart-id';
 import { CustomerId } from '../../domain/value-objects/customer-id';
 import { ProductId } from '../../domain/value-objects/product-id';
 import { Quantity } from '../../domain/value-objects/quantity';
-import { CreateCartDto } from '../dtos/create-cart.dto';
 import { AddItemDto } from '../dtos/add-item.dto';
 import {
-  CartResponseDto,
   CartItemResponseDto,
+  CartResponseDto,
 } from '../dtos/cart-response.dto';
+import { CreateCartDto } from '../dtos/create-cart.dto';
+import { UpdateQuantityDto } from '../dtos/update-quantity.dto';
 
 /**
  * CartService
@@ -79,6 +80,37 @@ export class CartService {
     if (!cart) {
       throw new Error('Cart not found');
     }
+
+    return this.mapToDto(cart);
+  }
+
+  /**
+   * Updates quantity of an item in the cart
+   * @param cartIdStr - Cart identifier as string
+   * @param productIdStr - Product identifier as string
+   * @param dto - UpdateQuantityDto with new quantity
+   * @returns CartResponseDto with updated cart
+   * @throws Error if cart not found
+   * @throws Error if product not in cart
+   */
+  async updateItemQuantity(
+    cartIdStr: string,
+    productIdStr: string,
+    dto: UpdateQuantityDto,
+  ): Promise<CartResponseDto> {
+    const cartId = CartId.fromString(cartIdStr);
+    const cart = await this.repository.findById(cartId);
+
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+
+    const productId = ProductId.fromString(productIdStr);
+    const quantity = Quantity.of(dto.quantity);
+
+    cart.updateItemQuantity(productId, quantity);
+
+    await this.repository.save(cart);
 
     return this.mapToDto(cart);
   }
