@@ -35,7 +35,8 @@ export class CartController {
     try {
       return await this.cartService.createCart(createCartDto);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(message);
     }
   }
 
@@ -52,10 +53,11 @@ export class CartController {
     try {
       return await this.cartService.addItem(cartId, addItemDto);
     } catch (error) {
-      if (error.message === 'Cart not found') {
-        throw new NotFoundException(error.message);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message === 'Cart not found') {
+        throw new NotFoundException(message);
       }
-      throw new BadRequestException(error.message);
+      throw new BadRequestException(message);
     }
   }
 
@@ -68,10 +70,11 @@ export class CartController {
     try {
       return await this.cartService.getCart(cartId);
     } catch (error) {
-      if (error.message === 'Cart not found') {
-        throw new NotFoundException(error.message);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message === 'Cart not found') {
+        throw new NotFoundException(message);
       }
-      throw new BadRequestException(error.message);
+      throw new BadRequestException(message);
     }
   }
 }

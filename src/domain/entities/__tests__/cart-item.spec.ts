@@ -95,7 +95,7 @@ describe('CartItem', () => {
 
       try {
         cartItem.addQuantity(Quantity.of(5));
-      } catch (error) {
+      } catch {
         // Expected to throw
       }
 

@@ -78,12 +78,6 @@ describe('ShoppingCart', () => {
     });
 
     it('should reject invalid quantity', () => {
-      const cart = ShoppingCart.create(
-        CartId.create(),
-        CustomerId.fromString('customer-1'),
-      );
-      const productId = ProductId.fromString('product-1');
-
       // Quantity.of() will throw for invalid values
       expect(() => Quantity.of(0)).toThrow();
       expect(() => Quantity.of(-1)).toThrow();
