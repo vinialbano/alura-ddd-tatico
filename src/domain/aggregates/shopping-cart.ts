@@ -95,6 +95,26 @@ export class ShoppingCart {
   }
 
   /**
+   * Updates quantity of an existing item in the cart
+   * @param productId - Product identifier
+   * @param quantity - New quantity (replaces current quantity)
+   * @throws Error if cart is converted
+   * @throws Error if product is not in cart
+   */
+  updateItemQuantity(productId: ProductId, quantity: Quantity): void {
+    this.ensureNotConverted();
+
+    const productKey = productId.getValue();
+    const existingItem = this.items.get(productKey);
+
+    if (!existingItem) {
+      throw new Error(`Product ${productKey} is not in the cart`);
+    }
+
+    existingItem.updateQuantity(quantity);
+  }
+
+  /**
    * Marks cart as converted to order
    * Once converted, cart becomes immutable
    */
