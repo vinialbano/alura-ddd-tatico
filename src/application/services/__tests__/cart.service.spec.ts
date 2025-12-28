@@ -188,4 +188,71 @@ describe('CartService (Integration)', () => {
       expect(retrievedCart.itemCount).toBe(2);
     });
   });
+
+  describe('convertCart - US4', () => {
+    it('should mark cart as converted', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 3,
+      });
+
+      expect(cartResponse.isConverted).toBe(false);
+
+      const convertedCart = await service.convertCart(cartResponse.cartId);
+
+      expect(convertedCart.isConverted).toBe(true);
+      expect(convertedCart.cartId).toBe(cartResponse.cartId);
+      expect(convertedCart.items).toHaveLength(1);
+    });
+
+    it('should allow converting empty cart', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+
+      expect(cartResponse.itemCount).toBe(0);
+
+      const convertedCart = await service.convertCart(cartResponse.cartId);
+
+      expect(convertedCart.isConverted).toBe(true);
+      expect(convertedCart.itemCount).toBe(0);
+    });
+
+    it('should throw error when cart not found', async () => {
+      const nonExistentCartId = '00000000-0000-0000-0000-000000000000';
+
+      await expect(service.convertCart(nonExistentCartId)).rejects.toThrow(
+        'Cart not found',
+      );
+    });
+
+    it('should be idempotent - allow converting already converted cart', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+
+      await service.convertCart(cartResponse.cartId);
+      const secondConversion = await service.convertCart(cartResponse.cartId);
+
+      expect(secondConversion.isConverted).toBe(true);
+    });
+
+    it('should prevent adding items after conversion', async () => {
+      const createDto: CreateCartDto = { customerId: 'customer-1' };
+      const cartResponse = await service.createCart(createDto);
+      await service.addItem(cartResponse.cartId, {
+        productId: 'product-1',
+        quantity: 3,
+      });
+
+      await service.convertCart(cartResponse.cartId);
+
+      await expect(
+        service.addItem(cartResponse.cartId, {
+          productId: 'product-2',
+          quantity: 5,
+        }),
+      ).rejects.toThrow('has already been converted and cannot be modified');
+    });
+  });
 });

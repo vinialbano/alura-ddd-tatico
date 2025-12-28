@@ -84,6 +84,28 @@ export class CartService {
   }
 
   /**
+   * Converts cart to order (marks as converted)
+   * Once converted, cart becomes immutable
+   * @param cartIdStr - Cart identifier as string
+   * @returns CartResponseDto with converted cart
+   * @throws Error if cart not found
+   */
+  async convertCart(cartIdStr: string): Promise<CartResponseDto> {
+    const cartId = CartId.fromString(cartIdStr);
+    const cart = await this.repository.findById(cartId);
+
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+
+    cart.markAsConverted();
+
+    await this.repository.save(cart);
+
+    return this.mapToDto(cart);
+  }
+
+  /**
    * Maps domain ShoppingCart to CartResponseDto
    * @param cart - ShoppingCart aggregate
    * @returns CartResponseDto
