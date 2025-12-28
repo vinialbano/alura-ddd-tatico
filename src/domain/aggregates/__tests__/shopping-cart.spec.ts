@@ -163,4 +163,77 @@ describe('ShoppingCart', () => {
       expect(cart.getItemCount()).toBe(2);
     });
   });
+
+  describe('markAsConverted - US4', () => {
+    it('should mark cart as converted', () => {
+      const cart = ShoppingCart.create(
+        CartId.create(),
+        CustomerId.fromString('customer-1'),
+      );
+      cart.addItem(ProductId.fromString('product-1'), Quantity.of(3));
+
+      expect(cart.isConverted()).toBe(false);
+
+      cart.markAsConverted();
+
+      expect(cart.isConverted()).toBe(true);
+    });
+
+    it('should allow marking empty cart as converted', () => {
+      const cart = ShoppingCart.create(
+        CartId.create(),
+        CustomerId.fromString('customer-1'),
+      );
+
+      expect(cart.getItemCount()).toBe(0);
+
+      cart.markAsConverted();
+
+      expect(cart.isConverted()).toBe(true);
+    });
+
+    it('should be idempotent - allow marking already converted cart', () => {
+      const cart = ShoppingCart.create(
+        CartId.create(),
+        CustomerId.fromString('customer-1'),
+      );
+
+      cart.markAsConverted();
+      expect(cart.isConverted()).toBe(true);
+
+      // Should not throw when called again
+      expect(() => cart.markAsConverted()).not.toThrow();
+      expect(cart.isConverted()).toBe(true);
+    });
+
+    it('should reject addItem after conversion', () => {
+      const cart = ShoppingCart.create(
+        CartId.create(),
+        CustomerId.fromString('customer-1'),
+      );
+      cart.addItem(ProductId.fromString('product-1'), Quantity.of(3));
+
+      cart.markAsConverted();
+
+      expect(() =>
+        cart.addItem(ProductId.fromString('product-2'), Quantity.of(5)),
+      ).toThrow('has already been converted and cannot be modified');
+    });
+
+    it('should reject adding to existing product after conversion', () => {
+      const cart = ShoppingCart.create(
+        CartId.create(),
+        CustomerId.fromString('customer-1'),
+      );
+      const productId = ProductId.fromString('product-1');
+      cart.addItem(productId, Quantity.of(3));
+
+      cart.markAsConverted();
+
+      // Attempt to add more of the same product
+      expect(() => cart.addItem(productId, Quantity.of(2))).toThrow(
+        'has already been converted and cannot be modified',
+      );
+    });
+  });
 });

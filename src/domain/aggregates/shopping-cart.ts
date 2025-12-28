@@ -1,8 +1,8 @@
+import { CartItem } from '../entities/cart-item';
 import { CartId } from '../value-objects/cart-id';
 import { CustomerId } from '../value-objects/customer-id';
 import { ProductId } from '../value-objects/product-id';
 import { Quantity } from '../value-objects/quantity';
-import { CartItem } from '../entities/cart-item';
 
 /**
  * ShoppingCart Aggregate Root
@@ -92,6 +92,14 @@ export class ShoppingCart {
    */
   getItemCount(): number {
     return this.items.size;
+  }
+
+  /**
+   * Marks cart as converted to order
+   * Once converted, cart becomes immutable
+   */
+  markAsConverted(): void {
+    this.conversionStatus = 'converted';
   }
 
   private ensureNotConverted(): void {
