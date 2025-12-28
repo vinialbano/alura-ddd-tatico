@@ -10,19 +10,23 @@ import {
   HttpStatus,
   NotFoundException,
   BadRequestException,
+  UseFilters,
 } from '@nestjs/common';
 import { CartService } from '../../application/services/cart.service';
 import { CreateCartDto } from '../../application/dtos/create-cart.dto';
 import { AddItemDto } from '../../application/dtos/add-item.dto';
 import { UpdateQuantityDto } from '../../application/dtos/update-quantity.dto';
 import { CartResponseDto } from '../../application/dtos/cart-response.dto';
+import { DomainExceptionFilter } from '../filters/domain-exception.filter';
 
 /**
  * CartController
  *
  * REST API endpoints for shopping cart operations
+ * Domain exceptions are automatically mapped to appropriate HTTP status codes via DomainExceptionFilter
  */
 @Controller('carts')
+@UseFilters(DomainExceptionFilter)
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
