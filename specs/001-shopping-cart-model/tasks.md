@@ -478,31 +478,31 @@ This document provides a complete task breakdown for implementing the Shopping C
 
 **Tasks**:
 
-- [ ] T220 Create domain exception classes in src/domain/exceptions/ or inline
-- [ ] T221 Implement CartAlreadyConvertedError exception
-- [ ] T222 Implement MaxProductsExceededError exception
-- [ ] T223 Implement InvalidQuantityError exception
-- [ ] T224 Implement ProductNotInCartError exception
-- [ ] T225 Implement EmptyCartError exception
-- [ ] T226 Commit exceptions with message "feat: implement domain exception classes"
+- [X] T220 Create domain exception classes in src/domain/exceptions/ or inline
+- [X] T221 Implement CartAlreadyConvertedError exception
+- [X] T222 Implement MaxProductsExceededError exception
+- [X] T223 Implement InvalidQuantityError exception
+- [X] T224 Implement ProductNotInCartError exception
+- [X] T225 Implement EmptyCartError exception
+- [X] T226 Commit exceptions with message "feat: implement domain exception classes"
 
-- [ ] T227 Add error handling middleware to CartController for domain exceptions
-- [ ] T228 Map domain exceptions to appropriate HTTP status codes (400, 409, etc.)
-- [ ] T229 Test error responses in e2e tests
-- [ ] T230 Commit error handling with message "feat: add domain exception error handling"
+- [X] T227 Add error handling middleware to CartController for domain exceptions
+- [X] T228 Map domain exceptions to appropriate HTTP status codes (400, 409, etc.)
+- [X] T229 Test error responses in e2e tests
+- [X] T230 Commit error handling with message "feat: add domain exception error handling"
 
-- [ ] T231 Add JSDoc comments to all public methods in domain layer
-- [ ] T232 Add JSDoc comments to CartService public methods
-- [ ] T233 Add JSDoc comments to CartController endpoints
-- [ ] T234 Commit documentation with message "docs: add JSDoc comments to public APIs"
+- [X] T231 Add JSDoc comments to all public methods in domain layer
+- [X] T232 Add JSDoc comments to CartService public methods
+- [X] T233 Add JSDoc comments to CartController endpoints
+- [X] T234 Commit documentation with message "docs: add JSDoc comments to public APIs"
 
-- [ ] T235 Run full test suite (npm test) and verify 100% pass
-- [ ] T236 Run e2e tests (npm run test:e2e) and verify all scenarios pass
-- [ ] T237 Run lint (npm run lint) and fix any warnings
-- [ ] T238 Run format (npm run format) on all source files
-- [ ] T239 Run build (npm run build) and verify clean compilation
-- [ ] T240 Verify test coverage meets project standards
-- [ ] T241 Commit final polish with message "chore: final quality gates and documentation"
+- [X] T235 Run full test suite (npm test) and verify 100% pass
+- [X] T236 Run e2e tests (npm run test:e2e) and verify all scenarios pass
+- [X] T237 Run lint (npm run lint) and fix any warnings
+- [X] T238 Run format (npm run format) on all source files
+- [X] T239 Run build (npm run build) and verify clean compilation
+- [X] T240 Verify test coverage meets project standards
+- [X] T241 Commit final polish with message "chore: final quality gates and documentation"
 
 ---
 
