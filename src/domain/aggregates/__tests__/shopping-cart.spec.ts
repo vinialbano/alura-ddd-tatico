@@ -39,7 +39,12 @@ describe('ShoppingCart', () => {
       const item = CartItem.create(productId, Quantity.of(5));
       items.set(productId.getValue(), item);
 
-      const cart = ShoppingCart.restore(cartId, customerId, items, 'active');
+      const cart = ShoppingCart.restore({
+        cartId,
+        customerId,
+        items,
+        conversionStatus: 'active',
+      });
 
       expect(cart.getCartId()).toBe(cartId);
       expect(cart.getCustomerId()).toBe(customerId);
@@ -56,7 +61,12 @@ describe('ShoppingCart', () => {
       const item = CartItem.create(productId, Quantity.of(3));
       items.set(productId.getValue(), item);
 
-      const cart = ShoppingCart.restore(cartId, customerId, items, 'converted');
+      const cart = ShoppingCart.restore({
+        cartId,
+        customerId,
+        items,
+        conversionStatus: 'converted',
+      });
 
       expect(cart.isConverted()).toBe(true);
       expect(cart.getItems()).toHaveLength(1);
@@ -67,7 +77,12 @@ describe('ShoppingCart', () => {
       const customerId = CustomerId.fromString('customer-1');
       const items = new Map<string, CartItem>();
 
-      const cart = ShoppingCart.restore(cartId, customerId, items, 'active');
+      const cart = ShoppingCart.restore({
+        cartId,
+        customerId,
+        items,
+        conversionStatus: 'active',
+      });
 
       expect(cart.getItemCount()).toBe(0);
       expect(cart.isConverted()).toBe(false);
@@ -85,7 +100,12 @@ describe('ShoppingCart', () => {
       items.set(product1.getValue(), item1);
       items.set(product2.getValue(), item2);
 
-      const cart = ShoppingCart.restore(cartId, customerId, items, 'active');
+      const cart = ShoppingCart.restore({
+        cartId,
+        customerId,
+        items,
+        conversionStatus: 'active',
+      });
 
       expect(cart.getItemCount()).toBe(2);
       expect(cart.getItems()).toHaveLength(2);

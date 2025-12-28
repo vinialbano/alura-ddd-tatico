@@ -5,6 +5,16 @@ import { ProductId } from '../value-objects/product-id';
 import { Quantity } from '../value-objects/quantity';
 
 /**
+ * Parameters for restoring a ShoppingCart aggregate from persistence
+ */
+export type RestoreShoppingCartParams = {
+  cartId: CartId;
+  customerId: CustomerId;
+  items: Map<string, CartItem>;
+  conversionStatus: 'active' | 'converted';
+};
+
+/**
  * ShoppingCart Aggregate Root
  *
  * Manages cart lifecycle and enforces cart-level invariants.
@@ -18,16 +28,11 @@ export class ShoppingCart {
   private readonly items: Map<string, CartItem>;
   private conversionStatus: 'active' | 'converted';
 
-  private constructor(
-    cartId: CartId,
-    customerId: CustomerId,
-    items: Map<string, CartItem>,
-    conversionStatus: 'active' | 'converted',
-  ) {
-    this.cartId = cartId;
-    this.customerId = customerId;
-    this.items = items;
-    this.conversionStatus = conversionStatus;
+  private constructor(params: RestoreShoppingCartParams) {
+    this.cartId = params.cartId;
+    this.customerId = params.customerId;
+    this.items = params.items;
+    this.conversionStatus = params.conversionStatus;
   }
 
   /**
@@ -36,26 +41,23 @@ export class ShoppingCart {
    * @param customerId - Customer identifier (required)
    */
   static create(cartId: CartId, customerId: CustomerId): ShoppingCart {
-    return new ShoppingCart(cartId, customerId, new Map(), 'active');
+    return new ShoppingCart({
+      cartId,
+      customerId,
+      items: new Map(),
+      conversionStatus: 'active',
+    });
   }
 
   /**
    * Restores an existing shopping cart from persistence
    * Used by repository layer to reconstitute aggregates
    *
-   * @param cartId - Cart identifier
-   * @param customerId - Customer identifier
-   * @param items - Map of cart items (productId -> CartItem)
-   * @param conversionStatus - Current conversion status
+   * @param params - Parameters containing cart state to restore
    * @returns Restored ShoppingCart aggregate
    */
-  static restore(
-    cartId: CartId,
-    customerId: CustomerId,
-    items: Map<string, CartItem>,
-    conversionStatus: 'active' | 'converted',
-  ): ShoppingCart {
-    return new ShoppingCart(cartId, customerId, items, conversionStatus);
+  static restore(params: RestoreShoppingCartParams): ShoppingCart {
+    return new ShoppingCart(params);
   }
 
   /**

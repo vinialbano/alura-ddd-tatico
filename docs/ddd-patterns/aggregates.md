@@ -16,12 +16,23 @@ When loading aggregates from persistence, use the `restore()` factory method pat
 const cart = ShoppingCart.create(cartId, customerId);
 
 // Restoring from persistence (with existing items and status)
-const cart = ShoppingCart.restore(cartId, customerId, items, conversionStatus);
+const cart = ShoppingCart.restore({
+  cartId,
+  customerId,
+  items,
+  conversionStatus,
+});
 ```
 
 **Key differences**:
-- `create()`: Initializes new aggregate with default state
-- `restore()`: Reconstitutes aggregate from persistence with arbitrary state
+- `create()`: Initializes new aggregate with default state (2 parameters)
+- `restore()`: Reconstitutes aggregate from persistence with arbitrary state (parameter object)
+
+**Benefits of Parameter Object Pattern**:
+- **Named parameters**: Clear intent at call site with property names
+- **Extensibility**: Easy to add optional parameters in future without breaking changes
+- **Type safety**: TypeScript ensures all required properties are provided
+- **Self-documenting**: The `RestoreShoppingCartParams` type documents the structure
 
 The `restore()` method bypasses initialization logic and accepts full aggregate state, enabling seamless persistence layer integration without exposing aggregate internals.
 
