@@ -1,6 +1,6 @@
+import { CartId } from '../shopping-cart/value-objects/cart-id';
 import { Order } from './order';
 import { OrderId } from './value-objects/order-id';
-import { CartId } from '../shopping-cart/value-objects/cart-id';
 
 /**
  * OrderRepository Interface
