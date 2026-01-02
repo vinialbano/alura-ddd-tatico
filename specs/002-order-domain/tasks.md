@@ -27,9 +27,9 @@
 
 **Purpose**: Project initialization and basic structure verification
 
-- [ ] T001 Verify project structure matches plan.md specifications
-- [ ] T002 [P] Verify existing quality gates (ESLint, Prettier, Jest, TypeScript strict mode)
-- [ ] T003 [P] Create domain layer directory structure per plan.md (aggregates, entities, value-objects, services, repositories, exceptions)
+- [X] T001 Verify project structure matches plan.md specifications
+- [X] T002 [P] Verify existing quality gates (ESLint, Prettier, Jest, TypeScript strict mode)
+- [X] T003 [P] Create domain layer directory structure per plan.md (aggregates, entities, value-objects, services, repositories, exceptions)
 
 ---
 
@@ -41,22 +41,22 @@
 
 ### Value Objects (Foundation)
 
-- [ ] T004 [P] Write tests for Money value object in src/domain/value-objects/__tests__/money.spec.ts
-- [ ] T005 [P] Implement Money value object in src/domain/value-objects/money.ts (amount, currency, validation, operations)
-- [ ] T006 [P] Write tests for OrderId value object in src/domain/value-objects/__tests__/order-id.spec.ts
-- [ ] T007 [P] Implement OrderId value object in src/domain/value-objects/order-id.ts (UUID wrapper, generation)
-- [ ] T008 [P] Write tests for OrderStatus value object in src/domain/value-objects/__tests__/order-status.spec.ts
-- [ ] T009 [P] Implement OrderStatus value object in src/domain/value-objects/order-status.ts (AwaitingPayment, Paid, Cancelled)
-- [ ] T010 [P] Write tests for ProductSnapshot value object in src/domain/value-objects/__tests__/product-snapshot.spec.ts
-- [ ] T011 [P] Implement ProductSnapshot value object in src/domain/value-objects/product-snapshot.ts (name, description, SKU)
-- [ ] T012 [P] Write tests for ShippingAddress value object in src/domain/value-objects/__tests__/shipping-address.spec.ts
-- [ ] T013 [P] Implement ShippingAddress value object in src/domain/value-objects/shipping-address.ts (5 required fields validation)
+- [X] T004 [P] Write tests for Money value object in src/domain/value-objects/__tests__/money.spec.ts
+- [X] T005 [P] Implement Money value object in src/domain/value-objects/money.ts (amount, currency, validation, operations)
+- [X] T006 [P] Write tests for OrderId value object in src/domain/value-objects/__tests__/order-id.spec.ts
+- [X] T007 [P] Implement OrderId value object in src/domain/value-objects/order-id.ts (UUID wrapper, generation)
+- [X] T008 [P] Write tests for OrderStatus value object in src/domain/value-objects/__tests__/order-status.spec.ts
+- [X] T009 [P] Implement OrderStatus value object in src/domain/value-objects/order-status.ts (AwaitingPayment, Paid, Cancelled)
+- [X] T010 [P] Write tests for ProductSnapshot value object in src/domain/value-objects/__tests__/product-snapshot.spec.ts
+- [X] T011 [P] Implement ProductSnapshot value object in src/domain/value-objects/product-snapshot.ts (name, description, SKU)
+- [X] T012 [P] Write tests for ShippingAddress value object in src/domain/value-objects/__tests__/shipping-address.spec.ts
+- [X] T013 [P] Implement ShippingAddress value object in src/domain/value-objects/shipping-address.ts (5 required fields validation)
 
 ### Domain Exceptions (Foundation)
 
-- [ ] T014 [P] Create InvalidOrderStateTransitionError in src/domain/exceptions/invalid-order-state-transition.error.ts
-- [ ] T015 [P] Create ProductDataUnavailableError in src/domain/exceptions/product-data-unavailable.error.ts
-- [ ] T016 [P] Create ProductPricingFailedError in src/domain/exceptions/product-pricing-failed.error.ts
+- [X] T014 [P] Create InvalidOrderStateTransitionError in src/domain/exceptions/invalid-order-state-transition.error.ts
+- [X] T015 [P] Create ProductDataUnavailableError in src/domain/exceptions/product-data-unavailable.error.ts
+- [X] T016 [P] Create ProductPricingFailedError in src/domain/exceptions/product-pricing-failed.error.ts
 
 **Checkpoint**: Foundation ready - value objects and exceptions complete. User story implementation can now begin in parallel.
 
