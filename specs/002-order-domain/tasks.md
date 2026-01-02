@@ -72,18 +72,18 @@
 
 > **CRITICAL: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T017 [P] [US1] Write tests for OrderItem entity in src/domain/entities/__tests__/order-item.spec.ts
-- [ ] T018 [P] [US1] Write tests for Order aggregate (creation scenarios) in src/domain/aggregates/__tests__/order.spec.ts
-- [ ] T019 [P] [US1] Write tests for CatalogGateway contract validation in src/application/gateways/__tests__/catalog.gateway.spec.ts
-- [ ] T020 [P] [US1] Write tests for PricingGateway contract validation in src/application/gateways/__tests__/pricing.gateway.spec.ts
-- [ ] T021 [P] [US1] Write tests for OrderPricingService in src/domain/services/__tests__/order-pricing.service.spec.ts
+- [X] T017 [P] [US1] Write tests for OrderItem entity in src/domain/entities/__tests__/order-item.spec.ts
+- [X] T018 [P] [US1] Write tests for Order aggregate (creation scenarios) in src/domain/aggregates/__tests__/order.spec.ts
+- [X] T019 [P] [US1] Write tests for CatalogGateway contract validation in src/application/gateways/__tests__/catalog.gateway.spec.ts
+- [X] T020 [P] [US1] Write tests for PricingGateway contract validation in src/application/gateways/__tests__/pricing.gateway.spec.ts
+- [X] T021 [P] [US1] Write tests for OrderPricingService in src/domain/services/__tests__/order-pricing.service.spec.ts
 - [ ] T022 [P] [US1] Write tests for CheckoutService in src/application/services/__tests__/checkout.service.spec.ts
 - [ ] T023 [P] [US1] Write E2E test for successful checkout in test/order.e2e-spec.ts
 
 ### Domain Layer Implementation for User Story 1
 
-- [ ] T024 [US1] Implement OrderItem entity in src/domain/entities/order-item.ts (productSnapshot, quantity, pricing, lineTotal calculation)
-- [ ] T025 [US1] Implement Order aggregate creation logic in src/domain/aggregates/order.ts (factory method, initial state AwaitingPayment)
+- [X] T024 [US1] Implement OrderItem entity in src/domain/entities/order-item.ts (productSnapshot, quantity, pricing, lineTotal calculation)
+- [X] T025 [US1] Implement Order aggregate creation logic in src/domain/aggregates/order.ts (factory method, initial state AwaitingPayment)
 - [ ] T026 [US1] Create OrderRepository interface in src/domain/repositories/order.repository.interface.ts (save, findById, findByCartId)
 
 ### Application Layer Implementation for User Story 1
