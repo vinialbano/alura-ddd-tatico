@@ -1,6 +1,6 @@
 import { CartItem } from '../cart-item';
-import { ProductId } from '../../value-objects/product-id';
-import { Quantity } from '../../value-objects/quantity';
+import { ProductId } from '../../shared/value-objects/product-id';
+import { Quantity } from '../../shared/value-objects/quantity';
 
 describe('CartItem', () => {
   describe('create', () => {

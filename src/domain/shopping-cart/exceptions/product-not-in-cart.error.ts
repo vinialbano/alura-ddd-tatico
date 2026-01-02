@@ -1,4 +1,4 @@
-import { ProductId } from '../value-objects/product-id';
+import { ProductId } from '../shared/value-objects/product-id';
 
 /**
  * Domain exception thrown when attempting to modify or remove a product that doesn't exist in the cart

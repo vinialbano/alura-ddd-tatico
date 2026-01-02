@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { ShoppingCartRepository } from '../../domain/repositories/shopping-cart.repository.interface';
-import { ShoppingCart } from '../../domain/aggregates/shopping-cart';
-import { CartId } from '../../domain/value-objects/cart-id';
-import { CustomerId } from '../../domain/value-objects/customer-id';
+import { ShoppingCartRepository } from '../../domain/shopping-cart/repositories/shopping-cart.repository.interface';
+import { ShoppingCart } from '../../domain/shopping-cart/shopping-cart';
+import { CartId } from '../../domain/shopping-cart/value-objects/cart-id';
+import { CustomerId } from '../../domain/shared/value-objects/customer-id';
 
 /**
  * InMemoryShoppingCartRepository

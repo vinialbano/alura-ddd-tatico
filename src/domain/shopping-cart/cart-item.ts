@@ -1,5 +1,5 @@
-import { ProductId } from '../value-objects/product-id';
-import { Quantity } from '../value-objects/quantity';
+import { ProductId } from '../shared/value-objects/product-id';
+import { Quantity } from '../shared/value-objects/quantity';
 
 /**
  * CartItem Entity

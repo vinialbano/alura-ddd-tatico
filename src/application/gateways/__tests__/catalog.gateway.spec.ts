@@ -1,9 +1,6 @@
-import {
-  CatalogGateway,
-  ProductData,
-} from '../catalog.gateway.interface';
-import { ProductId } from '../../../domain/value-objects/product-id';
-import { ProductDataUnavailableError } from '../../../domain/exceptions/product-data-unavailable.error';
+import { CatalogGateway, ProductData } from '../catalog.gateway.interface';
+import { ProductId } from '../../../domain/shared/value-objects/product-id';
+import { ProductDataUnavailableError } from '../../../domain/order/exceptions/product-data-unavailable.error';
 
 describe('CatalogGateway Contract', () => {
   // This file tests the contract/interface behavior
@@ -22,8 +19,7 @@ describe('CatalogGateway Contract', () => {
     it('should accept ProductId parameter and return ProductData', async () => {
       const mockProductData: ProductData = {
         name: 'Premium Coffee Beans',
-        description:
-          'Single-origin Arabica beans from Colombia, medium roast',
+        description: 'Single-origin Arabica beans from Colombia, medium roast',
         sku: 'COFFEE-COL-001',
       };
 
@@ -103,8 +99,7 @@ describe('CatalogGateway Contract', () => {
     it('should provide data suitable for ProductSnapshot creation', () => {
       const productData: ProductData = {
         name: 'Premium Coffee Beans',
-        description:
-          'Single-origin Arabica beans from Colombia, medium roast',
+        description: 'Single-origin Arabica beans from Colombia, medium roast',
         sku: 'COFFEE-COL-001',
       };
 

@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ShoppingCart } from '../../domain/aggregates/shopping-cart';
-import type { ShoppingCartRepository } from '../../domain/repositories/shopping-cart.repository.interface';
-import { CartId } from '../../domain/value-objects/cart-id';
-import { CustomerId } from '../../domain/value-objects/customer-id';
-import { ProductId } from '../../domain/value-objects/product-id';
-import { Quantity } from '../../domain/value-objects/quantity';
+import { ShoppingCart } from '../../domain/shopping-cart/shopping-cart';
+import type { ShoppingCartRepository } from '../../domain/shopping-cart/repositories/shopping-cart.repository.interface';
+import { CartId } from '../../domain/shopping-cart/value-objects/cart-id';
+import { CustomerId } from '../../domain/shared/value-objects/customer-id';
+import { ProductId } from '../../domain/shared/value-objects/product-id';
+import { Quantity } from '../../domain/shared/value-objects/quantity';
 import { AddItemDto } from '../dtos/add-item.dto';
 import {
   CartItemResponseDto,

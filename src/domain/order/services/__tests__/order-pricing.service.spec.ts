@@ -1,17 +1,17 @@
 import {
   CatalogGateway,
   ProductData,
-} from '../../../application/gateways/catalog.gateway.interface';
+} from '../../../../application/gateways/catalog.gateway.interface';
 import {
   PricingGateway,
   PricingResult,
-} from '../../../application/gateways/pricing.gateway.interface';
-import { CartItem } from '../../entities/cart-item';
+} from '../../../../application/gateways/pricing.gateway.interface';
+import { CartItem } from '../../../shopping-cart/cart-item';
 import { ProductDataUnavailableError } from '../../exceptions/product-data-unavailable.error';
 import { ProductPricingFailedError } from '../../exceptions/product-pricing-failed.error';
 import { Money } from '../../value-objects/money';
-import { ProductId } from '../../value-objects/product-id';
-import { Quantity } from '../../value-objects/quantity';
+import { ProductId } from '../../../shared/value-objects/product-id';
+import { Quantity } from '../../../shared/value-objects/quantity';
 import { OrderPricingService } from '../order-pricing.service';
 
 describe('OrderPricingService', () => {

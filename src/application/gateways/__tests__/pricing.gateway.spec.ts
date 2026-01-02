@@ -4,10 +4,10 @@ import {
   PricingResult,
   ItemPricing,
 } from '../pricing.gateway.interface';
-import { ProductId } from '../../../domain/value-objects/product-id';
-import { Quantity } from '../../../domain/value-objects/quantity';
-import { Money } from '../../../domain/value-objects/money';
-import { ProductPricingFailedError } from '../../../domain/exceptions/product-pricing-failed.error';
+import { ProductId } from '../../../domain/shared/value-objects/product-id';
+import { Quantity } from '../../../domain/shared/value-objects/quantity';
+import { Money } from '../../../domain/order/value-objects/money';
+import { ProductPricingFailedError } from '../../../domain/order/exceptions/product-pricing-failed.error';
 
 describe('PricingGateway Contract', () => {
   // This file tests the contract/interface behavior
@@ -79,9 +79,9 @@ describe('PricingGateway Contract', () => {
         },
       ];
 
-      await expect(
-        mockGateway.calculatePricing(pricingInputs),
-      ).rejects.toThrow(ProductPricingFailedError);
+      await expect(mockGateway.calculatePricing(pricingInputs)).rejects.toThrow(
+        ProductPricingFailedError,
+      );
     });
 
     it('should handle timeout scenario', async () => {
@@ -98,9 +98,9 @@ describe('PricingGateway Contract', () => {
         },
       ];
 
-      await expect(
-        mockGateway.calculatePricing(pricingInputs),
-      ).rejects.toThrow(ProductPricingFailedError);
+      await expect(mockGateway.calculatePricing(pricingInputs)).rejects.toThrow(
+        ProductPricingFailedError,
+      );
     });
 
     it('should handle empty input array', async () => {
@@ -382,9 +382,9 @@ describe('PricingGateway Contract', () => {
         },
       ];
 
-      await expect(
-        mockGateway.calculatePricing(pricingInputs),
-      ).rejects.toThrow(ProductPricingFailedError);
+      await expect(mockGateway.calculatePricing(pricingInputs)).rejects.toThrow(
+        ProductPricingFailedError,
+      );
     });
   });
 

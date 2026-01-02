@@ -1,4 +1,4 @@
-import { InvalidQuantityError } from '../exceptions/invalid-quantity.error';
+import { InvalidQuantityError } from '../../shopping-cart/exceptions/invalid-quantity.error';
 
 /**
  * Quantity Value Object

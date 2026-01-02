@@ -1,7 +1,7 @@
 import { OrderItem } from '../order-item';
-import { ProductSnapshot } from '../../value-objects/product-snapshot';
-import { Quantity } from '../../value-objects/quantity';
-import { Money } from '../../value-objects/money';
+import { ProductSnapshot } from '../value-objects/product-snapshot';
+import { Quantity } from '../../shared/value-objects/quantity';
+import { Money } from '../value-objects/money';
 
 describe('OrderItem Entity', () => {
   const createValidProductSnapshot = (): ProductSnapshot => {

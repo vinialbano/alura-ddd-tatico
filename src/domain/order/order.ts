@@ -1,11 +1,11 @@
-import { OrderId } from '../value-objects/order-id';
-import { CartId } from '../value-objects/cart-id';
-import { CustomerId } from '../value-objects/customer-id';
-import { OrderStatus } from '../value-objects/order-status';
-import { Money } from '../value-objects/money';
-import { ShippingAddress } from '../value-objects/shipping-address';
-import { OrderItem } from '../entities/order-item';
-import { InvalidOrderStateTransitionError } from '../exceptions/invalid-order-state-transition.error';
+import { OrderId } from './value-objects/order-id';
+import { CartId } from '../shopping-cart/value-objects/cart-id';
+import { CustomerId } from '../shared/value-objects/customer-id';
+import { OrderStatus } from './value-objects/order-status';
+import { Money } from './value-objects/money';
+import { ShippingAddress } from './value-objects/shipping-address';
+import { OrderItem } from './order-item';
+import { InvalidOrderStateTransitionError } from './exceptions/invalid-order-state-transition.error';
 
 /**
  * Order Aggregate Root
@@ -164,11 +164,15 @@ export class Order {
     );
 
     if (!allSameCurrency) {
-      throw new Error('All order items must use the same currency as the order total');
+      throw new Error(
+        'All order items must use the same currency as the order total',
+      );
     }
 
     if (this._orderLevelDiscount.currency !== orderCurrency) {
-      throw new Error('Order level discount must use the same currency as the order total');
+      throw new Error(
+        'Order level discount must use the same currency as the order total',
+      );
     }
   }
 

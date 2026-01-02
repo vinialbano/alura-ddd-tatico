@@ -1,9 +1,9 @@
 import { ShoppingCart } from '../shopping-cart';
-import { CartItem } from '../../entities/cart-item';
-import { CartId } from '../../value-objects/cart-id';
-import { CustomerId } from '../../value-objects/customer-id';
-import { ProductId } from '../../value-objects/product-id';
-import { Quantity } from '../../value-objects/quantity';
+import { CartItem } from '../cart-item';
+import { CartId } from '../value-objects/cart-id';
+import { CustomerId } from '../../shared/value-objects/customer-id';
+import { ProductId } from '../../shared/value-objects/product-id';
+import { Quantity } from '../../shared/value-objects/quantity';
 
 describe('ShoppingCart', () => {
   describe('create', () => {

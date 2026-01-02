@@ -1,10 +1,10 @@
-import { CatalogGateway } from '../../application/gateways/catalog.gateway.interface';
+import { CatalogGateway } from '../../../application/gateways/catalog.gateway.interface';
 import {
   PricingGateway,
   PricingInput,
-} from '../../application/gateways/pricing.gateway.interface';
-import { CartItem } from '../entities/cart-item';
-import { OrderItem } from '../entities/order-item';
+} from '../../../application/gateways/pricing.gateway.interface';
+import { CartItem } from '../../shopping-cart/cart-item';
+import { OrderItem } from '../order-item';
 import { ProductSnapshot } from '../value-objects/product-snapshot';
 import { Money } from '../value-objects/money';
 

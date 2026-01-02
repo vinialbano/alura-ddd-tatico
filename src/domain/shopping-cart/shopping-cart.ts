@@ -1,12 +1,12 @@
-import { CartItem } from '../entities/cart-item';
-import { CartId } from '../value-objects/cart-id';
-import { CustomerId } from '../value-objects/customer-id';
-import { ProductId } from '../value-objects/product-id';
-import { Quantity } from '../value-objects/quantity';
-import { CartAlreadyConvertedError } from '../exceptions/cart-already-converted.error';
-import { MaxProductsExceededError } from '../exceptions/max-products-exceeded.error';
-import { ProductNotInCartError } from '../exceptions/product-not-in-cart.error';
-import { EmptyCartError } from '../exceptions/empty-cart.error';
+import { CartItem } from './cart-item';
+import { CartId } from './value-objects/cart-id';
+import { CustomerId } from '../shared/value-objects/customer-id';
+import { ProductId } from '../shared/value-objects/product-id';
+import { Quantity } from '../shared/value-objects/quantity';
+import { CartAlreadyConvertedError } from './exceptions/cart-already-converted.error';
+import { MaxProductsExceededError } from './exceptions/max-products-exceeded.error';
+import { ProductNotInCartError } from './exceptions/product-not-in-cart.error';
+import { EmptyCartError } from './exceptions/empty-cart.error';
 
 /**
  * Parameters for constructing a ShoppingCart aggregate

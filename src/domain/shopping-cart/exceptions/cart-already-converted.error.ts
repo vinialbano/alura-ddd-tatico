@@ -1,4 +1,4 @@
-import { CartId } from '../value-objects/cart-id';
+import { CartId } from './value-objects/cart-id';
 
 /**
  * Domain exception thrown when attempting to modify a cart that has already been converted to an order

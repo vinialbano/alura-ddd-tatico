@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { CartNotFoundException } from '../../application/exceptions/cart-not-found.exception';
-import { CartAlreadyConvertedError } from '../../domain/exceptions/cart-already-converted.error';
-import { MaxProductsExceededError } from '../../domain/exceptions/max-products-exceeded.error';
-import { InvalidQuantityError } from '../../domain/exceptions/invalid-quantity.error';
-import { ProductNotInCartError } from '../../domain/exceptions/product-not-in-cart.error';
-import { EmptyCartError } from '../../domain/exceptions/empty-cart.error';
+import { CartAlreadyConvertedError } from '../../domain/shopping-cart/exceptions/cart-already-converted.error';
+import { MaxProductsExceededError } from '../../domain/shopping-cart/exceptions/max-products-exceeded.error';
+import { InvalidQuantityError } from '../../domain/shopping-cart/exceptions/invalid-quantity.error';
+import { ProductNotInCartError } from '../../domain/shopping-cart/exceptions/product-not-in-cart.error';
+import { EmptyCartError } from '../../domain/shopping-cart/exceptions/empty-cart.error';
 
 /**
  * Exception filter for domain and application exceptions
