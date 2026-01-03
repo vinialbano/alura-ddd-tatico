@@ -77,33 +77,33 @@
 - [X] T019 [P] [US1] Write tests for CatalogGateway contract validation in src/application/gateways/__tests__/catalog.gateway.spec.ts
 - [X] T020 [P] [US1] Write tests for PricingGateway contract validation in src/application/gateways/__tests__/pricing.gateway.spec.ts
 - [X] T021 [P] [US1] Write tests for OrderPricingService in src/domain/services/__tests__/order-pricing.service.spec.ts
-- [ ] T022 [P] [US1] Write tests for CheckoutService in src/application/services/__tests__/checkout.service.spec.ts
-- [ ] T023 [P] [US1] Write E2E test for successful checkout in test/order.e2e-spec.ts
+- [X] T022 [P] [US1] Write tests for CheckoutService in src/application/services/__tests__/checkout.service.spec.ts
+- [X] T023 [P] [US1] Write E2E test for successful checkout in test/order.e2e-spec.ts
 
 ### Domain Layer Implementation for User Story 1
 
 - [X] T024 [US1] Implement OrderItem entity in src/domain/entities/order-item.ts (productSnapshot, quantity, pricing, lineTotal calculation)
 - [X] T025 [US1] Implement Order aggregate creation logic in src/domain/aggregates/order.ts (factory method, initial state AwaitingPayment)
-- [ ] T026 [US1] Create OrderRepository interface in src/domain/repositories/order.repository.interface.ts (save, findById, findByCartId)
+- [X] T026 [US1] Create OrderRepository interface in src/domain/repositories/order.repository.interface.ts (save, findById, findByCartId)
 
 ### Application Layer Implementation for User Story 1
 
-- [ ] T027 [P] [US1] Define CatalogGateway interface in src/application/gateways/catalog.gateway.interface.ts (getProductData, ProductData types)
-- [ ] T028 [P] [US1] Define PricingGateway interface in src/application/gateways/pricing.gateway.interface.ts (calculatePricing, PricingInput/Result types)
-- [ ] T029 [US1] Implement OrderPricingService in src/domain/services/order-pricing.service.ts (orchestrate catalog + pricing, return PricedOrderData)
-- [ ] T030 [P] [US1] Create CheckoutDTO in src/application/dtos/checkout.dto.ts (cartId, shippingAddress validation)
-- [ ] T031 [P] [US1] Create OrderResponseDTO in src/application/dtos/order-response.dto.ts (complete order representation)
-- [ ] T032 [P] [US1] Create OrderNotFoundException in src/application/exceptions/order-not-found.exception.ts
-- [ ] T033 [US1] Implement CheckoutService in src/application/services/checkout.service.ts (validate cart, call pricing service, create order, mark cart converted)
+- [X] T027 [P] [US1] Define CatalogGateway interface in src/application/gateways/catalog.gateway.interface.ts (getProductData, ProductData types)
+- [X] T028 [P] [US1] Define PricingGateway interface in src/application/gateways/pricing.gateway.interface.ts (calculatePricing, PricingInput/Result types)
+- [X] T029 [US1] Implement OrderPricingService in src/domain/services/order-pricing.service.ts (orchestrate catalog + pricing, return PricedOrderData)
+- [X] T030 [P] [US1] Create CheckoutDTO in src/application/dtos/checkout.dto.ts (cartId, shippingAddress validation)
+- [X] T031 [P] [US1] Create OrderResponseDTO in src/application/dtos/order-response.dto.ts (complete order representation)
+- [X] T032 [P] [US1] Create OrderNotFoundException in src/application/exceptions/order-not-found.exception.ts
+- [X] T033 [US1] Implement CheckoutService in src/application/services/checkout.service.ts (validate cart, call pricing service, create order, mark cart converted)
 
 ### Infrastructure Layer Implementation for User Story 1
 
-- [ ] T034 [P] [US1] Implement StubCatalogGateway in src/infrastructure/gateways/stub-catalog.gateway.ts (hardcoded products with timeout simulation)
-- [ ] T035 [P] [US1] Implement StubPricingGateway in src/infrastructure/gateways/stub-pricing.gateway.ts (hardcoded pricing with discount logic)
-- [ ] T036 [US1] Implement InMemoryOrderRepository in src/infrastructure/repositories/in-memory-order.repository.ts (in-memory Map storage)
-- [ ] T037 [US1] Implement OrderController checkout endpoint in src/infrastructure/controllers/order.controller.ts (POST /orders/checkout)
-- [ ] T038 [US1] Create OrderModule in src/infrastructure/modules/order.module.ts (DI wiring for all order components)
-- [ ] T039 [US1] Update AppModule in src/app.module.ts to import OrderModule
+- [X] T034 [P] [US1] Implement StubCatalogGateway in src/infrastructure/gateways/stub-catalog.gateway.ts (hardcoded products with timeout simulation)
+- [X] T035 [P] [US1] Implement StubPricingGateway in src/infrastructure/gateways/stub-pricing.gateway.ts (hardcoded pricing with discount logic)
+- [X] T036 [US1] Implement InMemoryOrderRepository in src/infrastructure/repositories/in-memory-order.repository.ts (in-memory Map storage)
+- [X] T037 [US1] Implement OrderController checkout endpoint in src/infrastructure/controllers/order.controller.ts (POST /orders/checkout)
+- [X] T038 [US1] Create OrderModule in src/infrastructure/modules/order.module.ts (DI wiring for all order components)
+- [X] T039 [US1] Update AppModule in src/app.module.ts to import OrderModule
 
 **Checkpoint**: User Story 1 complete - checkout creates orders in AwaitingPayment state with product snapshots and pricing
 

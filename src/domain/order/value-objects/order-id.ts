@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 
 export class OrderId {
-  public readonly value: string;
+  private readonly value: string;
 
   constructor(value: string) {
     this.validate(value);
@@ -10,6 +10,10 @@ export class OrderId {
 
   static generate(): OrderId {
     return new OrderId(randomUUID());
+  }
+
+  getValue(): string {
+    return this.value;
   }
 
   private validate(value: string): void {

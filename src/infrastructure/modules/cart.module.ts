@@ -25,6 +25,6 @@ import { InMemoryShoppingCartRepository } from '../repositories/in-memory-shoppi
       inject: ['ShoppingCartRepository'],
     },
   ],
-  exports: [CartService],
+  exports: [CartService, 'ShoppingCartRepository'],
 })
 export class CartModule {}

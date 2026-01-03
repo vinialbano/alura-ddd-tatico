@@ -115,6 +115,20 @@ export class ShoppingCart {
   }
 
   /**
+   * Returns true if cart has no items
+   */
+  isEmpty(): boolean {
+    return this.items.size === 0;
+  }
+
+  /**
+   * Returns conversion status
+   */
+  getConversionStatus(): 'active' | 'converted' {
+    return this.conversionStatus;
+  }
+
+  /**
    * Updates quantity of an existing item in the cart
    * @param productId - Product identifier
    * @param quantity - New quantity (replaces current quantity)
