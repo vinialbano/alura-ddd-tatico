@@ -232,7 +232,7 @@ describe('Order Aggregate', () => {
 
       try {
         order.markAsPaid('pay_999');
-      } catch (error) {
+      } catch {
         // Expected to fail
       }
 
@@ -347,7 +347,7 @@ describe('Order Aggregate', () => {
 
       try {
         order.cancel('Second cancellation');
-      } catch (error) {
+      } catch {
         // Expected to fail
       }
 

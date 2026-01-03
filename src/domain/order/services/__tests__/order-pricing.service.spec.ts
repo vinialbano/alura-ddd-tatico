@@ -6,12 +6,12 @@ import {
   PricingGateway,
   PricingResult,
 } from '../../../../application/gateways/pricing.gateway.interface';
+import { ProductId } from '../../../shared/value-objects/product-id';
+import { Quantity } from '../../../shared/value-objects/quantity';
 import { CartItem } from '../../../shopping-cart/cart-item';
 import { ProductDataUnavailableError } from '../../exceptions/product-data-unavailable.error';
 import { ProductPricingFailedError } from '../../exceptions/product-pricing-failed.error';
 import { Money } from '../../value-objects/money';
-import { ProductId } from '../../../shared/value-objects/product-id';
-import { Quantity } from '../../../shared/value-objects/quantity';
 import { OrderPricingService } from '../order-pricing.service';
 
 describe('OrderPricingService', () => {
@@ -92,22 +92,22 @@ describe('OrderPricingService', () => {
 
       expect(mockCatalogGateway.getProductData).toHaveBeenCalledTimes(2);
       expect(mockCatalogGateway.getProductData).toHaveBeenCalledWith(
-        cartItems[0].productId,
+        cartItems[0].getProductId(),
       );
       expect(mockCatalogGateway.getProductData).toHaveBeenCalledWith(
-        cartItems[1].productId,
+        cartItems[1].getProductId(),
       );
 
       expect(mockPricingGateway.calculatePricing).toHaveBeenCalledTimes(1);
       expect(mockPricingGateway.calculatePricing).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
-            productId: cartItems[0].productId,
-            quantity: cartItems[0].quantity,
+            productId: cartItems[0].getProductId(),
+            quantity: cartItems[0].getQuantity(),
           }),
           expect.objectContaining({
-            productId: cartItems[1].productId,
-            quantity: cartItems[1].quantity,
+            productId: cartItems[1].getProductId(),
+            quantity: cartItems[1].getQuantity(),
           }),
         ]),
       );
@@ -277,6 +277,7 @@ describe('OrderPricingService', () => {
       await expect(orderPricingService.price(cartItems)).rejects.toThrow();
 
       expect(mockPricingGateway.calculatePricing).not.toHaveBeenCalled();
+      expect(mockCatalogGateway.getProductData).toHaveBeenCalled();
     });
   });
 
@@ -377,18 +378,18 @@ describe('OrderPricingService', () => {
       const cartItems = [createCartItem('product-1', 1)];
       const callSequence: string[] = [];
 
-      mockCatalogGateway.getProductData.mockImplementation(async () => {
+      mockCatalogGateway.getProductData.mockImplementation(() => {
         callSequence.push('catalog');
-        return {
+        return Promise.resolve({
           name: 'Product 1',
           description: 'Description 1',
           sku: 'SKU-1',
-        };
+        });
       });
 
-      mockPricingGateway.calculatePricing.mockImplementation(async () => {
+      mockPricingGateway.calculatePricing.mockImplementation(() => {
         callSequence.push('pricing');
-        return {
+        return Promise.resolve({
           items: [
             {
               productId: ProductId.fromString('product-1'),
@@ -399,7 +400,7 @@ describe('OrderPricingService', () => {
           ],
           orderLevelDiscount: new Money(0, 'USD'),
           orderTotal: new Money(10.0, 'USD'),
-        };
+        });
       });
 
       await orderPricingService.price(cartItems);

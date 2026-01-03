@@ -1,12 +1,13 @@
-import { CartId } from './value-objects/cart-id';
+import { CartId } from '../value-objects/cart-id';
 
 /**
  * Domain exception thrown when attempting to modify a cart that has already been converted to an order
  */
 export class CartAlreadyConvertedError extends Error {
   constructor(cartId: CartId) {
+    const cartIdValue: string = cartId.getValue();
     super(
-      `Cart ${cartId.getValue()} has already been converted and cannot be modified`,
+      `Cart ${cartIdValue} has already been converted and cannot be modified`,
     );
     this.name = 'CartAlreadyConvertedError';
     Object.setPrototypeOf(this, CartAlreadyConvertedError.prototype);

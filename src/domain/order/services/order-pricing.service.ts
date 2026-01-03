@@ -83,7 +83,7 @@ export class OrderPricingService {
       await this.pricingGateway.calculatePricing(pricingInputs);
 
     // Step 3: Combine snapshots + pricing → OrderItems
-    const orderItems = cartItems.map((cartItem, index) => {
+    const orderItems = cartItems.map((cartItem) => {
       const snapshot = productSnapshots.get(cartItem.getProductId().getValue());
       const pricing = pricingResult.items.find((p) =>
         p.productId.equals(cartItem.getProductId()),
