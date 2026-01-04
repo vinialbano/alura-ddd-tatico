@@ -1,8 +1,12 @@
+import { IsNotEmpty, IsString } from 'class-validator';
+
 /**
  * CreateCartDto
  *
  * Input DTO for creating a new shopping cart
  */
 export class CreateCartDto {
-  customerId: string;
+  @IsString()
+  @IsNotEmpty()
+  customerId!: string;
 }

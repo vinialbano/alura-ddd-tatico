@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ShoppingCart } from '../../domain/aggregates/shopping-cart';
-import type { ShoppingCartRepository } from '../../domain/repositories/shopping-cart.repository.interface';
-import { CartId } from '../../domain/value-objects/cart-id';
-import { CustomerId } from '../../domain/value-objects/customer-id';
-import { ProductId } from '../../domain/value-objects/product-id';
-import { Quantity } from '../../domain/value-objects/quantity';
+import { CustomerId } from '../../domain/shared/value-objects/customer-id';
+import { ProductId } from '../../domain/shared/value-objects/product-id';
+import { Quantity } from '../../domain/shared/value-objects/quantity';
+import { ShoppingCart } from '../../domain/shopping-cart/shopping-cart';
+import type { ShoppingCartRepository } from '../../domain/shopping-cart/shopping-cart.repository';
+import { CartId } from '../../domain/shopping-cart/value-objects/cart-id';
 import { AddItemDto } from '../dtos/add-item.dto';
 import {
   CartItemResponseDto,
@@ -13,6 +13,7 @@ import {
 import { CreateCartDto } from '../dtos/create-cart.dto';
 import { UpdateQuantityDto } from '../dtos/update-quantity.dto';
 import { CartNotFoundException } from '../exceptions/cart-not-found.exception';
+import { SHOPPING_CART_REPOSITORY } from '../../infrastructure/modules/cart.module';
 
 /**
  * CartService
@@ -23,7 +24,7 @@ import { CartNotFoundException } from '../exceptions/cart-not-found.exception';
 @Injectable()
 export class CartService {
   constructor(
-    @Inject('ShoppingCartRepository')
+    @Inject(SHOPPING_CART_REPOSITORY)
     private readonly repository: ShoppingCartRepository,
   ) {}
 

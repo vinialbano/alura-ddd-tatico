@@ -1,4 +1,4 @@
-import { CartId } from '../../domain/value-objects/cart-id';
+import { CartId } from '../../domain/shopping-cart/value-objects/cart-id';
 
 /**
  * Application exception thrown when a cart cannot be found in the repository
