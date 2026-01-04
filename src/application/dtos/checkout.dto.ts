@@ -1,5 +1,11 @@
-import { IsNotEmpty, IsString, IsUUID, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 
 /**
  * ShippingAddressDTO
@@ -11,6 +17,7 @@ export class ShippingAddressDTO {
   @IsNotEmpty()
   street!: string;
 
+  @IsOptional()
   @IsString()
   addressLine2?: string;
 
@@ -30,6 +37,7 @@ export class ShippingAddressDTO {
   @IsNotEmpty()
   country!: string;
 
+  @IsOptional()
   @IsString()
   deliveryInstructions?: string;
 }

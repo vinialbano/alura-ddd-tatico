@@ -11,6 +11,8 @@ import { MaxProductsExceededError } from '../../domain/shopping-cart/exceptions/
 import { InvalidQuantityError } from '../../domain/shopping-cart/exceptions/invalid-quantity.error';
 import { ProductNotInCartError } from '../../domain/shopping-cart/exceptions/product-not-in-cart.error';
 import { EmptyCartError } from '../../domain/shopping-cart/exceptions/empty-cart.error';
+import { ProductDataUnavailableError } from '../../domain/order/exceptions/product-data-unavailable.error';
+import { ProductPricingFailedError } from '../../domain/order/exceptions/product-pricing-failed.error';
 
 /**
  * Exception filter for domain and application exceptions
@@ -24,6 +26,8 @@ import { EmptyCartError } from '../../domain/shopping-cart/exceptions/empty-cart
   InvalidQuantityError,
   ProductNotInCartError,
   EmptyCartError,
+  ProductDataUnavailableError,
+  ProductPricingFailedError,
 )
 export class DomainExceptionFilter implements ExceptionFilter {
   catch(exception: Error, host: ArgumentsHost) {
@@ -66,6 +70,17 @@ export class DomainExceptionFilter implements ExceptionFilter {
       exception instanceof InvalidQuantityError ||
       exception instanceof ProductNotInCartError ||
       exception instanceof EmptyCartError
+    ) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        error: 'Bad Request',
+      };
+    }
+
+    // 400 Bad Request - Gateway/external service failures during checkout
+    if (
+      exception instanceof ProductDataUnavailableError ||
+      exception instanceof ProductPricingFailedError
     ) {
       return {
         status: HttpStatus.BAD_REQUEST,

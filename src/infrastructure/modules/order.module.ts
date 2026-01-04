@@ -53,7 +53,11 @@ export const PRICING_GATEWAY = 'PricingGateway';
     {
       provide: CheckoutService,
       useFactory: (cartRepository, orderRepository, pricingService) => {
-        return new CheckoutService(cartRepository, orderRepository, pricingService);
+        return new CheckoutService(
+          cartRepository,
+          orderRepository,
+          pricingService,
+        );
       },
       inject: ['ShoppingCartRepository', ORDER_REPOSITORY, OrderPricingService],
     },

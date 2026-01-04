@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 
@@ -13,6 +13,16 @@ describe('Order E2E Tests', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Enable automatic DTO validation
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
+
     await app.init();
   });
 

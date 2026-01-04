@@ -68,9 +68,7 @@ export class StubPricingGateway implements PricingGateway {
       const itemDiscount = new Money(itemDiscountAmount, this.currency);
 
       // Calculate line total
-      const lineTotal = unitPrice
-        .multiply(quantity)
-        .subtract(itemDiscount);
+      const lineTotal = unitPrice.multiply(quantity).subtract(itemDiscount);
 
       return {
         productId: item.productId,
