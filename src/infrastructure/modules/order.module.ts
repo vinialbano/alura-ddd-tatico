@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
+import { CatalogGateway } from 'src/application/gateways/catalog.gateway.interface';
+import { PricingGateway } from 'src/application/gateways/pricing.gateway.interface';
+import { OrderRepository } from 'src/domain/order/order.repository';
+import { ShoppingCartRepository } from 'src/domain/shopping-cart/shopping-cart.repository';
 import { CheckoutService } from '../../application/services/checkout.service';
 import { OrderService } from '../../application/services/order.service';
-import { OrderPricingService } from '../../domain/order/services/order-pricing.service';
 import { OrderCreationService } from '../../domain/order/services/order-creation.service';
+import { OrderPricingService } from '../../domain/order/services/order-pricing.service';
 import { OrderController } from '../controllers/order.controller';
 import { StubCatalogGateway } from '../gateways/stub-catalog.gateway';
 import { StubPricingGateway } from '../gateways/stub-pricing.gateway';
@@ -45,7 +49,10 @@ export const PRICING_GATEWAY = 'PricingGateway';
     // Domain Services (using factory to avoid NestJS decorators in domain layer)
     {
       provide: OrderPricingService,
-      useFactory: (catalogGateway, pricingGateway) => {
+      useFactory: (
+        catalogGateway: CatalogGateway,
+        pricingGateway: PricingGateway,
+      ) => {
         return new OrderPricingService(catalogGateway, pricingGateway);
       },
       inject: [CATALOG_GATEWAY, PRICING_GATEWAY],
@@ -59,10 +66,10 @@ export const PRICING_GATEWAY = 'PricingGateway';
     {
       provide: CheckoutService,
       useFactory: (
-        cartRepository,
-        orderRepository,
-        pricingService,
-        orderCreationService,
+        cartRepository: ShoppingCartRepository,
+        orderRepository: OrderRepository,
+        pricingService: OrderPricingService,
+        orderCreationService: OrderCreationService,
       ) => {
         return new CheckoutService(
           cartRepository,
@@ -80,7 +87,7 @@ export const PRICING_GATEWAY = 'PricingGateway';
     },
     {
       provide: OrderService,
-      useFactory: (orderRepository) => {
+      useFactory: (orderRepository: OrderRepository) => {
         return new OrderService(orderRepository);
       },
       inject: [ORDER_REPOSITORY],
