@@ -13,7 +13,10 @@ import { ShoppingCart } from '../../../domain/shopping-cart/shopping-cart';
 import { CartNotFoundException } from '../../exceptions/cart-not-found.exception';
 import { OrderItem } from '../../../domain/order/order-item';
 import { CheckoutDTO } from '../../dtos/checkout.dto';
-import { OrderResponseDTO } from '../../dtos/order-response.dto';
+import { Order } from '../../../domain/order/order';
+import { OrderId } from '../../../domain/order/value-objects/order-id';
+import { ShippingAddress } from '../../../domain/order/value-objects/shipping-address';
+import { EmptyCartError } from '../../../domain/shopping-cart/exceptions/empty-cart.error';
 
 const createCheckoutDto = (cartId: string): CheckoutDTO => ({
   cartId,
@@ -95,7 +98,6 @@ describe('CheckoutService', () => {
       mockPricingService.price.mockResolvedValue(mockPricedData);
 
       // OrderCreationService will throw EmptyCartError
-      const { EmptyCartError } = require('../../../domain/shopping-cart/exceptions/empty-cart.error');
       mockOrderCreationService.createFromCart.mockImplementation(() => {
         throw new EmptyCartError();
       });
@@ -135,10 +137,6 @@ describe('CheckoutService', () => {
       mockPricingService.price.mockResolvedValue(mockPricedData);
 
       // Mock OrderCreationService to return an Order
-      const { Order } = require('../../../domain/order/order');
-      const { OrderId } = require('../../../domain/order/value-objects/order-id');
-      const { ShippingAddress } = require('../../../domain/order/value-objects/shipping-address');
-
       const mockOrder = Order.create(
         OrderId.generate(),
         testCartId,
@@ -184,6 +182,58 @@ describe('CheckoutService', () => {
       // Assert - repositories called
       expect(mockOrderRepository.save).toHaveBeenCalled();
       expect(mockCartRepository.save).toHaveBeenCalled();
+    });
+
+    it('should return existing order when cart is already converted', async () => {
+      // Arrange
+      const cart = ShoppingCart.create(testCartId, testCustomerId);
+      cart.addItem(testProductId, Quantity.of(2));
+
+      const existingOrderId = OrderId.generate();
+      const existingOrder = Order.create(
+        existingOrderId,
+        testCartId,
+        testCustomerId,
+        [
+          OrderItem.create(
+            new ProductSnapshot({
+              name: 'Premium Coffee Beans',
+              description: 'Test description',
+              sku: 'COFFEE-COL-001',
+            }),
+            Quantity.of(2),
+            new Money(24.99, 'USD'),
+            new Money(0, 'USD'),
+          ),
+        ],
+        new ShippingAddress({
+          street: '123 Main St',
+          city: 'Springfield',
+          stateOrProvince: 'IL',
+          postalCode: '62701',
+          country: 'USA',
+        }),
+        new Money(0, 'USD'),
+        new Money(49.98, 'USD'),
+      );
+
+      // Mark cart as converted
+      cart.markAsConverted();
+
+      mockCartRepository.findById.mockResolvedValue(cart);
+      mockOrderRepository.findByCartId.mockResolvedValue(existingOrder);
+
+      const dto = createCheckoutDto(testCartId.getValue());
+
+      // Act
+      const response = await service.checkout(dto);
+
+      // Assert
+      expect(response.id).toBe(existingOrderId.getValue());
+      expect(mockOrderRepository.findByCartId).toHaveBeenCalledWith(testCartId);
+      expect(mockPricingService.price).not.toHaveBeenCalled();
+      expect(mockOrderRepository.save).not.toHaveBeenCalled();
+      expect(mockCartRepository.save).not.toHaveBeenCalled();
     });
   });
 });

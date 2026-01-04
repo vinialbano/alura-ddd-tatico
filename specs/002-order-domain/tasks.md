@@ -147,8 +147,8 @@
 
 ### Tests for User Story 3 (TDD - Write FIRST)
 
-- [ ] T050 [P] [US3] Write test for cart already converted scenario in src/application/services/__tests__/checkout.service.spec.ts
-- [ ] T051 [P] [US3] Write test for findByCartId repository method in src/infrastructure/repositories/__tests__/in-memory-order.repository.spec.ts
+- [X] T050 [P] [US3] Write test for cart already converted scenario in src/application/services/__tests__/checkout.service.spec.ts
+- [X] T051 [P] [US3] Write test for findByCartId repository method in src/infrastructure/repositories/__tests__/in-memory-order.repository.spec.ts
 - [X] T052 [P] [US3] Write E2E test for duplicate checkout prevention in test/order.e2e-spec.ts
 
 ### Implementation for User Story 3
@@ -172,7 +172,7 @@
 ### Tests for User Story 4 (TDD - Write FIRST)
 
 - [X] T056 [P] [US4] Write tests for Order.markAsPaid() in src/domain/aggregates/__tests__/order.spec.ts (valid transition, already paid rejection, cancelled rejection)
-- [ ] T057 [P] [US4] Write tests for OrderService.markAsPaid() in src/application/services/__tests__/order.service.spec.ts
+- [X] T057 [P] [US4] Write tests for OrderService.markAsPaid() in src/application/services/__tests__/order.service.spec.ts
 - [X] T058 [P] [US4] Write E2E test for mark paid endpoint in test/order.e2e-spec.ts
 
 ### Domain Layer Implementation for User Story 4
@@ -204,7 +204,7 @@
 ### Tests for User Story 5 (TDD - Write FIRST)
 
 - [X] T064 [P] [US5] Write tests for Order.cancel() in src/domain/aggregates/__tests__/order.spec.ts (valid transitions from AwaitingPayment and Paid, already cancelled rejection)
-- [ ] T065 [P] [US5] Write tests for OrderService.cancel() in src/application/services/__tests__/order.service.spec.ts
+- [X] T065 [P] [US5] Write tests for OrderService.cancel() in src/application/services/__tests__/order.service.spec.ts
 - [X] T066 [P] [US5] Write E2E test for cancel endpoint in test/order.e2e-spec.ts
 
 ### Domain Layer Implementation for User Story 5
@@ -254,7 +254,7 @@
 
 ### Tests (TDD - Write FIRST)
 
-- [ ] T077 [P] Write tests for GET /orders/:id endpoint in src/infrastructure/controllers/__tests__/order.controller.spec.ts
+- [X] T077 [P] Write tests for GET /orders/:id endpoint in src/infrastructure/controllers/__tests__/order.controller.spec.ts
 - [X] T078 [P] Write E2E test for get order by ID in test/order.e2e-spec.ts
 
 ### Implementation
@@ -270,10 +270,10 @@
 
 **Purpose**: Final improvements and validation
 
-- [ ] T081 [P] Run full test suite (npm run test && npm run test:e2e) and verify 100% pass rate
-- [ ] T082 [P] Run linting (npm run lint) and fix any issues
-- [ ] T083 [P] Run formatting (npm run format) on all files
-- [ ] T084 [P] Run build (npm run build) and verify no TypeScript errors
+- [X] T081 [P] Run full test suite (npm run test && npm run test:e2e) and verify 100% pass rate
+- [X] T082 [P] Run linting (npm run lint) and fix any issues
+- [X] T083 [P] Run formatting (npm run format) on all files
+- [X] T084 [P] Run build (npm run build) and verify no TypeScript errors
 - [ ] T085 [P] Validate all acceptance scenarios from spec.md manually
 - [ ] T086 [P] Review code against constitution principles (domain layer purity, layered architecture, TDD evidence)
 - [ ] T087 Create comprehensive commit following Conventional Commits format

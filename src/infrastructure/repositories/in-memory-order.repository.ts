@@ -26,6 +26,7 @@ export class InMemoryOrderRepository implements OrderRepository {
    */
   async save(order: Order): Promise<void> {
     this.orders.set(order.id.getValue(), order);
+    return Promise.resolve();
   }
 
   /**
@@ -36,7 +37,7 @@ export class InMemoryOrderRepository implements OrderRepository {
    */
   async findById(id: OrderId): Promise<Order | null> {
     const order = this.orders.get(id.getValue());
-    return order ?? null;
+    return Promise.resolve(order ?? null);
   }
 
   /**
@@ -50,10 +51,10 @@ export class InMemoryOrderRepository implements OrderRepository {
   async findByCartId(cartId: CartId): Promise<Order | null> {
     for (const order of this.orders.values()) {
       if (order.cartId.equals(cartId)) {
-        return order;
+        return Promise.resolve(order);
       }
     }
-    return null;
+    return Promise.resolve(null);
   }
 
   /**
