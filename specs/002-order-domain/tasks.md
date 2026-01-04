@@ -119,19 +119,19 @@
 
 ### Tests for User Story 2 (TDD - Write FIRST)
 
-- [ ] T040 [P] [US2] Write test for empty cart rejection in src/application/services/__tests__/checkout.service.spec.ts
-- [ ] T041 [P] [US2] Write test for missing product data error in src/domain/services/__tests__/order-pricing.service.spec.ts
-- [ ] T042 [P] [US2] Write test for missing price error in src/domain/services/__tests__/order-pricing.service.spec.ts
-- [ ] T043 [P] [US2] Write test for invalid shipping address in src/domain/value-objects/__tests__/shipping-address.spec.ts
-- [ ] T044 [P] [US2] Write E2E tests for invalid checkout scenarios in test/order.e2e-spec.ts (empty cart, pricing failures, invalid address)
+- [X] T040 [P] [US2] Write test for empty cart rejection in src/application/services/__tests__/checkout.service.spec.ts
+- [X] T041 [P] [US2] Write test for missing product data error in src/domain/services/__tests__/order-pricing.service.spec.ts
+- [X] T042 [P] [US2] Write test for missing price error in src/domain/services/__tests__/order-pricing.service.spec.ts
+- [X] T043 [P] [US2] Write test for invalid shipping address in src/domain/value-objects/__tests__/shipping-address.spec.ts
+- [X] T044 [P] [US2] Write E2E tests for invalid checkout scenarios in test/order.e2e-spec.ts (empty cart, pricing failures, invalid address)
 
 ### Implementation for User Story 2
 
-- [ ] T045 [P] [US2] Add empty cart validation in src/application/services/checkout.service.ts (check cart.items.length > 0)
-- [ ] T046 [P] [US2] Add product data unavailable error handling in src/domain/services/order-pricing.service.ts (catch ProductDataUnavailableError)
-- [ ] T047 [P] [US2] Add pricing failure error handling in src/domain/services/order-pricing.service.ts (catch ProductPricingFailedError)
-- [ ] T048 [P] [US2] Enhance ShippingAddress validation in src/domain/value-objects/shipping-address.ts (explicit field validation messages)
-- [ ] T049 [US2] Add error handling in OrderController in src/infrastructure/controllers/order.controller.ts (map domain exceptions to HTTP status codes)
+- [X] T045 [P] [US2] Add empty cart validation in src/application/services/checkout.service.ts (check cart.items.length > 0)
+- [X] T046 [P] [US2] Add product data unavailable error handling in src/domain/services/order-pricing.service.ts (catch ProductDataUnavailableError)
+- [X] T047 [P] [US2] Add pricing failure error handling in src/domain/services/order-pricing.service.ts (catch ProductPricingFailedError)
+- [X] T048 [P] [US2] Enhance ShippingAddress validation in src/domain/value-objects/shipping-address.ts (explicit field validation messages)
+- [X] T049 [US2] Add error handling in OrderController in src/infrastructure/controllers/order.controller.ts (map domain exceptions to HTTP status codes)
 
 **Checkpoint**: User Story 2 complete - invalid checkout attempts are rejected with clear error messages
 
@@ -149,13 +149,13 @@
 
 - [ ] T050 [P] [US3] Write test for cart already converted scenario in src/application/services/__tests__/checkout.service.spec.ts
 - [ ] T051 [P] [US3] Write test for findByCartId repository method in src/infrastructure/repositories/__tests__/in-memory-order.repository.spec.ts
-- [ ] T052 [P] [US3] Write E2E test for duplicate checkout prevention in test/order.e2e-spec.ts
+- [X] T052 [P] [US3] Write E2E test for duplicate checkout prevention in test/order.e2e-spec.ts
 
 ### Implementation for User Story 3
 
-- [ ] T053 [US3] Add isConverted check in CheckoutService in src/application/services/checkout.service.ts (if cart converted, return existing order)
-- [ ] T054 [US3] Implement findByCartId in InMemoryOrderRepository in src/infrastructure/repositories/in-memory-order.repository.ts
-- [ ] T055 [US3] Update ShoppingCart aggregate to track conversion in src/domain/aggregates/shopping-cart.ts (markAsConverted method, convertedOrderId field)
+- [X] T053 [US3] Add isConverted check in CheckoutService in src/application/services/checkout.service.ts (if cart converted, return existing order)
+- [X] T054 [US3] Implement findByCartId in InMemoryOrderRepository in src/infrastructure/repositories/in-memory-order.repository.ts
+- [X] T055 [US3] Update ShoppingCart aggregate to track conversion in src/domain/aggregates/shopping-cart.ts (markAsConverted method, convertedOrderId field)
 
 **Checkpoint**: User Story 3 complete - duplicate checkouts prevented via idempotent behavior
 
@@ -171,23 +171,23 @@
 
 ### Tests for User Story 4 (TDD - Write FIRST)
 
-- [ ] T056 [P] [US4] Write tests for Order.markAsPaid() in src/domain/aggregates/__tests__/order.spec.ts (valid transition, already paid rejection, cancelled rejection)
+- [X] T056 [P] [US4] Write tests for Order.markAsPaid() in src/domain/aggregates/__tests__/order.spec.ts (valid transition, already paid rejection, cancelled rejection)
 - [ ] T057 [P] [US4] Write tests for OrderService.markAsPaid() in src/application/services/__tests__/order.service.spec.ts
-- [ ] T058 [P] [US4] Write E2E test for mark paid endpoint in test/order.e2e-spec.ts
+- [X] T058 [P] [US4] Write E2E test for mark paid endpoint in test/order.e2e-spec.ts
 
 ### Domain Layer Implementation for User Story 4
 
-- [ ] T059 [US4] Implement Order.markAsPaid() in src/domain/aggregates/order.ts (state validation, transition to Paid, record paymentId)
-- [ ] T060 [US4] Implement Order.canBePaid() in src/domain/aggregates/order.ts (return true only if AwaitingPayment)
+- [X] T059 [US4] Implement Order.markAsPaid() in src/domain/aggregates/order.ts (state validation, transition to Paid, record paymentId)
+- [X] T060 [US4] Implement Order.canBePaid() in src/domain/aggregates/order.ts (return true only if AwaitingPayment)
 
 ### Application Layer Implementation for User Story 4
 
-- [ ] T061 [P] [US4] Create MarkPaidDTO in src/application/dtos/mark-paid.dto.ts (paymentId validation)
-- [ ] T062 [US4] Implement OrderService.markAsPaid() in src/application/services/order.service.ts (load order, call markAsPaid, persist)
+- [X] T061 [P] [US4] Create MarkPaidDTO in src/application/dtos/mark-paid.dto.ts (paymentId validation)
+- [X] T062 [US4] Implement OrderService.markAsPaid() in src/application/services/order.service.ts (load order, call markAsPaid, persist)
 
 ### Infrastructure Layer Implementation for User Story 4
 
-- [ ] T063 [US4] Implement mark paid endpoint in OrderController in src/infrastructure/controllers/order.controller.ts (POST /orders/:id/mark-paid)
+- [X] T063 [US4] Implement mark paid endpoint in OrderController in src/infrastructure/controllers/order.controller.ts (POST /orders/:id/mark-paid)
 
 **Checkpoint**: User Story 4 complete - orders can be marked as paid with state machine validation
 
@@ -203,23 +203,23 @@
 
 ### Tests for User Story 5 (TDD - Write FIRST)
 
-- [ ] T064 [P] [US5] Write tests for Order.cancel() in src/domain/aggregates/__tests__/order.spec.ts (valid transitions from AwaitingPayment and Paid, already cancelled rejection)
+- [X] T064 [P] [US5] Write tests for Order.cancel() in src/domain/aggregates/__tests__/order.spec.ts (valid transitions from AwaitingPayment and Paid, already cancelled rejection)
 - [ ] T065 [P] [US5] Write tests for OrderService.cancel() in src/application/services/__tests__/order.service.spec.ts
-- [ ] T066 [P] [US5] Write E2E test for cancel endpoint in test/order.e2e-spec.ts
+- [X] T066 [P] [US5] Write E2E test for cancel endpoint in test/order.e2e-spec.ts
 
 ### Domain Layer Implementation for User Story 5
 
-- [ ] T067 [US5] Implement Order.cancel() in src/domain/aggregates/order.ts (state validation, transition to Cancelled, record reason)
-- [ ] T068 [US5] Implement Order.canBeCancelled() in src/domain/aggregates/order.ts (return true if AwaitingPayment or Paid)
+- [X] T067 [US5] Implement Order.cancel() in src/domain/aggregates/order.ts (state validation, transition to Cancelled, record reason)
+- [X] T068 [US5] Implement Order.canBeCancelled() in src/domain/aggregates/order.ts (return true if AwaitingPayment or Paid)
 
 ### Application Layer Implementation for User Story 5
 
-- [ ] T069 [P] [US5] Create CancelOrderDTO in src/application/dtos/cancel-order.dto.ts (reason validation, min 1 char)
-- [ ] T070 [US5] Implement OrderService.cancel() in src/application/services/order.service.ts (load order, call cancel, persist)
+- [X] T069 [P] [US5] Create CancelOrderDTO in src/application/dtos/cancel-order.dto.ts (reason validation, min 1 char)
+- [X] T070 [US5] Implement OrderService.cancel() in src/application/services/order.service.ts (load order, call cancel, persist)
 
 ### Infrastructure Layer Implementation for User Story 5
 
-- [ ] T071 [US5] Implement cancel endpoint in OrderController in src/infrastructure/controllers/order.controller.ts (POST /orders/:id/cancel)
+- [X] T071 [US5] Implement cancel endpoint in OrderController in src/infrastructure/controllers/order.controller.ts (POST /orders/:id/cancel)
 
 **Checkpoint**: User Story 5 complete - orders can be cancelled with reason recording
 
@@ -235,14 +235,14 @@
 
 ### Tests for User Story 6 (TDD - Write FIRST)
 
-- [ ] T072 [P] [US6] Write comprehensive state machine tests in src/domain/aggregates/__tests__/order.spec.ts (all invalid transitions)
-- [ ] T073 [P] [US6] Write E2E tests for invalid state transitions in test/order.e2e-spec.ts
+- [X] T072 [P] [US6] Write comprehensive state machine tests in src/domain/aggregates/__tests__/order.spec.ts (all invalid transitions)
+- [X] T073 [P] [US6] Write E2E tests for invalid state transitions in test/order.e2e-spec.ts
 
 ### Implementation for User Story 6
 
-- [ ] T074 [P] [US6] Enhance error messages in Order.markAsPaid() in src/domain/aggregates/order.ts (include current state in error)
-- [ ] T075 [P] [US6] Enhance error messages in Order.cancel() in src/domain/aggregates/order.ts (include current state in error)
-- [ ] T076 [US6] Add state preservation validation tests in src/domain/aggregates/__tests__/order.spec.ts (ensure state unchanged after failed transition)
+- [X] T074 [P] [US6] Enhance error messages in Order.markAsPaid() in src/domain/aggregates/order.ts (include current state in error)
+- [X] T075 [P] [US6] Enhance error messages in Order.cancel() in src/domain/aggregates/order.ts (include current state in error)
+- [X] T076 [US6] Add state preservation validation tests in src/domain/aggregates/__tests__/order.spec.ts (ensure state unchanged after failed transition)
 
 **Checkpoint**: User Story 6 complete - state machine strictly enforced with clear error messages
 
@@ -255,12 +255,12 @@
 ### Tests (TDD - Write FIRST)
 
 - [ ] T077 [P] Write tests for GET /orders/:id endpoint in src/infrastructure/controllers/__tests__/order.controller.spec.ts
-- [ ] T078 [P] Write E2E test for get order by ID in test/order.e2e-spec.ts
+- [X] T078 [P] Write E2E test for get order by ID in test/order.e2e-spec.ts
 
 ### Implementation
 
-- [ ] T079 [P] Implement OrderService.findById() in src/application/services/order.service.ts
-- [ ] T080 [P] Implement GET /orders/:id endpoint in OrderController in src/infrastructure/controllers/order.controller.ts
+- [X] T079 [P] Implement OrderService.findById() in src/application/services/order.service.ts
+- [X] T080 [P] Implement GET /orders/:id endpoint in OrderController in src/infrastructure/controllers/order.controller.ts
 
 **Checkpoint**: Supporting endpoints complete
 

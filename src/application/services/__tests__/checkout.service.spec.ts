@@ -2,6 +2,7 @@ import { CheckoutService } from '../checkout.service';
 import { ShoppingCartRepository } from '../../../domain/shopping-cart/shopping-cart.repository';
 import { OrderRepository } from '../../../domain/order/order.repository';
 import { OrderPricingService } from '../../../domain/order/services/order-pricing.service';
+import { OrderCreationService } from '../../../domain/order/services/order-creation.service';
 import { CartId } from '../../../domain/shopping-cart/value-objects/cart-id';
 import { CustomerId } from '../../../domain/shared/value-objects/customer-id';
 import { ProductId } from '../../../domain/shared/value-objects/product-id';
@@ -30,6 +31,7 @@ describe('CheckoutService', () => {
   let mockCartRepository: jest.Mocked<ShoppingCartRepository>;
   let mockOrderRepository: jest.Mocked<OrderRepository>;
   let mockPricingService: jest.Mocked<OrderPricingService>;
+  let mockOrderCreationService: jest.Mocked<OrderCreationService>;
 
   const testCustomerId = CustomerId.fromString('customer-123');
   const testCartId = CartId.create();
@@ -52,10 +54,16 @@ describe('CheckoutService', () => {
       price: jest.fn(),
     } as any;
 
+    mockOrderCreationService = {
+      createFromCart: jest.fn(),
+      canConvertCart: jest.fn(),
+    } as any;
+
     service = new CheckoutService(
       mockCartRepository,
       mockOrderRepository,
       mockPricingService,
+      mockOrderCreationService,
     );
   });
 
@@ -78,14 +86,27 @@ describe('CheckoutService', () => {
       // Arrange
       const emptyCart = ShoppingCart.create(testCartId, testCustomerId);
       mockCartRepository.findById.mockResolvedValue(emptyCart);
+
+      const mockPricedData = {
+        items: [],
+        orderLevelDiscount: new Money(0, 'USD'),
+        orderTotal: new Money(0, 'USD'),
+      };
+      mockPricingService.price.mockResolvedValue(mockPricedData);
+
+      // OrderCreationService will throw EmptyCartError
+      const { EmptyCartError } = require('../../../domain/shopping-cart/exceptions/empty-cart.error');
+      mockOrderCreationService.createFromCart.mockImplementation(() => {
+        throw new EmptyCartError();
+      });
+
       const dto = createCheckoutDto(testCartId.getValue());
 
       // Act & Assert
       await expect(service.checkout(dto)).rejects.toThrow(
-        'Cannot checkout empty cart',
+        'Cannot convert empty cart',
       );
 
-      expect(mockPricingService.price).not.toHaveBeenCalled();
       expect(mockOrderRepository.save).not.toHaveBeenCalled();
     });
 
@@ -112,6 +133,28 @@ describe('CheckoutService', () => {
         orderTotal: new Money(49.98, 'USD'),
       };
       mockPricingService.price.mockResolvedValue(mockPricedData);
+
+      // Mock OrderCreationService to return an Order
+      const { Order } = require('../../../domain/order/order');
+      const { OrderId } = require('../../../domain/order/value-objects/order-id');
+      const { ShippingAddress } = require('../../../domain/order/value-objects/shipping-address');
+
+      const mockOrder = Order.create(
+        OrderId.generate(),
+        testCartId,
+        testCustomerId,
+        mockPricedData.items,
+        new ShippingAddress({
+          street: '123 Main St',
+          city: 'Springfield',
+          stateOrProvince: 'IL',
+          postalCode: '62701',
+          country: 'USA',
+        }),
+        mockPricedData.orderLevelDiscount,
+        mockPricedData.orderTotal,
+      );
+      mockOrderCreationService.createFromCart.mockReturnValue(mockOrder);
 
       const dto = createCheckoutDto(testCartId.getValue());
 

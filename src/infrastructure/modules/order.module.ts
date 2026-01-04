@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
-import { OrderController } from '../controllers/order.controller';
 import { CheckoutService } from '../../application/services/checkout.service';
+import { OrderService } from '../../application/services/order.service';
 import { OrderPricingService } from '../../domain/order/services/order-pricing.service';
-import { InMemoryOrderRepository } from '../repositories/in-memory-order.repository';
+import { OrderCreationService } from '../../domain/order/services/order-creation.service';
+import { OrderController } from '../controllers/order.controller';
 import { StubCatalogGateway } from '../gateways/stub-catalog.gateway';
 import { StubPricingGateway } from '../gateways/stub-pricing.gateway';
-import { CartModule } from './cart.module';
+import { InMemoryOrderRepository } from '../repositories/in-memory-order.repository';
+import { CartModule, SHOPPING_CART_REPOSITORY } from './cart.module';
 
 // Injection tokens for interfaces
 export const ORDER_REPOSITORY = 'OrderRepository';
@@ -48,18 +50,40 @@ export const PRICING_GATEWAY = 'PricingGateway';
       },
       inject: [CATALOG_GATEWAY, PRICING_GATEWAY],
     },
+    {
+      provide: OrderCreationService,
+      useClass: OrderCreationService,
+    },
 
     // Application Services (using factory)
     {
       provide: CheckoutService,
-      useFactory: (cartRepository, orderRepository, pricingService) => {
+      useFactory: (
+        cartRepository,
+        orderRepository,
+        pricingService,
+        orderCreationService,
+      ) => {
         return new CheckoutService(
           cartRepository,
           orderRepository,
           pricingService,
+          orderCreationService,
         );
       },
-      inject: ['ShoppingCartRepository', ORDER_REPOSITORY, OrderPricingService],
+      inject: [
+        SHOPPING_CART_REPOSITORY,
+        ORDER_REPOSITORY,
+        OrderPricingService,
+        OrderCreationService,
+      ],
+    },
+    {
+      provide: OrderService,
+      useFactory: (orderRepository) => {
+        return new OrderService(orderRepository);
+      },
+      inject: [ORDER_REPOSITORY],
     },
   ],
   exports: [

@@ -12,6 +12,10 @@ export class OrderId {
     return new OrderId(randomUUID());
   }
 
+  static fromString(value: string): OrderId {
+    return new OrderId(value);
+  }
+
   getValue(): string {
     return this.value;
   }

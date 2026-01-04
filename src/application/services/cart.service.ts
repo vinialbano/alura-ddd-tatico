@@ -13,6 +13,7 @@ import {
 import { CreateCartDto } from '../dtos/create-cart.dto';
 import { UpdateQuantityDto } from '../dtos/update-quantity.dto';
 import { CartNotFoundException } from '../exceptions/cart-not-found.exception';
+import { SHOPPING_CART_REPOSITORY } from '../../infrastructure/modules/cart.module';
 
 /**
  * CartService
@@ -23,7 +24,7 @@ import { CartNotFoundException } from '../exceptions/cart-not-found.exception';
 @Injectable()
 export class CartService {
   constructor(
-    @Inject('ShoppingCartRepository')
+    @Inject(SHOPPING_CART_REPOSITORY)
     private readonly repository: ShoppingCartRepository,
   ) {}
 

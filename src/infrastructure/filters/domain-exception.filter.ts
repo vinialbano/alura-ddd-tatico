@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { CartNotFoundException } from '../../application/exceptions/cart-not-found.exception';
+import { OrderNotFoundException } from '../../application/exceptions/order-not-found.exception';
 import { CartAlreadyConvertedError } from '../../domain/shopping-cart/exceptions/cart-already-converted.error';
 import { MaxProductsExceededError } from '../../domain/shopping-cart/exceptions/max-products-exceeded.error';
 import { InvalidQuantityError } from '../../domain/shopping-cart/exceptions/invalid-quantity.error';
@@ -13,6 +14,7 @@ import { ProductNotInCartError } from '../../domain/shopping-cart/exceptions/pro
 import { EmptyCartError } from '../../domain/shopping-cart/exceptions/empty-cart.error';
 import { ProductDataUnavailableError } from '../../domain/order/exceptions/product-data-unavailable.error';
 import { ProductPricingFailedError } from '../../domain/order/exceptions/product-pricing-failed.error';
+import { InvalidOrderStateTransitionError } from '../../domain/order/exceptions/invalid-order-state-transition.error';
 
 /**
  * Exception filter for domain and application exceptions
@@ -21,6 +23,7 @@ import { ProductPricingFailedError } from '../../domain/order/exceptions/product
  */
 @Catch(
   CartNotFoundException,
+  OrderNotFoundException,
   CartAlreadyConvertedError,
   MaxProductsExceededError,
   InvalidQuantityError,
@@ -28,6 +31,7 @@ import { ProductPricingFailedError } from '../../domain/order/exceptions/product
   EmptyCartError,
   ProductDataUnavailableError,
   ProductPricingFailedError,
+  InvalidOrderStateTransitionError,
 )
 export class DomainExceptionFilter implements ExceptionFilter {
   catch(exception: Error, host: ArgumentsHost) {
@@ -49,7 +53,10 @@ export class DomainExceptionFilter implements ExceptionFilter {
     error: string;
   } {
     // 404 Not Found - Resource doesn't exist
-    if (exception instanceof CartNotFoundException) {
+    if (
+      exception instanceof CartNotFoundException ||
+      exception instanceof OrderNotFoundException
+    ) {
       return {
         status: HttpStatus.NOT_FOUND,
         error: 'Not Found',
@@ -57,7 +64,10 @@ export class DomainExceptionFilter implements ExceptionFilter {
     }
 
     // 409 Conflict - Attempting operation on incompatible state
-    if (exception instanceof CartAlreadyConvertedError) {
+    if (
+      exception instanceof CartAlreadyConvertedError ||
+      exception instanceof InvalidOrderStateTransitionError
+    ) {
       return {
         status: HttpStatus.CONFLICT,
         error: 'Conflict',

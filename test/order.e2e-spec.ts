@@ -143,6 +143,35 @@ describe('Order E2E Tests', () => {
       expect(response.body).toHaveProperty('message');
     });
 
+    it('should reject checkout with empty cart', async () => {
+      // Arrange - Create an empty cart without items
+      const emptyCartResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-456' })
+        .expect(201);
+
+      const emptyCartId = emptyCartResponse.body.cartId;
+
+      // Act - Attempt to checkout empty cart
+      const response = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: emptyCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(400);
+
+      // Assert
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toContain('empty');
+    });
+
     it('should return existing order on duplicate checkout attempt', async () => {
       // First checkout
       const firstResponse = await request(app.getHttpServer())
@@ -178,6 +207,241 @@ describe('Order E2E Tests', () => {
 
       // Assert - should return the same order
       expect(secondResponse.body.id).toBe(firstOrderId);
+    });
+  });
+
+  describe('GET /orders/:id', () => {
+    it('should retrieve order by ID', async () => {
+      // Arrange - Create an order first
+      const checkoutResponse = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: createdCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(201);
+
+      const orderId = checkoutResponse.body.id;
+
+      // Act
+      const response = await request(app.getHttpServer())
+        .get(`/orders/${orderId}`)
+        .expect(200);
+
+      // Assert
+      expect(response.body).toHaveProperty('id', orderId);
+      expect(response.body).toHaveProperty('status', 'AWAITING_PAYMENT');
+      expect(response.body).toHaveProperty('items');
+      expect(response.body.items).toHaveLength(1);
+    });
+
+    it('should return 404 for non-existent order', async () => {
+      // Act
+      const response = await request(app.getHttpServer())
+        .get('/orders/00000000-0000-0000-0000-000000000000')
+        .expect(404);
+
+      // Assert
+      expect(response.body).toHaveProperty('message');
+    });
+  });
+
+  describe('POST /orders/:id/mark-paid', () => {
+    it('should mark order as paid with valid payment ID', async () => {
+      // Arrange - Create an order first
+      const checkoutResponse = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: createdCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(201);
+
+      const orderId = checkoutResponse.body.id;
+
+      // Act
+      const response = await request(app.getHttpServer())
+        .post(`/orders/${orderId}/mark-paid`)
+        .send({ paymentId: 'pay_123456' })
+        .expect(200);
+
+      // Assert
+      expect(response.body).toHaveProperty('id', orderId);
+      expect(response.body).toHaveProperty('status', 'PAID');
+      expect(response.body).toHaveProperty('paymentId', 'pay_123456');
+    });
+
+    it('should reject marking already paid order as paid', async () => {
+      // Arrange - Create and mark order as paid
+      const checkoutResponse = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: createdCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(201);
+
+      const orderId = checkoutResponse.body.id;
+
+      await request(app.getHttpServer())
+        .post(`/orders/${orderId}/mark-paid`)
+        .send({ paymentId: 'pay_first' })
+        .expect(200);
+
+      // Act - Try to mark as paid again
+      const response = await request(app.getHttpServer())
+        .post(`/orders/${orderId}/mark-paid`)
+        .send({ paymentId: 'pay_second' })
+        .expect(409);
+
+      // Assert
+      expect(response.body).toHaveProperty('message');
+    });
+
+    it('should return 404 for non-existent order', async () => {
+      // Act
+      const response = await request(app.getHttpServer())
+        .post('/orders/00000000-0000-0000-0000-000000000000/mark-paid')
+        .send({ paymentId: 'pay_123' })
+        .expect(404);
+
+      // Assert
+      expect(response.body).toHaveProperty('message');
+    });
+  });
+
+  describe('POST /orders/:id/cancel', () => {
+    it('should cancel order from AwaitingPayment state', async () => {
+      // Arrange - Create an order
+      const checkoutResponse = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: createdCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(201);
+
+      const orderId = checkoutResponse.body.id;
+
+      // Act
+      const response = await request(app.getHttpServer())
+        .post(`/orders/${orderId}/cancel`)
+        .send({ reason: 'Customer requested cancellation' })
+        .expect(200);
+
+      // Assert
+      expect(response.body).toHaveProperty('id', orderId);
+      expect(response.body).toHaveProperty('status', 'CANCELLED');
+      expect(response.body).toHaveProperty(
+        'cancellationReason',
+        'Customer requested cancellation',
+      );
+    });
+
+    it('should cancel order from Paid state (refund scenario)', async () => {
+      // Arrange - Create and mark order as paid
+      const checkoutResponse = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: createdCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(201);
+
+      const orderId = checkoutResponse.body.id;
+
+      await request(app.getHttpServer())
+        .post(`/orders/${orderId}/mark-paid`)
+        .send({ paymentId: 'pay_123' })
+        .expect(200);
+
+      // Act - Cancel paid order
+      const response = await request(app.getHttpServer())
+        .post(`/orders/${orderId}/cancel`)
+        .send({ reason: 'Product defect - refund requested' })
+        .expect(200);
+
+      // Assert
+      expect(response.body).toHaveProperty('id', orderId);
+      expect(response.body).toHaveProperty('status', 'CANCELLED');
+      expect(response.body).toHaveProperty(
+        'cancellationReason',
+        'Product defect - refund requested',
+      );
+    });
+
+    it('should reject cancelling already cancelled order', async () => {
+      // Arrange - Create and cancel order
+      const checkoutResponse = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: createdCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(201);
+
+      const orderId = checkoutResponse.body.id;
+
+      await request(app.getHttpServer())
+        .post(`/orders/${orderId}/cancel`)
+        .send({ reason: 'First cancellation' })
+        .expect(200);
+
+      // Act - Try to cancel again
+      const response = await request(app.getHttpServer())
+        .post(`/orders/${orderId}/cancel`)
+        .send({ reason: 'Second cancellation' })
+        .expect(409);
+
+      // Assert
+      expect(response.body).toHaveProperty('message');
+    });
+
+    it('should return 404 for non-existent order', async () => {
+      // Act
+      const response = await request(app.getHttpServer())
+        .post('/orders/00000000-0000-0000-0000-000000000000/cancel')
+        .send({ reason: 'Test cancellation' })
+        .expect(404);
+
+      // Assert
+      expect(response.body).toHaveProperty('message');
     });
   });
 });
