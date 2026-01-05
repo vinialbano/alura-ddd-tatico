@@ -1,0 +1,352 @@
+openapi: 3.0.3
+info:
+  title: Order Payment API
+  description: API endpoint for processing payment on orders in AwaitingPayment state
+  version: 1.0.0
+  contact:
+    name: Orders Bounded Context
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+
+paths:
+  /orders/{orderId}/pay:
+    post:
+      summary: Process payment for an order
+      description: |
+        Processes payment for an order currently in AwaitingPayment state. Calls external payment gateway,
+        transitions order to Paid state on approval, and raises OrderPaid domain event.
+
+        **State Machine Rules:**
+        - Only orders in AwaitingPayment state can be paid
+        - Payment ID is recorded from gateway response
+        - OrderPaid event is raised on success
+
+        **Performance:**
+        - Target: < 3 seconds including gateway latency
+        - Gateway timeout: 3 seconds
+
+      operationId: payOrder
+      tags:
+        - Orders
+        - Payment
+
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          description: UUID of the order to pay
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+
+      requestBody:
+        description: Payment request body (currently empty - payment details handled by stubbed gateway)
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              example: {}
+
+      responses:
+        '200':
+          description: Payment processed successfully, order is now Paid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+              examples:
+                successfulPayment:
+                  summary: Order successfully paid
+                  value:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    customerId: "customer-123"
+                    status: "Paid"
+                    totalAmount:
+                      amount: 100.00
+                      currency: "USD"
+                    paymentId: "PAY-550e8400"
+                    cancellationReason: null
+                    items:
+                      - productSnapshot:
+                          name: "Wireless Mouse"
+                          description: "Ergonomic wireless mouse"
+                          sku: "MOUSE-001"
+                        quantity: 2
+                        unitPrice:
+                          amount: 25.00
+                          currency: "USD"
+                        itemDiscount:
+                          amount: 0.00
+                          currency: "USD"
+                        lineTotal:
+                          amount: 50.00
+                          currency: "USD"
+                    shippingAddress:
+                      street: "123 Main St"
+                      city: "San Francisco"
+                      state: "CA"
+                      postalCode: "94102"
+                      country: "USA"
+                    orderLevelDiscount:
+                      amount: 0.00
+                      currency: "USD"
+                    createdAt: "2026-01-04T15:00:00Z"
+
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 404
+                message: "Order with id '550e8400-e29b-41d4-a716-446655440000' not found"
+                error: "Not Found"
+
+        '409':
+          description: Order is not in AwaitingPayment state (already paid or cancelled)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                alreadyPaid:
+                  summary: Order already paid
+                  value:
+                    statusCode: 409
+                    message: "Cannot mark order as paid: order is in Paid state"
+                    error: "Conflict"
+                    currentState: "Paid"
+                orderCancelled:
+                  summary: Order was cancelled
+                  value:
+                    statusCode: 409
+                    message: "Cannot mark order as paid: order is in Cancelled state"
+                    error: "Conflict"
+                    currentState: "Cancelled"
+
+        '422':
+          description: Payment was declined by payment gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentDeclinedResponse'
+              examples:
+                insufficientFunds:
+                  summary: Insufficient funds
+                  value:
+                    statusCode: 422
+                    message: "Payment declined"
+                    error: "Unprocessable Entity"
+                    reason: "Insufficient funds"
+                cardDeclined:
+                  summary: Card declined
+                  value:
+                    statusCode: 422
+                    message: "Payment declined"
+                    error: "Unprocessable Entity"
+                    reason: "Card declined"
+                fraudCheck:
+                  summary: Fraud check failed
+                  value:
+                    statusCode: 422
+                    message: "Payment declined"
+                    error: "Unprocessable Entity"
+                    reason: "Fraud check failed"
+
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 500
+                message: "Internal server error"
+                error: "Internal Server Error"
+
+components:
+  schemas:
+    OrderResponse:
+      type: object
+      required:
+        - id
+        - customerId
+        - status
+        - totalAmount
+        - items
+        - shippingAddress
+        - orderLevelDiscount
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique order identifier
+        customerId:
+          type: string
+          description: Customer who owns the order
+        status:
+          type: string
+          enum: [AwaitingPayment, Paid, Cancelled]
+          description: Current order state
+        totalAmount:
+          $ref: '#/components/schemas/Money'
+        paymentId:
+          type: string
+          nullable: true
+          description: Payment transaction ID (null if not paid)
+          example: "PAY-550e8400"
+        cancellationReason:
+          type: string
+          nullable: true
+          description: Cancellation reason (null if not cancelled)
+          maxLength: 500
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          minItems: 1
+        shippingAddress:
+          $ref: '#/components/schemas/ShippingAddress'
+        orderLevelDiscount:
+          $ref: '#/components/schemas/Money'
+        createdAt:
+          type: string
+          format: date-time
+          description: Order creation timestamp (ISO 8601)
+
+    OrderItem:
+      type: object
+      required:
+        - productSnapshot
+        - quantity
+        - unitPrice
+        - itemDiscount
+        - lineTotal
+      properties:
+        productSnapshot:
+          $ref: '#/components/schemas/ProductSnapshot'
+        quantity:
+          type: integer
+          minimum: 1
+          description: Quantity ordered
+        unitPrice:
+          $ref: '#/components/schemas/Money'
+        itemDiscount:
+          $ref: '#/components/schemas/Money'
+          description: Item-level discount (product promotions)
+        lineTotal:
+          $ref: '#/components/schemas/Money'
+          description: Unit price × quantity
+
+    ProductSnapshot:
+      type: object
+      required:
+        - name
+        - description
+        - sku
+      properties:
+        name:
+          type: string
+          description: Product name at time of order
+        description:
+          type: string
+          description: Product description at time of order
+        sku:
+          type: string
+          description: Product SKU at time of order
+
+    Money:
+      type: object
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: number
+          format: double
+          minimum: 0
+          description: Monetary amount
+          example: 100.00
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          description: ISO 4217 3-letter currency code
+          example: "USD"
+
+    ShippingAddress:
+      type: object
+      required:
+        - street
+        - city
+        - state
+        - postalCode
+        - country
+      properties:
+        street:
+          type: string
+          description: Street address
+        city:
+          type: string
+          description: City
+        state:
+          type: string
+          description: State/province
+        postalCode:
+          type: string
+          description: Postal code
+        country:
+          type: string
+          description: Country
+
+    ErrorResponse:
+      type: object
+      required:
+        - statusCode
+        - message
+        - error
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP status code
+        message:
+          type: string
+          description: Error message
+        error:
+          type: string
+          description: Error type
+        currentState:
+          type: string
+          description: Current order state (included for 409 errors)
+
+    PaymentDeclinedResponse:
+      type: object
+      required:
+        - statusCode
+        - message
+        - error
+        - reason
+      properties:
+        statusCode:
+          type: integer
+          example: 422
+        message:
+          type: string
+          example: "Payment declined"
+        error:
+          type: string
+          example: "Unprocessable Entity"
+        reason:
+          type: string
+          description: Reason payment was declined by gateway
+          enum:
+            - "Insufficient funds"
+            - "Card declined"
+            - "Invalid amount"
+            - "Fraud check failed"

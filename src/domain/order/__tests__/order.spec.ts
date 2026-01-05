@@ -9,6 +9,8 @@ import { OrderItem } from '../order-item';
 import { ProductSnapshot } from '../value-objects/product-snapshot';
 import { Quantity } from '../../shared/value-objects/quantity';
 import { InvalidOrderStateTransitionError } from '../exceptions/invalid-order-state-transition.error';
+import { OrderPaid } from '../events/order-paid.event';
+import { OrderCancelled } from '../events/order-cancelled.event';
 
 describe('Order Aggregate', () => {
   // Test data factories
@@ -239,6 +241,61 @@ describe('Order Aggregate', () => {
       expect(order.status).toBe(statusBeforeAttempt);
       expect(order.paymentId).toBe(paymentIdBeforeAttempt);
     });
+
+    it('should raise OrderPaid domain event when marking as paid', () => {
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      const paymentId = 'PAY-123456';
+      order.markAsPaid(paymentId);
+
+      const events = order.getDomainEvents();
+      expect(events).toHaveLength(1);
+      expect(events[0]).toBeInstanceOf(OrderPaid);
+      expect((events[0] as OrderPaid).paymentId).toBe(paymentId);
+      expect((events[0] as OrderPaid).aggregateId).toBe(orderId.getValue());
+    });
+
+    it('should record payment ID when marking as paid', () => {
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      const paymentId = 'PAY-XYZ-789';
+      order.markAsPaid(paymentId);
+
+      expect(order.paymentId).toBe(paymentId);
+      expect(order.status.equals(OrderStatus.Paid)).toBe(true);
+    });
   });
 
   describe('State Machine: cancel', () => {
@@ -296,6 +353,79 @@ describe('Order Aggregate', () => {
       expect(order.paymentId).toBe('pay_123'); // Payment ID preserved
     });
 
+    it('should raise OrderCancelled event when cancelling from AwaitingPayment (T037)', () => {
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      const cancellationReason = 'Customer changed mind';
+      order.cancel(cancellationReason);
+
+      const events = order.getDomainEvents();
+      expect(events).toHaveLength(1);
+      expect(events[0]).toBeInstanceOf(OrderCancelled);
+
+      const cancelledEvent = events[0] as OrderCancelled;
+      expect(cancelledEvent.aggregateId).toBe(orderId.getValue());
+      expect(cancelledEvent.cancellationReason).toBe(cancellationReason);
+      expect(cancelledEvent.previousState).toBe('AWAITING_PAYMENT');
+      expect(cancelledEvent.occurredAt).toBeInstanceOf(Date);
+    });
+
+    it('should raise OrderCancelled event when cancelling from Paid (T050)', () => {
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      // Mark as paid first
+      order.markAsPaid('pay_123');
+
+      // Clear domain events from markAsPaid
+      order.clearDomainEvents();
+
+      // Now cancel (refund scenario)
+      const cancellationReason = 'Refund requested';
+      order.cancel(cancellationReason);
+
+      const events = order.getDomainEvents();
+      expect(events).toHaveLength(1);
+      expect(events[0]).toBeInstanceOf(OrderCancelled);
+
+      const cancelledEvent = events[0] as OrderCancelled;
+      expect(cancelledEvent.aggregateId).toBe(orderId.getValue());
+      expect(cancelledEvent.cancellationReason).toBe(cancellationReason);
+      expect(cancelledEvent.previousState).toBe('PAID');
+      expect(cancelledEvent.occurredAt).toBeInstanceOf(Date);
+    });
+
     it('should throw error when cancelling already cancelled order', () => {
       const orderId = OrderId.generate();
       const cartId = CartId.create();
@@ -320,6 +450,44 @@ describe('Order Aggregate', () => {
       expect(() => {
         order.cancel('Second cancellation attempt');
       }).toThrow(InvalidOrderStateTransitionError);
+    });
+
+    it('should throw error when cancelling with empty reason (T039)', () => {
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      // Test empty string
+      expect(() => {
+        order.cancel('');
+      }).toThrow('Cancellation reason cannot be empty');
+
+      // Test whitespace-only string
+      expect(() => {
+        order.cancel('   ');
+      }).toThrow('Cancellation reason cannot be empty');
+
+      // Test tab/newline characters
+      expect(() => {
+        order.cancel('\t\n');
+      }).toThrow('Cancellation reason cannot be empty');
+
+      // Verify order remained in AwaitingPayment
+      expect(order.status).toBe(OrderStatus.AwaitingPayment);
     });
 
     it('should preserve order state when cancel fails', () => {
