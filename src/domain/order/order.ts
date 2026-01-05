@@ -6,6 +6,9 @@ import { Money } from './value-objects/money';
 import { ShippingAddress } from './value-objects/shipping-address';
 import { OrderItem } from './order-item';
 import { InvalidOrderStateTransitionError } from './exceptions/invalid-order-state-transition.error';
+import { DomainEvent } from '../shared/domain-event';
+import { OrderPaid } from './events/order-paid.event';
+import { OrderCancelled } from './events/order-cancelled.event';
 
 /**
  * Order Aggregate Root
@@ -34,6 +37,8 @@ import { InvalidOrderStateTransitionError } from './exceptions/invalid-order-sta
  * - CancellationReason must be provided when marking as Cancelled
  */
 export class Order {
+  private readonly _domainEvents: DomainEvent[] = [];
+
   private constructor(
     private readonly _id: OrderId,
     private readonly _cartId: CartId,
@@ -90,6 +95,8 @@ export class Order {
   /**
    * Transition order from AwaitingPayment to Paid status
    *
+   * Raises OrderPaid domain event when successful
+   *
    * @param paymentId - Payment transaction identifier
    * @throws InvalidOrderStateTransitionError if not in AwaitingPayment status
    */
@@ -102,12 +109,19 @@ export class Order {
 
     this._status = OrderStatus.Paid;
     this._paymentId = paymentId;
+
+    // Raise domain event
+    this._domainEvents.push(
+      new OrderPaid(this._id.getValue(), new Date(), paymentId),
+    );
   }
 
   /**
    * Transition order to Cancelled status with reason
    *
    * Can be called from AwaitingPayment (cancellation) or Paid (refund scenario)
+   *
+   * Raises OrderCancelled domain event with previous state for subscriber context
    *
    * @param reason - Cancellation reason (min 1 character)
    * @throws InvalidOrderStateTransitionError if already cancelled
@@ -119,8 +133,21 @@ export class Order {
       );
     }
 
+    // Capture previous state before transitioning
+    const previousState = this._status.toString();
+
     this._status = OrderStatus.Cancelled;
     this._cancellationReason = reason;
+
+    // Raise domain event
+    this._domainEvents.push(
+      new OrderCancelled(
+        this._id.getValue(),
+        new Date(),
+        reason,
+        previousState,
+      ),
+    );
   }
 
   /**
@@ -220,5 +247,24 @@ export class Order {
 
   get createdAt(): Date {
     return this._createdAt;
+  }
+
+  /**
+   * Get all domain events raised by this aggregate
+   *
+   * @returns Readonly array of domain events
+   */
+  getDomainEvents(): readonly DomainEvent[] {
+    return this._domainEvents;
+  }
+
+  /**
+   * Clear all domain events after they have been published
+   *
+   * Should be called by the application service after successfully
+   * publishing events to the event bus
+   */
+  clearDomainEvents(): void {
+    this._domainEvents.length = 0;
   }
 }
