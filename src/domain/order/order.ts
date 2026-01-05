@@ -178,7 +178,10 @@ export class Order {
   /**
    * Transition order to Cancelled status with reason
    *
-   * Can be called from AwaitingPayment (cancellation) or Paid (refund scenario)
+   * Can be called from AwaitingPayment, Paid, or StockReserved states
+   * - AwaitingPayment: Simple cancellation (no refund or stock release needed)
+   * - Paid: Requires refund processing
+   * - StockReserved: Requires refund and stock release
    *
    * Raises OrderCancelled domain event with previous state for subscriber context
    *
@@ -227,12 +230,13 @@ export class Order {
   /**
    * Check if order can be cancelled
    *
-   * @returns true if order is in AwaitingPayment or Paid status
+   * @returns true if order is in AwaitingPayment, Paid, or StockReserved status
    */
   canBeCancelled(): boolean {
     return (
       this._status.equals(OrderStatus.AwaitingPayment) ||
-      this._status.equals(OrderStatus.Paid)
+      this._status.equals(OrderStatus.Paid) ||
+      this._status.equals(OrderStatus.StockReserved)
     );
   }
 

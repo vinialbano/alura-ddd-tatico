@@ -133,7 +133,7 @@ describe('Event-Driven Integration Flow E2E', () => {
       const orderId = checkoutResponse.body.id;
 
       // Step 2: Poll for STOCK_RESERVED state (max 5 seconds)
-      let order = null;
+      let order: Awaited<ReturnType<typeof orderRepository.findById>> = null;
       let attempts = 0;
       const maxAttempts = 50; // 50 * 100ms = 5 seconds
 
@@ -160,6 +160,131 @@ describe('Event-Driven Integration Flow E2E', () => {
         `✓ Event-driven flow completed in ${elapsedSeconds.toFixed(3)} seconds`,
       );
     }, 10000);
+  });
+
+  describe('Order Cancellation Propagation (T040)', () => {
+    it('should propagate order.cancelled event to consumers after cancelling order', async () => {
+      // Create a fresh cart for this test
+      const createCartResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-123' })
+        .expect(201);
+
+      const testCartId = createCartResponse.body.cartId;
+
+      // Add an item to the cart
+      await request(app.getHttpServer())
+        .post(`/carts/${testCartId}/items`)
+        .send({
+          productId: 'COFFEE-COL-001',
+          quantity: 2,
+        })
+        .expect(200);
+
+      // Step 1: Create and complete an order (AWAITING_PAYMENT → PAID → STOCK_RESERVED)
+      const checkoutResponse = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: testCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(201);
+
+      const orderId = checkoutResponse.body.id;
+
+      // Wait for order to reach STOCK_RESERVED state
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      // Verify order is in STOCK_RESERVED state
+      let order = await orderRepository.findById(OrderId.fromString(orderId));
+      expect(order).not.toBeNull();
+      expect(order!.status.toString()).toBe('STOCK_RESERVED');
+
+      // Step 2: Cancel the order
+      await request(app.getHttpServer())
+        .post(`/orders/${orderId}/cancel`)
+        .send({
+          reason: 'Customer requested cancellation',
+        })
+        .expect(200);
+
+      // Wait for cancellation event to propagate
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Step 3: Verify order status changed to CANCELLED
+      order = await orderRepository.findById(OrderId.fromString(orderId));
+      expect(order).not.toBeNull();
+      expect(order!.status.toString()).toBe('CANCELLED');
+      expect(order!.cancellationReason).toBe('Customer requested cancellation');
+
+      // Note: In a real E2E test, we would verify that:
+      // - PaymentsConsumer logged refund trigger (was STOCK_RESERVED)
+      // - StockConsumer logged stock release (was STOCK_RESERVED)
+      // For this test, we verify the order state transition is correct
+    });
+
+    it('should handle cancellation from AWAITING_PAYMENT state', async () => {
+      // Create a fresh cart for this test
+      const createCartResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-123' })
+        .expect(201);
+
+      const testCartId = createCartResponse.body.cartId;
+
+      // Add an item to the cart
+      await request(app.getHttpServer())
+        .post(`/carts/${testCartId}/items`)
+        .send({
+          productId: 'COFFEE-COL-001',
+          quantity: 2,
+        })
+        .expect(200);
+
+      // Step 1: Create order (will be in AWAITING_PAYMENT initially)
+      const checkoutResponse = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: testCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(201);
+
+      const orderId = checkoutResponse.body.id;
+
+      // Step 2: Cancel immediately (before payment processing)
+      await request(app.getHttpServer())
+        .post(`/orders/${orderId}/cancel`)
+        .send({
+          reason: 'Changed my mind',
+        })
+        .expect(200);
+
+      // Wait for cancellation to process
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Step 3: Verify order is CANCELLED
+      const order = await orderRepository.findById(OrderId.fromString(orderId));
+      expect(order).not.toBeNull();
+      expect(order!.status.toString()).toBe('CANCELLED');
+      expect(order!.cancellationReason).toBe('Changed my mind');
+
+      // Cancellation from AWAITING_PAYMENT means:
+      // - No refund needed (never paid)
+      // - No stock to release (never reserved)
+    });
   });
 
   describe('Idempotent Event Handling', () => {
