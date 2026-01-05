@@ -73,14 +73,14 @@
 - [X] T026 [US1] Add reserveStock(reservationId: string) method to Order aggregate in src/domain/order/order.ts with state validation (only from Paid) and transition to StockReserved
 - [X] T027 [US1] Add processedReservationIds: Set<string> private field to Order aggregate in src/domain/order/order.ts
 - [X] T028 [US1] Modify CheckoutService in src/application/order/services/checkout.service.ts to call eventPublisher.publishDomainEvents() after repository save
-- [ ] T029 [US1] Create PaymentApprovedHandler application service in src/application/events/handlers/payment-approved.handler.ts with handle(message: IntegrationMessage<PaymentApprovedPayload>) method
-- [ ] T030 [US1] Create StockReservedHandler application service in src/application/events/handlers/stock-reserved.handler.ts with handle(message: IntegrationMessage<StockReservedPayload>) method
-- [ ] T031 [P] [US1] Create PaymentsConsumer infrastructure service in src/infrastructure/events/consumers/payments-consumer.ts that subscribes to order.placed and publishes payment.approved with simulated 10ms delay
-- [ ] T032 [P] [US1] Create StockConsumer infrastructure service in src/infrastructure/events/consumers/stock-consumer.ts that subscribes to order.paid and publishes stock.reserved with simulated 10ms delay
-- [ ] T033 [P] [US1] Create payment-approved infrastructure handler adapter in src/infrastructure/order/event-handlers/payment-approved.handler.ts that delegates to application handler
-- [ ] T034 [P] [US1] Create stock-reserved infrastructure handler adapter in src/infrastructure/order/event-handlers/stock-reserved.handler.ts that delegates to application handler
-- [ ] T035 [US1] Register PaymentsConsumer, StockConsumer, and handlers in src/infrastructure/app.module.ts with OnModuleInit lifecycle hook to subscribe to topics
-- [ ] T036 [US1] Verify end-to-end test passes (T022) and complete flow reaches StockReserved state within 5 seconds (SC-002)
+- [X] T029 [US1] Create PaymentApprovedHandler application service in src/application/events/handlers/payment-approved.handler.ts with handle(message: IntegrationMessage<PaymentApprovedPayload>) method
+- [X] T030 [US1] Create StockReservedHandler application service in src/application/events/handlers/stock-reserved.handler.ts with handle(message: IntegrationMessage<StockReservedPayload>) method
+- [X] T031 [P] [US1] Create PaymentsConsumer infrastructure service in src/infrastructure/events/consumers/payments-consumer.ts that subscribes to order.placed and publishes payment.approved with simulated 10ms delay
+- [X] T032 [P] [US1] Create StockConsumer infrastructure service in src/infrastructure/events/consumers/stock-consumer.ts that subscribes to order.paid and publishes stock.reserved with simulated 10ms delay
+- [X] T033 [P] [US1] Create payment-approved infrastructure handler adapter in src/infrastructure/order/event-handlers/payment-approved.handler.ts that delegates to application handler
+- [X] T034 [P] [US1] Create stock-reserved infrastructure handler adapter in src/infrastructure/order/event-handlers/stock-reserved.handler.ts that delegates to application handler
+- [X] T035 [US1] Register PaymentsConsumer, StockConsumer, and handlers in src/infrastructure/app.module.ts with OnModuleInit lifecycle hook to subscribe to topics
+- [X] T036 [US1] Verify end-to-end test passes (T022) and complete flow reaches StockReserved state within 5 seconds (SC-002)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. The MVP is complete!
 
