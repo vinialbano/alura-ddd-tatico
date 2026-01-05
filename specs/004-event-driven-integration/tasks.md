@@ -94,16 +94,16 @@
 
 ### Tests for User Story 2 (TDD: Write these tests FIRST, ensure they FAIL before implementation)
 
-- [ ] T037 [P] [US2] Write unit tests for Order.cancel() OrderCancelled emission in src/domain/order/order.spec.ts
-- [ ] T038 [P] [US2] Write integration tests for PaymentsConsumer order.cancelled handling in src/infrastructure/events/consumers/payments-consumer.spec.ts
-- [ ] T039 [P] [US2] Write integration tests for StockConsumer order.cancelled handling in src/infrastructure/events/consumers/stock-consumer.spec.ts
+- [X] T037 [P] [US2] Write unit tests for Order.cancel() OrderCancelled emission in src/domain/order/order.spec.ts
+- [X] T038 [P] [US2] Write integration tests for PaymentsConsumer order.cancelled handling in src/infrastructure/events/consumers/payments-consumer.spec.ts
+- [X] T039 [P] [US2] Write integration tests for StockConsumer order.cancelled handling in src/infrastructure/events/consumers/stock-consumer.spec.ts
 - [ ] T040 [US2] Write end-to-end test for cancellation propagation in test/e2e/event-driven-flow.e2e-spec.ts
 
 ### Implementation for User Story 2
 
-- [ ] T041 [US2] Verify Order.cancel() in src/domain/order/order.ts emits OrderCancelled event with eventId (should already exist from foundation, verify only)
-- [ ] T042 [US2] Add order.cancelled subscription handler to PaymentsConsumer in src/infrastructure/events/consumers/payments-consumer.ts to log refund trigger (simulated)
-- [ ] T043 [US2] Add order.cancelled subscription handler to StockConsumer in src/infrastructure/events/consumers/stock-consumer.ts to log stock release (simulated)
+- [X] T041 [US2] Verify Order.cancel() in src/domain/order/order.ts emits OrderCancelled event with eventId (should already exist from foundation, verify only)
+- [X] T042 [US2] Add order.cancelled subscription handler to PaymentsConsumer in src/infrastructure/events/consumers/payments-consumer.ts to log refund trigger (simulated)
+- [X] T043 [US2] Add order.cancelled subscription handler to StockConsumer in src/infrastructure/events/consumers/stock-consumer.ts to log stock release (simulated)
 - [ ] T044 [US2] Verify end-to-end cancellation test passes (T040) and consumers receive order.cancelled event
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently

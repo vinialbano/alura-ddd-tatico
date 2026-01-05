@@ -4,6 +4,7 @@ import type { IMessageBus } from '../../../application/events/message-bus.interf
 import {
   IntegrationMessage,
   OrderPlacedPayload,
+  OrderCancelledPayload,
   PaymentApprovedPayload,
 } from '../../../application/events/integration-message';
 import { MESSAGE_BUS } from '../../../application/events/message-bus.interface';
@@ -15,9 +16,10 @@ import { MESSAGE_BUS } from '../../../application/events/message-bus.interface';
  * In a real system, this would be a separate microservice.
  *
  * Responsibilities:
- * 1. Subscribe to "order.placed" topic
- * 2. Simulate payment processing (10ms delay)
- * 3. Publish "payment.approved" message back to message bus
+ * 1. Subscribe to "order.placed" topic - process payments
+ * 2. Subscribe to "order.cancelled" topic - trigger refunds
+ * 3. Simulate payment processing (10ms delay)
+ * 4. Publish "payment.approved" message back to message bus
  *
  * This consumer demonstrates eventual consistency and async integration patterns.
  */
@@ -39,7 +41,13 @@ export class PaymentsConsumer {
       'order.placed',
       this.handleOrderPlaced.bind(this),
     );
-    this.logger.log('PaymentsConsumer subscribed to order.placed topic');
+    this.messageBus.subscribe<OrderCancelledPayload>(
+      'order.cancelled',
+      this.handleOrderCancelled.bind(this),
+    );
+    this.logger.log(
+      'PaymentsConsumer subscribed to order.placed and order.cancelled topics',
+    );
   }
 
   /**
@@ -81,5 +89,36 @@ export class PaymentsConsumer {
     this.logger.log(
       `[PAYMENTS BC] Published payment.approved message for order ${orderId} with payment ${paymentId}`,
     );
+  }
+
+  /**
+   * Handle order.cancelled integration message
+   * Simulates refund processing for cancelled orders
+   *
+   * @param message - Integration message with order cancellation details
+   */
+  private async handleOrderCancelled(
+    message: IntegrationMessage<OrderCancelledPayload>,
+  ): Promise<void> {
+    const { payload, messageId } = message;
+    const { orderId, reason, previousStatus } = payload;
+
+    this.logger.log(
+      `[PAYMENTS BC] Received order.cancelled message ${messageId} for order ${orderId}`,
+    );
+
+    // Determine if refund is needed based on previous state
+    if (previousStatus === 'PAID' || previousStatus === 'STOCK_RESERVED') {
+      this.logger.log(
+        `[PAYMENTS BC] REFUND triggered for order ${orderId} (was ${previousStatus}, reason: ${reason})`,
+      );
+      // In a real system, this would call a refund API
+      // await this.paymentGateway.refund(orderId, paymentId);
+    } else {
+      this.logger.log(
+        `[PAYMENTS BC] No refund needed for order ${orderId} (was ${previousStatus}, reason: ${reason})`,
+      );
+      // Order was cancelled before payment - no refund needed
+    }
   }
 }

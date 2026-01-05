@@ -4,6 +4,7 @@ import type { IMessageBus } from '../../../application/events/message-bus.interf
 import {
   IntegrationMessage,
   OrderPaidPayload,
+  OrderCancelledPayload,
   StockReservedPayload,
 } from '../../../application/events/integration-message';
 import { MESSAGE_BUS } from '../../../application/events/message-bus.interface';
@@ -15,9 +16,10 @@ import { MESSAGE_BUS } from '../../../application/events/message-bus.interface';
  * In a real system, this would be a separate microservice.
  *
  * Responsibilities:
- * 1. Subscribe to "order.paid" topic
- * 2. Simulate stock reservation processing (10ms delay)
- * 3. Publish "stock.reserved" message back to message bus
+ * 1. Subscribe to "order.paid" topic - reserve stock
+ * 2. Subscribe to "order.cancelled" topic - release reserved stock
+ * 3. Simulate stock reservation processing (10ms delay)
+ * 4. Publish "stock.reserved" message back to message bus
  *
  * This consumer demonstrates eventual consistency and async integration patterns.
  */
@@ -39,7 +41,13 @@ export class StockConsumer {
       'order.paid',
       this.handleOrderPaid.bind(this),
     );
-    this.logger.log('StockConsumer subscribed to order.paid topic');
+    this.messageBus.subscribe<OrderCancelledPayload>(
+      'order.cancelled',
+      this.handleOrderCancelled.bind(this),
+    );
+    this.logger.log(
+      'StockConsumer subscribed to order.paid and order.cancelled topics',
+    );
   }
 
   /**
@@ -86,5 +94,36 @@ export class StockConsumer {
     this.logger.log(
       `[INVENTORY BC] Published stock.reserved message for order ${orderId} with reservation ${reservationId}`,
     );
+  }
+
+  /**
+   * Handle order.cancelled integration message
+   * Simulates stock release for cancelled orders
+   *
+   * @param message - Integration message with order cancellation details
+   */
+  private async handleOrderCancelled(
+    message: IntegrationMessage<OrderCancelledPayload>,
+  ): Promise<void> {
+    const { payload, messageId } = message;
+    const { orderId, reason, previousStatus } = payload;
+
+    this.logger.log(
+      `[INVENTORY BC] Received order.cancelled message ${messageId} for order ${orderId}`,
+    );
+
+    // Determine if stock release is needed based on previous state
+    if (previousStatus === 'STOCK_RESERVED' || previousStatus === 'PAID') {
+      this.logger.log(
+        `[INVENTORY BC] RELEASE stock for order ${orderId} (was ${previousStatus}, reason: ${reason})`,
+      );
+      // In a real system, this would release reserved stock
+      // await this.inventoryService.releaseStock(orderId, reservationId);
+    } else {
+      this.logger.log(
+        `[INVENTORY BC] No stock to release for order ${orderId} (was ${previousStatus}, reason: ${reason})`,
+      );
+      // Order was cancelled before stock reservation - nothing to release
+    }
   }
 }
