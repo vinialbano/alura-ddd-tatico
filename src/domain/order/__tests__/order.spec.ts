@@ -11,6 +11,10 @@ import { Quantity } from '../../shared/value-objects/quantity';
 import { InvalidOrderStateTransitionError } from '../exceptions/invalid-order-state-transition.error';
 import { OrderPaid } from '../events/order-paid.event';
 import { OrderCancelled } from '../events/order-cancelled.event';
+import { OrderPlaced } from '../events/order-placed.event';
+import { EventId } from '../../shared/value-objects/event-id';
+import { PaymentId } from '../../shared/value-objects/payment-id';
+import { ReservationId } from '../../shared/value-objects/reservation-id';
 
 describe('Order Aggregate', () => {
   // Test data factories
@@ -127,6 +131,198 @@ describe('Order Aggregate', () => {
       expect(order.items[0].productSnapshot.name).toBe('Product A');
       expect(order.items[1].productSnapshot.name).toBe('Product B');
       expect(order.items[2].productSnapshot.name).toBe('Product C');
+    });
+  });
+
+  describe('Domain Events: OrderPlaced (T015)', () => {
+    it('should emit OrderPlaced event when order is created', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      // Act
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      // Assert
+      const events = order.getDomainEvents();
+      expect(events).toHaveLength(1);
+      expect(events[0]).toBeInstanceOf(OrderPlaced);
+    });
+
+    it('should include valid EventId in OrderPlaced event', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      // Act
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      // Assert
+      const events = order.getDomainEvents();
+      const orderPlacedEvent = events[0] as OrderPlaced;
+
+      expect(orderPlacedEvent.eventId).toBeInstanceOf(EventId);
+      expect(orderPlacedEvent.eventId.getValue()).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      );
+    });
+
+    it('should include all order details in OrderPlaced event', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [
+        createValidOrderItem('Product A', 2, 50.0, 5.0),
+        createValidOrderItem('Product B', 1, 30.0, 0),
+      ];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(10.0, 'USD');
+      const totalAmount = new Money(115.0, 'USD');
+
+      // Act
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      // Assert
+      const events = order.getDomainEvents();
+      const orderPlacedEvent = events[0] as OrderPlaced;
+
+      expect(orderPlacedEvent.orderId).toBe(orderId);
+      expect(orderPlacedEvent.customerId).toBe(customerId);
+      expect(orderPlacedEvent.cartId).toBe(cartId);
+      expect(orderPlacedEvent.items).toEqual(items);
+      expect(orderPlacedEvent.totalAmount).toBe(totalAmount);
+      expect(orderPlacedEvent.shippingAddress).toBe(shippingAddress);
+      expect(orderPlacedEvent.timestamp).toBeInstanceOf(Date);
+    });
+
+    it('should set aggregateId to orderId in OrderPlaced event', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      // Act
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      // Assert
+      const events = order.getDomainEvents();
+      const orderPlacedEvent = events[0] as OrderPlaced;
+
+      expect(orderPlacedEvent.aggregateId).toBe(orderId.getValue());
+    });
+
+    it('should set occurredAt timestamp in OrderPlaced event', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const beforeCreation = new Date();
+
+      // Act
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      const afterCreation = new Date();
+
+      // Assert
+      const events = order.getDomainEvents();
+      const orderPlacedEvent = events[0] as OrderPlaced;
+
+      expect(orderPlacedEvent.occurredAt).toBeInstanceOf(Date);
+      expect(orderPlacedEvent.occurredAt.getTime()).toBeGreaterThanOrEqual(
+        beforeCreation.getTime(),
+      );
+      expect(orderPlacedEvent.occurredAt.getTime()).toBeLessThanOrEqual(
+        afterCreation.getTime(),
+      );
+    });
+
+    it('should emit OrderPlaced with empty order-level discount', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem('Product', 1, 100.0, 0)];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      // Act
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      // Assert
+      const events = order.getDomainEvents();
+      const orderPlacedEvent = events[0] as OrderPlaced;
+
+      expect(orderPlacedEvent.totalAmount.amount).toBe(100.0);
+      expect(orderPlacedEvent.items).toHaveLength(1);
     });
   });
 
@@ -261,6 +457,9 @@ describe('Order Aggregate', () => {
         totalAmount,
       );
 
+      // Clear OrderPlaced event from creation
+      order.clearDomainEvents();
+
       const paymentId = 'PAY-123456';
       order.markAsPaid(paymentId);
 
@@ -295,6 +494,341 @@ describe('Order Aggregate', () => {
 
       expect(order.paymentId).toBe(paymentId);
       expect(order.status.equals(OrderStatus.Paid)).toBe(true);
+    });
+  });
+
+  describe('Idempotency: markAsPaid (T016)', () => {
+    it('should handle duplicate payment approval for same payment ID (idempotent)', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      const paymentId = 'PAY-12345';
+
+      // Act - First call should succeed
+      order.markAsPaid(paymentId);
+      const statusAfterFirst = order.status;
+
+      // Clear events to verify second call doesn't emit new event
+      order.clearDomainEvents();
+
+      // Act - Second call with same payment ID should be idempotent
+      order.markAsPaid(paymentId);
+
+      // Assert
+      expect(order.status).toBe(statusAfterFirst);
+      expect(order.status).toBe(OrderStatus.Paid);
+      expect(order.getDomainEvents()).toHaveLength(0); // No new event emitted
+    });
+
+    it('should reject duplicate payment approval with different payment ID', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      const firstPaymentId = 'PAY-11111';
+      const secondPaymentId = 'PAY-22222';
+
+      // Act - First payment succeeds
+      order.markAsPaid(firstPaymentId);
+
+      // Assert - Second payment with different ID should fail
+      expect(() => {
+        order.markAsPaid(secondPaymentId);
+      }).toThrow(InvalidOrderStateTransitionError);
+
+      // Order should still have first payment ID
+      expect(order.paymentId).toBe(firstPaymentId);
+    });
+
+    it('should track multiple processed payment IDs from duplicate approvals', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      const paymentId = 'PAY-12345';
+
+      // Act - Process same payment ID multiple times
+      order.markAsPaid(paymentId);
+      order.markAsPaid(paymentId);
+      order.markAsPaid(paymentId);
+
+      // Assert - Should only transition once, but track all attempts
+      expect(order.status).toBe(OrderStatus.Paid);
+      expect(order.hasProcessedPayment(paymentId)).toBe(true);
+    });
+
+    it('should allow idempotent calls before and after state transition', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      const paymentId = 'PAY-99999';
+
+      // Act & Assert
+      expect(order.status).toBe(OrderStatus.AwaitingPayment);
+
+      // First call - transitions to Paid
+      order.markAsPaid(paymentId);
+      expect(order.status).toBe(OrderStatus.Paid);
+
+      // Subsequent calls - idempotent (no error, no state change)
+      order.markAsPaid(paymentId);
+      expect(order.status).toBe(OrderStatus.Paid);
+
+      order.markAsPaid(paymentId);
+      expect(order.status).toBe(OrderStatus.Paid);
+    });
+  });
+
+  describe('State Machine: reserveStock (T017)', () => {
+    it('should transition from Paid to StockReserved with reservation ID', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      // Transition to Paid first
+      order.markAsPaid('PAY-123');
+
+      // Act
+      const reservationId = 'RSV-456';
+      order.reserveStock(reservationId);
+
+      // Assert
+      expect(order.status).toBe(OrderStatus.StockReserved);
+    });
+
+    it('should throw error when reserving stock from AwaitingPayment status', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      // Act & Assert - Should fail because order is not Paid yet
+      expect(() => {
+        order.reserveStock('RSV-789');
+      }).toThrow(InvalidOrderStateTransitionError);
+    });
+
+    it('should throw error when reserving stock from Cancelled status', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      order.cancel('Test cancellation');
+
+      // Act & Assert
+      expect(() => {
+        order.reserveStock('RSV-999');
+      }).toThrow(InvalidOrderStateTransitionError);
+    });
+
+    it('should handle duplicate stock reservation for same reservation ID (idempotent)', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      order.markAsPaid('PAY-123');
+
+      const reservationId = 'RSV-555';
+
+      // Act - First call should succeed
+      order.reserveStock(reservationId);
+      const statusAfterFirst = order.status;
+
+      // Act - Second call with same reservation ID should be idempotent
+      order.reserveStock(reservationId);
+
+      // Assert
+      expect(order.status).toBe(statusAfterFirst);
+      expect(order.status).toBe(OrderStatus.StockReserved);
+    });
+
+    it('should reject duplicate stock reservation with different reservation ID', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      order.markAsPaid('PAY-123');
+
+      const firstReservationId = 'RSV-111';
+      const secondReservationId = 'RSV-222';
+
+      // Act - First reservation succeeds
+      order.reserveStock(firstReservationId);
+
+      // Assert - Second reservation with different ID should fail
+      expect(() => {
+        order.reserveStock(secondReservationId);
+      }).toThrow(InvalidOrderStateTransitionError);
+    });
+
+    it('should track processed reservation IDs', () => {
+      // Arrange
+      const orderId = OrderId.generate();
+      const cartId = CartId.create();
+      const customerId = CustomerId.fromString('customer-123');
+      const items = [createValidOrderItem()];
+      const shippingAddress = createValidShippingAddress();
+      const orderLevelDiscount = new Money(0, 'USD');
+      const totalAmount = new Money(100.0, 'USD');
+
+      const order = Order.create(
+        orderId,
+        cartId,
+        customerId,
+        items,
+        shippingAddress,
+        orderLevelDiscount,
+        totalAmount,
+      );
+
+      order.markAsPaid('PAY-123');
+
+      const reservationId = 'RSV-777';
+
+      // Act - Process same reservation ID multiple times
+      order.reserveStock(reservationId);
+      order.reserveStock(reservationId);
+      order.reserveStock(reservationId);
+
+      // Assert
+      expect(order.status).toBe(OrderStatus.StockReserved);
+      expect(order.hasProcessedReservation(reservationId)).toBe(true);
     });
   });
 
@@ -371,6 +905,9 @@ describe('Order Aggregate', () => {
         orderLevelDiscount,
         totalAmount,
       );
+
+      // Clear OrderPlaced event from creation
+      order.clearDomainEvents();
 
       const cancellationReason = 'Customer changed mind';
       order.cancel(cancellationReason);

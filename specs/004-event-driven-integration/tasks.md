@@ -56,9 +56,9 @@
 
 ### Tests for User Story 1 (TDD: Write these tests FIRST, ensure they FAIL before implementation)
 
-- [ ] T015 [P] [US1] Write unit tests for Order.create() OrderPlaced emission in src/domain/order/order.spec.ts
-- [ ] T016 [P] [US1] Write unit tests for Order.markAsPaid() with idempotency checking in src/domain/order/order.spec.ts
-- [ ] T017 [P] [US1] Write unit tests for Order.reserveStock() state transition in src/domain/order/order.spec.ts
+- [X] T015 [P] [US1] Write unit tests for Order.create() OrderPlaced emission in src/domain/order/order.spec.ts
+- [X] T016 [P] [US1] Write unit tests for Order.markAsPaid() with idempotency checking in src/domain/order/order.spec.ts
+- [X] T017 [P] [US1] Write unit tests for Order.reserveStock() state transition in src/domain/order/order.spec.ts
 - [ ] T018 [P] [US1] Write integration tests for PaymentApprovedHandler in src/application/events/handlers/payment-approved.handler.spec.ts
 - [ ] T019 [P] [US1] Write integration tests for StockReservedHandler in src/application/events/handlers/stock-reserved.handler.spec.ts
 - [ ] T020 [P] [US1] Write integration tests for PaymentsConsumer in src/infrastructure/events/consumers/payments-consumer.spec.ts
@@ -67,12 +67,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T023 [US1] Modify Order.create() in src/domain/order/order.ts to emit OrderPlaced event with EventId.create(), orderId, customerId, items, totalAmount, shippingAddress, timestamp
-- [ ] T024 [US1] Add processedPaymentIds: Set<string> private field to Order aggregate in src/domain/order/order.ts
-- [ ] T025 [US1] Enhance Order.markAsPaid() in src/domain/order/order.ts to check processedPaymentIds for idempotency before state transition
-- [ ] T026 [US1] Add reserveStock(reservationId: string) method to Order aggregate in src/domain/order/order.ts with state validation (only from Paid) and transition to StockReserved
-- [ ] T027 [US1] Add processedReservationIds: Set<string> private field to Order aggregate in src/domain/order/order.ts
-- [ ] T028 [US1] Modify CheckoutService in src/application/order/services/checkout.service.ts to call eventPublisher.publishDomainEvents() after repository save
+- [X] T023 [US1] Modify Order.create() in src/domain/order/order.ts to emit OrderPlaced event with EventId.create(), orderId, customerId, items, totalAmount, shippingAddress, timestamp
+- [X] T024 [US1] Add processedPaymentIds: Set<string> private field to Order aggregate in src/domain/order/order.ts
+- [X] T025 [US1] Enhance Order.markAsPaid() in src/domain/order/order.ts to check processedPaymentIds for idempotency before state transition
+- [X] T026 [US1] Add reserveStock(reservationId: string) method to Order aggregate in src/domain/order/order.ts with state validation (only from Paid) and transition to StockReserved
+- [X] T027 [US1] Add processedReservationIds: Set<string> private field to Order aggregate in src/domain/order/order.ts
+- [X] T028 [US1] Modify CheckoutService in src/application/order/services/checkout.service.ts to call eventPublisher.publishDomainEvents() after repository save
 - [ ] T029 [US1] Create PaymentApprovedHandler application service in src/application/events/handlers/payment-approved.handler.ts with handle(message: IntegrationMessage<PaymentApprovedPayload>) method
 - [ ] T030 [US1] Create StockReservedHandler application service in src/application/events/handlers/stock-reserved.handler.ts with handle(message: IntegrationMessage<StockReservedPayload>) method
 - [ ] T031 [P] [US1] Create PaymentsConsumer infrastructure service in src/infrastructure/events/consumers/payments-consumer.ts that subscribes to order.placed and publishes payment.approved with simulated 10ms delay

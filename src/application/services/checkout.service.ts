@@ -9,6 +9,7 @@ import { CartId } from '../../domain/shopping-cart/value-objects/cart-id';
 import { SHOPPING_CART_REPOSITORY } from '../../infrastructure/modules/cart.module';
 import { ORDER_REPOSITORY } from '../../infrastructure/modules/order.module';
 import { CheckoutDTO, ShippingAddressDTO } from '../dtos/checkout.dto';
+import { DomainEventPublisher } from '../../infrastructure/events/domain-event-publisher';
 import {
   MoneyDTO,
   OrderItemDTO,
@@ -37,6 +38,7 @@ export class CheckoutService {
     private readonly orderRepository: OrderRepository,
     private readonly pricingService: OrderPricingService,
     private readonly orderCreationService: OrderCreationService,
+    private readonly eventPublisher: DomainEventPublisher,
   ) {}
 
   /**
@@ -82,6 +84,11 @@ export class CheckoutService {
     await this.orderRepository.save(order);
     cart.markAsConverted();
     await this.cartRepository.save(cart);
+
+    // 6. Publish domain events (OrderPlaced) to message bus
+    await this.eventPublisher.publishDomainEvents([
+      ...order.getDomainEvents(),
+    ]);
 
     return this.mapToDto(order);
   }
