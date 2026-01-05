@@ -212,3 +212,4 @@ See `package.json` for all scripts. Key commands:
 
 - TypeScript 5.7.3 with Node.js (target ES2023) + NestJS 11.0.1, class-validator 0.14.3, class-transformer 0.5.1
 - In-memory repositories (educational, no persistent database)
+- In-memory (educational - no persistent database for events or idempotency tracking)
