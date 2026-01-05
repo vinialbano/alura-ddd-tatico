@@ -9,6 +9,7 @@ import { InvalidOrderStateTransitionError } from './exceptions/invalid-order-sta
 import { DomainEvent } from '../shared/domain-event';
 import { OrderPaid } from './events/order-paid.event';
 import { OrderCancelled } from './events/order-cancelled.event';
+import { EventId } from '../shared/value-objects/event-id';
 
 /**
  * Order Aggregate Root
@@ -112,7 +113,12 @@ export class Order {
 
     // Raise domain event
     this._domainEvents.push(
-      new OrderPaid(this._id.getValue(), new Date(), paymentId),
+      new OrderPaid(
+        EventId.generate(),
+        this._id.getValue(),
+        new Date(),
+        paymentId,
+      ),
     );
   }
 
@@ -147,6 +153,7 @@ export class Order {
     // Raise domain event
     this._domainEvents.push(
       new OrderCancelled(
+        EventId.generate(),
         this._id.getValue(),
         new Date(),
         reason,

@@ -20,10 +20,10 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create directory structure: `src/domain/shared/value-objects/`, `src/application/events/handlers/`, `src/infrastructure/events/consumers/`, `src/infrastructure/order/event-handlers/`
-- [ ] T002 [P] Create event-id.ts value object in src/domain/shared/value-objects/event-id.ts
-- [ ] T003 [P] Create payment-id.ts value object in src/domain/shared/value-objects/payment-id.ts
-- [ ] T004 [P] Create reservation-id.ts value object in src/domain/shared/value-objects/reservation-id.ts
+- [X] T001 Create directory structure: `src/domain/shared/value-objects/`, `src/application/events/handlers/`, `src/infrastructure/events/consumers/`, `src/infrastructure/order/event-handlers/`
+- [X] T002 [P] Create event-id.ts value object in src/domain/shared/value-objects/event-id.ts
+- [X] T003 [P] Create payment-id.ts value object in src/domain/shared/value-objects/payment-id.ts
+- [X] T004 [P] Create reservation-id.ts value object in src/domain/shared/value-objects/reservation-id.ts
 
 ---
 
@@ -33,16 +33,16 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Create IMessageBus interface in src/application/events/message-bus.interface.ts with publish() and subscribe() methods
-- [ ] T006 Create IntegrationMessage envelope interface in src/application/events/integration-message.ts with messageId, topic, timestamp, payload, correlationId fields
-- [ ] T007 [P] Write unit tests for InMemoryMessageBus in src/infrastructure/events/in-memory-message-bus.spec.ts (TDD: test publish/subscribe mechanics)
-- [ ] T008 Implement InMemoryMessageBus in src/infrastructure/events/in-memory-message-bus.ts using Map-based topic routing and setTimeout for async delivery
-- [ ] T009 Create OrderPlaced domain event in src/domain/order/events/order-placed.event.ts with eventId, orderId, customerId, items, totalAmount, shippingAddress, timestamp
-- [ ] T010 [P] Enhance OrderPaid event in src/domain/order/events/order-paid.event.ts to include eventId as first constructor parameter (BREAKING CHANGE)
-- [ ] T011 [P] Enhance OrderCancelled event in src/domain/order/events/order-cancelled.event.ts to include eventId as first constructor parameter (BREAKING CHANGE)
-- [ ] T012 [P] Write unit tests for DomainEventPublisher in src/infrastructure/events/domain-event-publisher.spec.ts (TDD: test event-to-message mapping)
-- [ ] T013 Create DomainEventPublisher service in src/infrastructure/events/domain-event-publisher.ts with publishDomainEvents() and mapping logic for OrderPlaced → order.placed, OrderPaid → order.paid, OrderCancelled → order.cancelled
-- [ ] T014 Register InMemoryMessageBus and DomainEventPublisher as providers in src/infrastructure/app.module.ts
+- [X] T005 Create IMessageBus interface in src/application/events/message-bus.interface.ts with publish() and subscribe() methods
+- [X] T006 Create IntegrationMessage envelope interface in src/application/events/integration-message.ts with messageId, topic, timestamp, payload, correlationId fields
+- [X] T007 [P] Write unit tests for InMemoryMessageBus in src/infrastructure/events/in-memory-message-bus.spec.ts (TDD: test publish/subscribe mechanics)
+- [X] T008 Implement InMemoryMessageBus in src/infrastructure/events/in-memory-message-bus.ts using Map-based topic routing and setTimeout for async delivery
+- [X] T009 Create OrderPlaced domain event in src/domain/order/events/order-placed.event.ts with eventId, orderId, customerId, items, totalAmount, shippingAddress, timestamp
+- [X] T010 [P] Enhance OrderPaid event in src/domain/order/events/order-paid.event.ts to include eventId as first constructor parameter (BREAKING CHANGE)
+- [X] T011 [P] Enhance OrderCancelled event in src/domain/order/events/order-cancelled.event.ts to include eventId as first constructor parameter (BREAKING CHANGE)
+- [X] T012 [P] Write unit tests for DomainEventPublisher in src/infrastructure/events/domain-event-publisher.spec.ts (TDD: test event-to-message mapping)
+- [X] T013 Create DomainEventPublisher service in src/infrastructure/events/domain-event-publisher.ts with publishDomainEvents() and mapping logic for OrderPlaced → order.placed, OrderPaid → order.paid, OrderCancelled → order.cancelled
+- [X] T014 Register InMemoryMessageBus and DomainEventPublisher as providers in src/infrastructure/app.module.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

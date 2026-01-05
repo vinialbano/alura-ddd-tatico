@@ -1,4 +1,7 @@
-import { ConfirmPaymentService, PaymentDeclinedError } from '../confirm-payment.service';
+import {
+  ConfirmPaymentService,
+  PaymentDeclinedError,
+} from '../confirm-payment.service';
 import { OrderRepository } from '../../../../domain/order/order.repository';
 import { IPaymentGateway } from '../../gateways/payment-gateway.interface';
 import { Order } from '../../../../domain/order/order';
