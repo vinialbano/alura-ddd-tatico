@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { CatalogGateway } from 'src/application/gateways/catalog.gateway.interface';
 import { PricingGateway } from 'src/application/gateways/pricing.gateway.interface';
+import { IPaymentGateway } from 'src/application/order/gateways/payment-gateway.interface';
 import { OrderRepository } from 'src/domain/order/order.repository';
 import { ShoppingCartRepository } from 'src/domain/shopping-cart/shopping-cart.repository';
+import { ConfirmPaymentService } from '../../application/order/services/confirm-payment.service';
 import { CheckoutService } from '../../application/services/checkout.service';
 import { OrderService } from '../../application/services/order.service';
 import { OrderCreationService } from '../../domain/order/services/order-creation.service';
@@ -10,6 +12,7 @@ import { OrderPricingService } from '../../domain/order/services/order-pricing.s
 import { OrderController } from '../controllers/order.controller';
 import { StubCatalogGateway } from '../gateways/stub-catalog.gateway';
 import { StubPricingGateway } from '../gateways/stub-pricing.gateway';
+import { StubbedPaymentGateway } from '../order/gateways/stubbed-payment.gateway';
 import { InMemoryOrderRepository } from '../repositories/in-memory-order.repository';
 import { CartModule, SHOPPING_CART_REPOSITORY } from './cart.module';
 
@@ -17,6 +20,7 @@ import { CartModule, SHOPPING_CART_REPOSITORY } from './cart.module';
 export const ORDER_REPOSITORY = 'OrderRepository';
 export const CATALOG_GATEWAY = 'CatalogGateway';
 export const PRICING_GATEWAY = 'PricingGateway';
+export const PAYMENT_GATEWAY = 'PaymentGateway';
 
 /**
  * OrderModule
@@ -44,6 +48,10 @@ export const PRICING_GATEWAY = 'PricingGateway';
     {
       provide: PRICING_GATEWAY,
       useClass: StubPricingGateway,
+    },
+    {
+      provide: PAYMENT_GATEWAY,
+      useClass: StubbedPaymentGateway,
     },
 
     // Domain Services (using factory to avoid NestJS decorators in domain layer)
@@ -91,6 +99,16 @@ export const PRICING_GATEWAY = 'PricingGateway';
         return new OrderService(orderRepository);
       },
       inject: [ORDER_REPOSITORY],
+    },
+    {
+      provide: ConfirmPaymentService,
+      useFactory: (
+        orderRepository: OrderRepository,
+        paymentGateway: IPaymentGateway,
+      ) => {
+        return new ConfirmPaymentService(orderRepository, paymentGateway);
+      },
+      inject: [ORDER_REPOSITORY, PAYMENT_GATEWAY],
     },
   ],
   exports: [
