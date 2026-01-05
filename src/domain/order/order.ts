@@ -133,6 +133,11 @@ export class Order {
       );
     }
 
+    // Validate reason is not empty or whitespace-only
+    if (!reason || reason.trim().length === 0) {
+      throw new Error('Cancellation reason cannot be empty');
+    }
+
     // Capture previous state before transitioning
     const previousState = this._status.toString();
 

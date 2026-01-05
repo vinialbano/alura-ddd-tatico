@@ -134,6 +134,17 @@ export class OrderController {
     @Param('id') id: string,
     @Body() dto: CancelOrderDTO,
   ): Promise<OrderResponseDTO> {
-    return await this.orderService.cancel(id, dto.reason);
+    try {
+      return await this.orderService.cancel(id, dto.reason);
+    } catch (error) {
+      if (error instanceof InvalidOrderStateTransitionError) {
+        throw new ConflictException(error.message);
+      }
+      // Handle domain validation errors (empty/whitespace reason)
+      if (error instanceof Error && error.message.includes('Cancellation reason cannot be empty')) {
+        throw new UnprocessableEntityException(error.message);
+      }
+      throw error;
+    }
   }
 }

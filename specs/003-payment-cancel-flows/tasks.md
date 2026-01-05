@@ -42,13 +42,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Create PaymentGateway interface in src/application/order/gateways/payment-gateway.interface.ts
-- [ ] T006 Create PaymentResult type in src/application/order/gateways/payment-result.ts
-- [ ] T007 Implement StubbedPaymentGateway in src/infrastructure/order/gateways/stubbed-payment.gateway.ts with deterministic test patterns
-- [ ] T008 Register PaymentGateway provider in OrderModule (src/infrastructure/order/order.module.ts)
-- [ ] T009 [P] Create PayOrderDto (empty body) in src/application/order/dtos/pay-order.dto.ts
-- [ ] T010 [P] Create CancelOrderDto with reason validation in src/application/order/dtos/cancel-order.dto.ts
-- [ ] T011 [P] Extend OrderResponseDto to include paymentId and cancellationReason fields in src/application/order/dtos/order-response.dto.ts
+- [X] T005 Create PaymentGateway interface in src/application/order/gateways/payment-gateway.interface.ts
+- [X] T006 Create PaymentResult type in src/application/order/gateways/payment-result.ts
+- [X] T007 Implement StubbedPaymentGateway in src/infrastructure/order/gateways/stubbed-payment.gateway.ts with deterministic test patterns
+- [X] T008 Register PaymentGateway provider in OrderModule (src/infrastructure/order/order.module.ts)
+- [X] T009 [P] Create PayOrderDto (empty body) in src/application/order/dtos/pay-order.dto.ts
+- [X] T010 [P] Create CancelOrderDto with reason validation in src/application/order/dtos/cancel-order.dto.ts
+- [X] T011 [P] Extend OrderResponseDto to include paymentId and cancellationReason fields in src/application/order/dtos/order-response.dto.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -64,19 +64,19 @@
 
 > **TDD**: Write these tests FIRST, ensure they FAIL, then implement
 
-- [ ] T012 [P] [US1] Write unit test: Order.markAsPaid() transitions from AwaitingPayment to Paid in src/domain/order/__tests__/order.spec.ts
-- [ ] T013 [P] [US1] Write unit test: Order.markAsPaid() raises OrderPaid event in src/domain/order/__tests__/order.spec.ts
-- [ ] T014 [P] [US1] Write unit test: Order.markAsPaid() records paymentId in src/domain/order/__tests__/order.spec.ts
-- [ ] T015 [P] [US1] Write integration test: ConfirmPaymentService with approved gateway response in src/application/order/services/__tests__/confirm-payment.service.spec.ts
-- [ ] T016 [P] [US1] Write E2E test: POST /orders/:id/pay success (200) in test/order/order-payment.e2e-spec.ts
+- [X] T012 [P] [US1] Write unit test: Order.markAsPaid() transitions from AwaitingPayment to Paid in src/domain/order/__tests__/order.spec.ts
+- [X] T013 [P] [US1] Write unit test: Order.markAsPaid() raises OrderPaid event in src/domain/order/__tests__/order.spec.ts
+- [X] T014 [P] [US1] Write unit test: Order.markAsPaid() records paymentId in src/domain/order/__tests__/order.spec.ts
+- [X] T015 [P] [US1] Write integration test: ConfirmPaymentService with approved gateway response in src/application/order/services/__tests__/confirm-payment.service.spec.ts
+- [X] T016 [P] [US1] Write E2E test: POST /orders/:id/pay success (200) in test/order/order-payment.e2e-spec.ts
 
 ### Implementation for User Story 1
 
-- [ ] T017 [US1] Update Order.markAsPaid() to raise OrderPaid event and add to _domainEvents array in src/domain/order/order.ts
-- [ ] T018 [US1] Create ConfirmPaymentService with payment gateway orchestration in src/application/order/services/confirm-payment.service.ts
-- [ ] T019 [US1] Add POST /orders/:id/pay endpoint to OrderController in src/infrastructure/order/controllers/order.controller.ts
-- [ ] T020 [US1] Add error handling for successful payment (200 response with updated OrderResponseDto) in OrderController
-- [ ] T021 [US1] Run tests and verify all User Story 1 tests pass
+- [X] T017 [US1] Update Order.markAsPaid() to raise OrderPaid event and add to _domainEvents array in src/domain/order/order.ts
+- [X] T018 [US1] Create ConfirmPaymentService with payment gateway orchestration in src/application/order/services/confirm-payment.service.ts
+- [X] T019 [US1] Add POST /orders/:id/pay endpoint to OrderController in src/infrastructure/order/controllers/order.controller.ts
+- [X] T020 [US1] Add error handling for successful payment (200 response with updated OrderResponseDto) in OrderController
+- [X] T021 [US1] Run tests and verify all User Story 1 tests pass
 
 **Checkpoint**: User Story 1 complete and independently testable - orders can be paid successfully
 
@@ -90,16 +90,16 @@
 
 ### Tests for User Story 2 ⚠️ WRITE FIRST
 
-- [ ] T022 [P] [US2] Write unit test: Order remains in AwaitingPayment when markAsPaid not called in src/domain/order/__tests__/order.spec.ts
-- [ ] T023 [P] [US2] Write integration test: ConfirmPaymentService with declined gateway response throws PaymentDeclinedError in src/application/order/services/__tests__/confirm-payment.service.spec.ts
-- [ ] T024 [P] [US2] Write E2E test: POST /orders/:id/pay with rejection returns 422 with reason in test/order/order-payment.e2e-spec.ts
+- [X] T022 [P] [US2] Write unit test: Order remains in AwaitingPayment when markAsPaid not called in src/domain/order/__tests__/order.spec.ts
+- [X] T023 [P] [US2] Write integration test: ConfirmPaymentService with declined gateway response throws PaymentDeclinedError in src/application/order/services/__tests__/confirm-payment.service.spec.ts
+- [X] T024 [P] [US2] Write E2E test: POST /orders/:id/pay with rejection returns 422 with reason in test/order/order-payment.e2e-spec.ts
 
 ### Implementation for User Story 2
 
-- [ ] T025 [US2] Create PaymentDeclinedError exception in src/application/order/exceptions/payment-declined.error.ts
-- [ ] T026 [US2] Update ConfirmPaymentService to throw PaymentDeclinedError when gateway returns success: false in src/application/order/services/confirm-payment.service.ts
-- [ ] T027 [US2] Add error handling for PaymentDeclinedError (422 UnprocessableEntityException) in OrderController POST /orders/:id/pay
-- [ ] T028 [US2] Run tests and verify all User Story 2 tests pass
+- [X] T025 [US2] Create PaymentDeclinedError exception in src/application/order/exceptions/payment-declined.error.ts
+- [X] T026 [US2] Update ConfirmPaymentService to throw PaymentDeclinedError when gateway returns success: false in src/application/order/services/confirm-payment.service.ts
+- [X] T027 [US2] Add error handling for PaymentDeclinedError (422 UnprocessableEntityException) in OrderController POST /orders/:id/pay
+- [X] T028 [US2] Run tests and verify all User Story 2 tests pass
 
 **Checkpoint**: Payment rejection handled gracefully - users get clear feedback on declined payments
 
@@ -113,16 +113,16 @@
 
 ### Tests for User Story 3 ⚠️ WRITE FIRST
 
-- [ ] T029 [P] [US3] Write unit test: Order.markAsPaid() throws InvalidOrderStateTransitionError when already Paid in src/domain/order/__tests__/order.spec.ts
-- [ ] T030 [P] [US3] Write unit test: Order.markAsPaid() throws InvalidOrderStateTransitionError when Cancelled in src/domain/order/__tests__/order.spec.ts
-- [ ] T031 [P] [US3] Write E2E test: POST /orders/:id/pay on Paid order returns 409 in test/order/order-payment.e2e-spec.ts
-- [ ] T032 [P] [US3] Write E2E test: POST /orders/:id/pay on Cancelled order returns 409 in test/order/order-payment.e2e-spec.ts
+- [X] T029 [P] [US3] Write unit test: Order.markAsPaid() throws InvalidOrderStateTransitionError when already Paid in src/domain/order/__tests__/order.spec.ts
+- [X] T030 [P] [US3] Write unit test: Order.markAsPaid() throws InvalidOrderStateTransitionError when Cancelled in src/domain/order/__tests__/order.spec.ts
+- [X] T031 [P] [US3] Write E2E test: POST /orders/:id/pay on Paid order returns 409 in test/order/order-payment.e2e-spec.ts
+- [X] T032 [P] [US3] Write E2E test: POST /orders/:id/pay on Cancelled order returns 409 in test/order/order-payment.e2e-spec.ts
 
 ### Implementation for User Story 3
 
-- [ ] T033 [US3] Verify Order.markAsPaid() already throws InvalidOrderStateTransitionError for invalid states (implemented in Stage 2) in src/domain/order/order.ts
-- [ ] T034 [US3] Add error handling for InvalidOrderStateTransitionError (409 ConflictException) in OrderController POST /orders/:id/pay
-- [ ] T035 [US3] Run tests and verify all User Story 3 tests pass
+- [X] T033 [US3] Verify Order.markAsPaid() already throws InvalidOrderStateTransitionError for invalid states (implemented in Stage 2) in src/domain/order/order.ts
+- [X] T034 [US3] Add error handling for InvalidOrderStateTransitionError (409 ConflictException) in OrderController POST /orders/:id/pay
+- [X] T035 [US3] Run tests and verify all User Story 3 tests pass
 
 **Checkpoint**: State machine enforced - prevents duplicate payments and invalid state transitions
 
@@ -136,22 +136,22 @@
 
 ### Tests for User Story 4 ⚠️ WRITE FIRST
 
-- [ ] T036 [P] [US4] Write unit test: Order.cancel() transitions from AwaitingPayment to Cancelled in src/domain/order/__tests__/order.spec.ts
-- [ ] T037 [P] [US4] Write unit test: Order.cancel() raises OrderCancelled event with previousState="AwaitingPayment" in src/domain/order/__tests__/order.spec.ts
-- [ ] T038 [P] [US4] Write unit test: Order.cancel() records cancellation reason in src/domain/order/__tests__/order.spec.ts
-- [ ] T039 [P] [US4] Write unit test: Order.cancel() requires non-empty reason in src/domain/order/__tests__/order.spec.ts
-- [ ] T040 [P] [US4] Write integration test: CancelOrderService with valid reason in src/application/order/services/__tests__/cancel-order.service.spec.ts
-- [ ] T041 [P] [US4] Write E2E test: POST /orders/:id/cancel success (200) from AwaitingPayment in test/order/order-cancellation.e2e-spec.ts
-- [ ] T042 [P] [US4] Write E2E test: POST /orders/:id/cancel with empty reason returns 400 in test/order/order-cancellation.e2e-spec.ts
+- [X] T036 [P] [US4] Write unit test: Order.cancel() transitions from AwaitingPayment to Cancelled in src/domain/order/__tests__/order.spec.ts
+- [X] T037 [P] [US4] Write unit test: Order.cancel() raises OrderCancelled event with previousState="AwaitingPayment" in src/domain/order/__tests__/order.spec.ts
+- [X] T038 [P] [US4] Write unit test: Order.cancel() records cancellation reason in src/domain/order/__tests__/order.spec.ts
+- [X] T039 [P] [US4] Write unit test: Order.cancel() requires non-empty reason in src/domain/order/__tests__/order.spec.ts
+- [X] T040 [P] [US4] Write integration test: CancelOrderService with valid reason in src/application/order/services/__tests__/cancel-order.service.spec.ts
+- [X] T041 [P] [US4] Write E2E test: POST /orders/:id/cancel success (200) from AwaitingPayment in test/order/order-cancellation.e2e-spec.ts
+- [X] T042 [P] [US4] Write E2E test: POST /orders/:id/cancel with empty reason returns 400 in test/order/order-cancellation.e2e-spec.ts
 
 ### Implementation for User Story 4
 
-- [ ] T043 [US4] Update Order.cancel() to raise OrderCancelled event with previousState and add to _domainEvents array in src/domain/order/order.ts
-- [ ] T044 [US4] Update Order.cancel() to validate reason is non-empty and non-whitespace in src/domain/order/order.ts
-- [ ] T045 [US4] Create CancelOrderService with cancellation orchestration in src/application/order/services/cancel-order.service.ts
-- [ ] T046 [US4] Add POST /orders/:id/cancel endpoint to OrderController in src/infrastructure/order/controllers/order.controller.ts
-- [ ] T047 [US4] Add error handling for successful cancellation (200 response) and validation errors (400/422) in OrderController
-- [ ] T048 [US4] Run tests and verify all User Story 4 tests pass
+- [X] T043 [US4] Update Order.cancel() to raise OrderCancelled event with previousState and add to _domainEvents array in src/domain/order/order.ts
+- [X] T044 [US4] Update Order.cancel() to validate reason is non-empty and non-whitespace in src/domain/order/order.ts
+- [X] T045 [US4] Create CancelOrderService with cancellation orchestration in src/application/order/services/cancel-order.service.ts
+- [X] T046 [US4] Add POST /orders/:id/cancel endpoint to OrderController in src/infrastructure/order/controllers/order.controller.ts
+- [X] T047 [US4] Add error handling for successful cancellation (200 response) and validation errors (400/422) in OrderController
+- [X] T048 [US4] Run tests and verify all User Story 4 tests pass
 
 **Checkpoint**: Pre-payment cancellation works - customers can cancel orders before paying
 
@@ -165,16 +165,16 @@
 
 ### Tests for User Story 5 ⚠️ WRITE FIRST
 
-- [ ] T049 [P] [US5] Write unit test: Order.cancel() transitions from Paid to Cancelled in src/domain/order/__tests__/order.spec.ts
-- [ ] T050 [P] [US5] Write unit test: Order.cancel() raises OrderCancelled event with previousState="Paid" in src/domain/order/__tests__/order.spec.ts
-- [ ] T051 [P] [US5] Write unit test: Order.cancel() preserves paymentId when cancelling Paid order in src/domain/order/__tests__/order.spec.ts
-- [ ] T052 [P] [US5] Write E2E test: POST /orders/:id/cancel success (200) from Paid state preserves paymentId in test/order/order-cancellation.e2e-spec.ts
+- [X] T049 [P] [US5] Write unit test: Order.cancel() transitions from Paid to Cancelled in src/domain/order/__tests__/order.spec.ts
+- [X] T050 [P] [US5] Write unit test: Order.cancel() raises OrderCancelled event with previousState="Paid" in src/domain/order/__tests__/order.spec.ts
+- [X] T051 [P] [US5] Write unit test: Order.cancel() preserves paymentId when cancelling Paid order in src/domain/order/__tests__/order.spec.ts
+- [X] T052 [P] [US5] Write E2E test: POST /orders/:id/cancel success (200) from Paid state preserves paymentId in test/order/order-cancellation.e2e-spec.ts
 
 ### Implementation for User Story 5
 
-- [ ] T053 [US5] Verify Order.cancel() already allows cancellation from Paid state (implemented in Stage 2) in src/domain/order/order.ts
-- [ ] T054 [US5] Verify OrderCancelled event includes previousState to distinguish refund scenario in src/domain/order/events/order-cancelled.event.ts
-- [ ] T055 [US5] Run tests and verify all User Story 5 tests pass
+- [X] T053 [US5] Verify Order.cancel() already allows cancellation from Paid state (implemented in Stage 2) in src/domain/order/order.ts
+- [X] T054 [US5] Verify OrderCancelled event includes previousState to distinguish refund scenario in src/domain/order/events/order-cancelled.event.ts
+- [X] T055 [US5] Run tests and verify all User Story 5 tests pass
 
 **Checkpoint**: Post-payment cancellation works - customer service can cancel paid orders for refunds
 
@@ -188,15 +188,15 @@
 
 ### Tests for User Story 6 ⚠️ WRITE FIRST
 
-- [ ] T056 [P] [US6] Write unit test: Order.cancel() throws InvalidOrderStateTransitionError when already Cancelled in src/domain/order/__tests__/order.spec.ts
-- [ ] T057 [P] [US6] Write unit test: Cancellation reason preserved when subsequent cancel attempt rejected in src/domain/order/__tests__/order.spec.ts
-- [ ] T058 [P] [US6] Write E2E test: POST /orders/:id/cancel on already-Cancelled order returns 409 in test/order/order-cancellation.e2e-spec.ts
+- [X] T056 [P] [US6] Write unit test: Order.cancel() throws InvalidOrderStateTransitionError when already Cancelled in src/domain/order/__tests__/order.spec.ts
+- [X] T057 [P] [US6] Write unit test: Cancellation reason preserved when subsequent cancel attempt rejected in src/domain/order/__tests__/order.spec.ts
+- [X] T058 [P] [US6] Write E2E test: POST /orders/:id/cancel on already-Cancelled order returns 409 in test/order/order-cancellation.e2e-spec.ts
 
 ### Implementation for User Story 6
 
-- [ ] T059 [US6] Verify Order.cancel() already throws InvalidOrderStateTransitionError when Cancelled (implemented in Stage 2) in src/domain/order/order.ts
-- [ ] T060 [US6] Add error handling for InvalidOrderStateTransitionError (409 ConflictException) in OrderController POST /orders/:id/cancel
-- [ ] T061 [US6] Run tests and verify all User Story 6 tests pass
+- [X] T059 [US6] Verify Order.cancel() already throws InvalidOrderStateTransitionError when Cancelled (implemented in Stage 2) in src/domain/order/order.ts
+- [X] T060 [US6] Add error handling for InvalidOrderStateTransitionError (409 ConflictException) in OrderController POST /orders/:id/cancel
+- [X] T061 [US6] Run tests and verify all User Story 6 tests pass
 
 **Checkpoint**: Cancellation state machine enforced - prevents duplicate cancellations
 
@@ -206,15 +206,15 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T062 [P] Add error message formatting to include current order state in InvalidOrderStateTransitionError messages
-- [ ] T063 [P] Add validation for whitespace-only cancellation reasons in CancelOrderService
-- [ ] T064 [P] Add timeout handling (3 seconds) for payment gateway calls in ConfirmPaymentService
-- [ ] T065 [P] Verify domain event publishing infrastructure (stub for now, will be implemented in Stage 4)
-- [ ] T066 [P] Run full test suite and verify 100% pass rate: npm run test && npm run test:e2e
-- [ ] T067 [P] Run linting and formatting: npm run lint && npm run format
-- [ ] T068 [P] Verify build succeeds: npm run build
-- [ ] T069 [P] Update quickstart.md examples with actual order IDs and test patterns
-- [ ] T070 Document stubbed gateway test patterns (orderId ending patterns) in comments
+- [X] T062 [P] Add error message formatting to include current order state in InvalidOrderStateTransitionError messages
+- [X] T063 [P] Add validation for whitespace-only cancellation reasons in CancelOrderService
+- [X] T064 [P] Add timeout handling (3 seconds) for payment gateway calls in ConfirmPaymentService
+- [X] T065 [P] Verify domain event publishing infrastructure (stub for now, will be implemented in Stage 4)
+- [X] T066 [P] Run full test suite and verify 100% pass rate: npm run test && npm run test:e2e
+- [X] T067 [P] Run linting and formatting: npm run lint && npm run format
+- [X] T068 [P] Verify build succeeds: npm run build
+- [X] T069 [P] Update quickstart.md examples with actual order IDs and test patterns
+- [X] T070 Document stubbed gateway test patterns (orderId ending patterns) in comments
 
 ---
 
