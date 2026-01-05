@@ -27,10 +27,10 @@
 
 **Purpose**: Domain event infrastructure that all user stories depend on
 
-- [ ] T001 [P] Create base DomainEvent interface in src/domain/shared/domain-event.ts
-- [ ] T002 [P] Extend Order aggregate to collect domain events: add private _domainEvents array, getDomainEvents() and clearDomainEvents() methods in src/domain/order/order.ts
-- [ ] T003 [P] Create OrderPaid domain event in src/domain/order/events/order-paid.event.ts
-- [ ] T004 [P] Create OrderCancelled domain event in src/domain/order/events/order-cancelled.event.ts
+- [X] T001 [P] Create base DomainEvent interface in src/domain/shared/domain-event.ts
+- [X] T002 [P] Extend Order aggregate to collect domain events: add private _domainEvents array, getDomainEvents() and clearDomainEvents() methods in src/domain/order/order.ts
+- [X] T003 [P] Create OrderPaid domain event in src/domain/order/events/order-paid.event.ts
+- [X] T004 [P] Create OrderCancelled domain event in src/domain/order/events/order-cancelled.event.ts
 
 **Checkpoint**: Domain event infrastructure ready - all user stories can now raise and collect events
 
