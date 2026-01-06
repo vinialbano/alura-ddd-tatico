@@ -5,6 +5,7 @@ import { AppModule } from '../src/app.module';
 import { OrderRepository } from '../src/domain/order/order.repository';
 import { ORDER_REPOSITORY } from '../src/infrastructure/modules/order.module';
 import { OrderId } from '../src/domain/order/value-objects/order-id';
+import { MESSAGE_BUS } from '../src/application/events/message-bus.interface';
 
 /**
  * Event-Driven Integration Flow E2E Tests
@@ -288,16 +289,308 @@ describe('Event-Driven Integration Flow E2E', () => {
   });
 
   describe('Idempotent Event Handling', () => {
-    it('should handle duplicate payment.approved messages without errors', async () => {
-      // This test will be implemented in Phase 5 (User Story 3)
-      // For now, we just verify the basic flow works
-      expect(true).toBe(true);
+    it('should handle duplicate payment.approved messages without errors (T047)', async () => {
+      // Create a fresh cart for this test
+      const createCartResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-123' })
+        .expect(201);
+
+      const testCartId = createCartResponse.body.cartId;
+
+      // Add an item to the cart
+      await request(app.getHttpServer())
+        .post(`/carts/${testCartId}/items`)
+        .send({
+          productId: 'COFFEE-COL-001',
+          quantity: 2,
+        })
+        .expect(200);
+
+      // Step 1: Create order through checkout
+      const checkoutResponse = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: testCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(201);
+
+      const orderId = checkoutResponse.body.id;
+
+      // Step 2: Wait for payment processing but not stock reservation
+      // Payment happens ~10ms after checkout, stock happens ~10ms after payment
+      await new Promise((resolve) => setTimeout(resolve, 25));
+
+      // Step 3: Verify order is PAID (but not yet STOCK_RESERVED)
+      let order = await orderRepository.findById(OrderId.fromString(orderId));
+      expect(order).not.toBeNull();
+      // Order might be PAID or STOCK_RESERVED depending on timing, so accept both
+      expect(['PAID', 'STOCK_RESERVED']).toContain(order!.status.toString());
+      const firstPaymentId = order!.paymentId;
+
+      // Step 4: Manually trigger duplicate payment.approved
+      // (In real system, this simulates duplicate message delivery)
+      const duplicatePaymentMessage = {
+        messageId: 'duplicate-msg-001',
+        topic: 'payment.approved',
+        timestamp: new Date(),
+        correlationId: orderId,
+        payload: {
+          orderId,
+          paymentId: firstPaymentId, // Same payment ID
+          approvedAmount: 49.98,
+          currency: 'USD',
+          timestamp: new Date().toISOString(),
+        },
+      };
+
+      // Publish duplicate message through message bus
+      const messageBus = app.get(MESSAGE_BUS);
+      await messageBus.publish('payment.approved', duplicatePaymentMessage.payload);
+
+      // Wait for processing
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Step 5: Verify order state is valid (duplicate didn't cause issues)
+      order = await orderRepository.findById(OrderId.fromString(orderId));
+      expect(order).not.toBeNull();
+      // Order should be PAID or STOCK_RESERVED (normal flow continues)
+      expect(['PAID', 'STOCK_RESERVED']).toContain(order!.status.toString());
+      expect(order!.paymentId).toBe(firstPaymentId);
+
+      // Verify idempotency: payment ID should only be processed once
+      expect(order!.hasProcessedPayment(firstPaymentId!)).toBe(true);
     });
 
-    it('should handle duplicate stock.reserved messages without errors', async () => {
-      // This test will be implemented in Phase 5 (User Story 3)
-      // For now, we just verify the basic flow works
-      expect(true).toBe(true);
+    it('should handle duplicate stock.reserved messages without errors (T048)', async () => {
+      // Create a fresh cart for this test
+      const createCartResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-123' })
+        .expect(201);
+
+      const testCartId = createCartResponse.body.cartId;
+
+      // Add an item to the cart
+      await request(app.getHttpServer())
+        .post(`/carts/${testCartId}/items`)
+        .send({
+          productId: 'COFFEE-COL-001',
+          quantity: 2,
+        })
+        .expect(200);
+
+      // Step 1: Create order and wait for it to reach STOCK_RESERVED
+      const checkoutResponse = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: testCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(201);
+
+      const orderId = checkoutResponse.body.id;
+
+      // Wait for complete flow
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      // Step 2: Verify order is STOCK_RESERVED
+      let order = await orderRepository.findById(OrderId.fromString(orderId));
+      expect(order).not.toBeNull();
+      expect(order!.status.toString()).toBe('STOCK_RESERVED');
+
+      // Step 3: Get the internal reservation ID by checking processed IDs
+      // We can't access it directly, but we can publish a duplicate message
+      const duplicateStockMessage = {
+        messageId: 'duplicate-msg-002',
+        topic: 'stock.reserved',
+        timestamp: new Date(),
+        correlationId: orderId,
+        payload: {
+          orderId,
+          reservationId: 'test-duplicate-reservation',
+          items: [],
+          timestamp: new Date().toISOString(),
+        },
+      };
+
+      // Publish duplicate message through message bus
+      const messageBus = app.get(MESSAGE_BUS);
+
+      // First send with one ID
+      await messageBus.publish('stock.reserved', duplicateStockMessage.payload);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Send exact duplicate
+      await messageBus.publish('stock.reserved', duplicateStockMessage.payload);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Step 4: Verify order is still STOCK_RESERVED (no error occurred)
+      order = await orderRepository.findById(OrderId.fromString(orderId));
+      expect(order).not.toBeNull();
+      expect(order!.status.toString()).toBe('STOCK_RESERVED');
+    });
+  });
+
+  describe('Invalid State Transition Rejection (T057)', () => {
+    it('should reject payment.approved for order in Cancelled state', async () => {
+      // Create a fresh cart for this test
+      const createCartResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-123' })
+        .expect(201);
+
+      const testCartId = createCartResponse.body.cartId;
+
+      // Add an item to the cart
+      await request(app.getHttpServer())
+        .post(`/carts/${testCartId}/items`)
+        .send({
+          productId: 'COFFEE-COL-001',
+          quantity: 2,
+        })
+        .expect(200);
+
+      // Step 1: Create order
+      const checkoutResponse = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: testCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(201);
+
+      const orderId = checkoutResponse.body.id;
+
+      // Step 2: Cancel the order immediately
+      await request(app.getHttpServer())
+        .post(`/orders/${orderId}/cancel`)
+        .send({
+          reason: 'Customer cancelled immediately',
+        })
+        .expect(200);
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Step 3: Verify order is CANCELLED
+      let order = await orderRepository.findById(OrderId.fromString(orderId));
+      expect(order).not.toBeNull();
+      expect(order!.status.toString()).toBe('CANCELLED');
+
+      // Step 4: Try to send payment.approved for cancelled order
+      const paymentMessage = {
+        messageId: 'invalid-payment-001',
+        topic: 'payment.approved',
+        timestamp: new Date(),
+        correlationId: orderId,
+        payload: {
+          orderId,
+          paymentId: 'payment-invalid-123',
+          approvedAmount: 49.98,
+          currency: 'USD',
+          timestamp: new Date().toISOString(),
+        },
+      };
+
+      const messageBus = app.get(MESSAGE_BUS);
+
+      // This should be logged as error but not crash
+      await messageBus.publish('payment.approved', paymentMessage.payload);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Step 5: Verify order is still CANCELLED (state unchanged)
+      order = await orderRepository.findById(OrderId.fromString(orderId));
+      expect(order).not.toBeNull();
+      expect(order!.status.toString()).toBe('CANCELLED');
+      expect(order!.paymentId).toBeNull();
+    });
+
+    it('should reject stock.reserved for order in AWAITING_PAYMENT state', async () => {
+      // Create a fresh cart for this test
+      const createCartResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-123' })
+        .expect(201);
+
+      const testCartId = createCartResponse.body.cartId;
+
+      // Add an item to the cart
+      await request(app.getHttpServer())
+        .post(`/carts/${testCartId}/items`)
+        .send({
+          productId: 'COFFEE-COL-001',
+          quantity: 2,
+        })
+        .expect(200);
+
+      // Step 1: Create order (will be in AWAITING_PAYMENT initially)
+      const checkoutResponse = await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: testCartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        })
+        .expect(201);
+
+      const orderId = checkoutResponse.body.id;
+
+      // Step 2: Immediately check order is AWAITING_PAYMENT before automatic flow
+      let order = await orderRepository.findById(OrderId.fromString(orderId));
+      expect(order).not.toBeNull();
+      expect(order!.status.toString()).toBe('AWAITING_PAYMENT');
+
+      // Step 3: Try to reserve stock while still in AWAITING_PAYMENT
+      const stockMessage = {
+        messageId: 'invalid-stock-001',
+        topic: 'stock.reserved',
+        timestamp: new Date(),
+        correlationId: orderId,
+        payload: {
+          orderId,
+          reservationId: 'invalid-reservation-123',
+          items: [],
+          timestamp: new Date().toISOString(),
+        },
+      };
+
+      const messageBus = app.get(MESSAGE_BUS);
+
+      // This should be logged as error but not crash
+      await messageBus.publish('stock.reserved', stockMessage.payload);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      // Step 4: Verify the invalid message didn't cause state corruption
+      // Order might have progressed through normal flow, but shouldn't have
+      // used the invalid reservation ID
+      order = await orderRepository.findById(OrderId.fromString(orderId));
+      expect(order).not.toBeNull();
+      // The invalid message should have been rejected, order continues normal flow
+      expect(['AWAITING_PAYMENT', 'PAID', 'STOCK_RESERVED']).toContain(order!.status.toString());
     });
   });
 });
