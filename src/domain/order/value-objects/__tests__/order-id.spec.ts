@@ -33,7 +33,7 @@ describe('OrderId', () => {
       expect(() => new OrderId('123')).toThrow(
         'Invalid UUID format for OrderId',
       );
-      expect(() => new OrderId('')).toThrow('Invalid UUID format for OrderId');
+      expect(() => new OrderId('')).toThrow('ID cannot be empty');
     });
 
     it('should accept lowercase UUID', () => {
