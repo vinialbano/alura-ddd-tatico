@@ -18,6 +18,12 @@ import { OrderId } from '../../../domain/order/value-objects/order-id';
 import { ShippingAddress } from '../../../domain/order/value-objects/shipping-address';
 import { EmptyCartError } from '../../../domain/shopping-cart/exceptions/empty-cart.error';
 import { DomainEventPublisher } from '../../../infrastructure/events/domain-event-publisher';
+import { createMockCartRepository } from '../../../../test/factories/mock-repositories.factory';
+import { createMockOrderRepository } from '../../../../test/factories/mock-repositories.factory';
+import { createMockPricingService } from '../../../../test/factories/mock-services.factory';
+import { createMockOrderCreationService } from '../../../../test/factories/mock-services.factory';
+import { createMockEventPublisher } from '../../../../test/factories/mock-services.factory';
+import { OrderBuilder } from '../../../../test/builders/order.builder';
 
 const createCheckoutDto = (cartId: string): CheckoutDTO => ({
   cartId,
@@ -43,30 +49,11 @@ describe('CheckoutService', () => {
   const testProductId = ProductId.fromString('COFFEE-COL-001');
 
   beforeEach(() => {
-    mockCartRepository = {
-      save: jest.fn(),
-      findById: jest.fn(),
-      findByCustomerId: jest.fn(),
-    } as any;
-
-    mockOrderRepository = {
-      save: jest.fn(),
-      findById: jest.fn(),
-      findByCartId: jest.fn(),
-    } as any;
-
-    mockPricingService = {
-      price: jest.fn(),
-    } as any;
-
-    mockOrderCreationService = {
-      createFromCart: jest.fn(),
-      canConvertCart: jest.fn(),
-    } as any;
-
-    mockEventPublisher = {
-      publishDomainEvents: jest.fn().mockResolvedValue(undefined),
-    } as any;
+    mockCartRepository = createMockCartRepository();
+    mockOrderRepository = createMockOrderRepository();
+    mockPricingService = createMockPricingService();
+    mockOrderCreationService = createMockOrderCreationService();
+    mockEventPublisher = createMockEventPublisher();
 
     service = new CheckoutService(
       mockCartRepository,
@@ -197,32 +184,19 @@ describe('CheckoutService', () => {
       cart.addItem(testProductId, Quantity.of(2));
 
       const existingOrderId = OrderId.generate();
-      const existingOrder = Order.create(
-        existingOrderId,
-        testCartId,
-        testCustomerId,
-        [
-          OrderItem.create(
-            new ProductSnapshot({
-              name: 'Premium Coffee Beans',
-              description: 'Test description',
-              sku: 'COFFEE-COL-001',
-            }),
-            Quantity.of(2),
-            new Money(24.99, 'USD'),
-            new Money(0, 'USD'),
-          ),
-        ],
-        new ShippingAddress({
-          street: '123 Main St',
-          city: 'Springfield',
-          stateOrProvince: 'IL',
-          postalCode: '62701',
-          country: 'USA',
-        }),
-        new Money(0, 'USD'),
-        new Money(49.98, 'USD'),
-      );
+      const existingOrder = OrderBuilder.create()
+        .withOrderId(existingOrderId)
+        .withCustomerId(testCustomerId)
+        .withShippingAddress(
+          new ShippingAddress({
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          }),
+        )
+        .build();
 
       // Mark cart as converted
       cart.markAsConverted();

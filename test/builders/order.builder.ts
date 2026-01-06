@@ -50,6 +50,11 @@ export class OrderBuilder {
     ];
   }
 
+  withOrderId(orderId: OrderId): OrderBuilder {
+    this.orderId = orderId;
+    return this;
+  }
+
   withStatus(status: OrderStatus): OrderBuilder {
     this.status = status;
     return this;
