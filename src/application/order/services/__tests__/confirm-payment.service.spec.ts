@@ -4,74 +4,17 @@ import {
 } from '../confirm-payment.service';
 import { OrderRepository } from '../../../../domain/order/order.repository';
 import { IPaymentGateway } from '../../gateways/payment-gateway.interface';
-import { Order } from '../../../../domain/order/order';
-import { OrderId } from '../../../../domain/order/value-objects/order-id';
-import { CartId } from '../../../../domain/shopping-cart/value-objects/cart-id';
-import { CustomerId } from '../../../../domain/shared/value-objects/customer-id';
-import { Money } from '../../../../domain/order/value-objects/money';
-import { ShippingAddress } from '../../../../domain/order/value-objects/shipping-address';
-import { OrderItem } from '../../../../domain/order/order-item';
-import { ProductSnapshot } from '../../../../domain/order/value-objects/product-snapshot';
-import { Quantity } from '../../../../domain/shared/value-objects/quantity';
 import { OrderStatus } from '../../../../domain/order/value-objects/order-status';
+import { OrderBuilder } from '../../../../../test/builders/order.builder';
+import { createMockOrderRepository } from '../../../../../test/factories/mock-repositories.factory';
 
 describe('ConfirmPaymentService', () => {
   let service: ConfirmPaymentService;
   let mockOrderRepository: jest.Mocked<OrderRepository>;
   let mockPaymentGateway: jest.Mocked<IPaymentGateway>;
 
-  const createTestOrder = (
-    status: OrderStatus = OrderStatus.AwaitingPayment,
-  ): Order => {
-    const testOrderId = OrderId.generate();
-    const testCartId = CartId.create();
-    const testCustomerId = CustomerId.fromString('customer-123');
-    const shippingAddress = new ShippingAddress({
-      street: '123 Main St',
-      city: 'Springfield',
-      stateOrProvince: 'IL',
-      postalCode: '62701',
-      country: 'USA',
-    });
-
-    const orderItem = OrderItem.create(
-      new ProductSnapshot({
-        name: 'Test Product',
-        description: 'Test Description',
-        sku: 'TEST-001',
-      }),
-      Quantity.of(1),
-      new Money(100.0, 'USD'),
-      new Money(0, 'USD'),
-    );
-
-    const order = Order.create(
-      testOrderId,
-      testCartId,
-      testCustomerId,
-      [orderItem],
-      shippingAddress,
-      new Money(0, 'USD'),
-      new Money(100.0, 'USD'),
-    );
-
-    // Set status if different from default
-    if (status === OrderStatus.Paid) {
-      order.markAsPaid('TEST-PAYMENT-ID');
-    } else if (status === OrderStatus.Cancelled) {
-      order.cancel('Test cancellation');
-    }
-
-    return order;
-  };
-
   beforeEach(() => {
-    // Create mock repository
-    mockOrderRepository = {
-      findById: jest.fn(),
-      save: jest.fn(),
-      findAll: jest.fn(),
-    } as jest.Mocked<OrderRepository>;
+    mockOrderRepository = createMockOrderRepository();
 
     // Create mock payment gateway
     mockPaymentGateway = {
@@ -88,7 +31,7 @@ describe('ConfirmPaymentService', () => {
   describe('execute', () => {
     it('should successfully confirm payment when gateway approves (T015)', async () => {
       // Arrange
-      const order = createTestOrder(OrderStatus.AwaitingPayment);
+      const order = OrderBuilder.create().build();
       const orderId = order.id.getValue();
 
       mockOrderRepository.findById.mockResolvedValue(order);
@@ -121,7 +64,7 @@ describe('ConfirmPaymentService', () => {
 
     it('should throw PaymentDeclinedError when gateway declines payment (T023)', async () => {
       // Arrange
-      const order = createTestOrder(OrderStatus.AwaitingPayment);
+      const order = OrderBuilder.create().build();
       const orderId = order.id.getValue();
 
       mockOrderRepository.findById.mockResolvedValue(order);
@@ -145,7 +88,7 @@ describe('ConfirmPaymentService', () => {
 
     it('should throw PaymentDeclinedError with correct reason for card declined', async () => {
       // Arrange
-      const order = createTestOrder(OrderStatus.AwaitingPayment);
+      const order = OrderBuilder.create().build();
       const orderId = order.id.getValue();
 
       mockOrderRepository.findById.mockResolvedValue(order);
