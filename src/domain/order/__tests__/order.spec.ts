@@ -666,7 +666,7 @@ describe('Order Aggregate', () => {
       order.markAsPaid('PAY-123');
 
       // Act
-      const reservationId = 'RSV-456';
+      const reservationId = 'RES-456';
       order.reserveStock(reservationId);
 
       // Assert
@@ -695,7 +695,7 @@ describe('Order Aggregate', () => {
 
       // Act & Assert - Should fail because order is not Paid yet
       expect(() => {
-        order.reserveStock('RSV-789');
+        order.reserveStock('RES-789');
       }).toThrow(InvalidOrderStateTransitionError);
     });
 
@@ -723,7 +723,7 @@ describe('Order Aggregate', () => {
 
       // Act & Assert
       expect(() => {
-        order.reserveStock('RSV-999');
+        order.reserveStock('RES-999');
       }).toThrow(InvalidOrderStateTransitionError);
     });
 
@@ -749,7 +749,7 @@ describe('Order Aggregate', () => {
 
       order.markAsPaid('PAY-123');
 
-      const reservationId = 'RSV-555';
+      const reservationId = 'RES-555';
 
       // Act - First call should succeed
       order.reserveStock(reservationId);
@@ -785,8 +785,8 @@ describe('Order Aggregate', () => {
 
       order.markAsPaid('PAY-123');
 
-      const firstReservationId = 'RSV-111';
-      const secondReservationId = 'RSV-222';
+      const firstReservationId = 'RES-111';
+      const secondReservationId = 'RES-222';
 
       // Act - First reservation succeeds
       order.reserveStock(firstReservationId);
@@ -819,7 +819,7 @@ describe('Order Aggregate', () => {
 
       order.markAsPaid('PAY-123');
 
-      const reservationId = 'RSV-777';
+      const reservationId = 'RES-777';
 
       // Act - Process same reservation ID multiple times
       order.reserveStock(reservationId);
