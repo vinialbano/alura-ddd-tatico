@@ -1,8 +1,8 @@
 import { UuidId } from '../../shared/base/uuid-id.base';
 
 export class OrderId extends UuidId {
-  static generate(): OrderId {
-    return super.generate.call(this);
+  constructor(value: string) {
+    super(value);
   }
 
   static fromString(value: string): OrderId {

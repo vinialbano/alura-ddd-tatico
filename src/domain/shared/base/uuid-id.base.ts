@@ -26,6 +26,14 @@ export abstract class UuidId extends StringId {
   }
 
   /**
+   * Generates a new instance of the subclass with a random UUID
+   * @returns New instance of the subclass with generated UUID
+   */
+  static generate<T extends UuidId>(this: new (value: string) => T): T {
+    return new this(randomUUID());
+  }
+
+  /**
    * Generates a new UUID string using crypto.randomUUID()
    * Protected static method for use by subclasses
    */
@@ -40,7 +48,7 @@ export abstract class UuidId extends StringId {
    */
   private validateUuidFormat(value: string): void {
     if (!UuidId.UUID_REGEX.test(value)) {
-      throw new Error('Invalid UUID format');
+      throw new Error(`Invalid UUID format for ${this.constructor.name}`);
     }
   }
 }

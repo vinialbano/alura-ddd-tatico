@@ -11,7 +11,7 @@
  * @abstract
  */
 export abstract class StringId {
-  protected readonly value: string;
+  public readonly value: string;
 
   protected constructor(value: string) {
     this.validateNonEmpty(value);
