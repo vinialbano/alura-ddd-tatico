@@ -9,8 +9,12 @@ import {
 describe('StockConsumer', () => {
   let consumer: StockConsumer;
   let mockMessageBus: jest.Mocked<IMessageBus>;
-  let orderPaidHandler: (message: IntegrationMessage<OrderPaidPayload>) => Promise<void>;
-  let orderCancelledHandler: (message: IntegrationMessage<OrderCancelledPayload>) => Promise<void>;
+  let orderPaidHandler: (
+    message: IntegrationMessage<OrderPaidPayload>,
+  ) => Promise<void>;
+  let orderCancelledHandler: (
+    message: IntegrationMessage<OrderCancelledPayload>,
+  ) => Promise<void>;
 
   beforeEach(() => {
     mockMessageBus = {

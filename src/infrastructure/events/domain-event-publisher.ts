@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import type { IMessageBus } from '../../application/events/message-bus.interface';
 import { MESSAGE_BUS } from '../../application/events/message-bus.interface';
 import { DomainEvent } from '../../domain/shared/domain-event';
@@ -18,6 +18,8 @@ import {
  */
 @Injectable()
 export class DomainEventPublisher {
+  private readonly logger = new Logger(DomainEventPublisher.name);
+
   constructor(@Inject(MESSAGE_BUS) private readonly messageBus: IMessageBus) {}
 
   /**
@@ -64,6 +66,9 @@ export class DomainEventPublisher {
       timestamp: event.timestamp.toISOString(),
     };
 
+    this.logger.log(
+      `Publishing order.placed for order ${payload.orderId} (${payload.items.length} items, ${payload.totalAmount} ${payload.currency})`,
+    );
     await this.messageBus.publish('order.placed', payload);
   }
 
@@ -76,6 +81,9 @@ export class DomainEventPublisher {
       timestamp: event.occurredAt.toISOString(),
     };
 
+    this.logger.log(
+      `Publishing order.paid for order ${payload.orderId} with payment ${payload.paymentId}`,
+    );
     await this.messageBus.publish('order.paid', payload);
   }
 
@@ -87,6 +95,9 @@ export class DomainEventPublisher {
       timestamp: event.occurredAt.toISOString(),
     };
 
+    this.logger.log(
+      `Publishing order.cancelled for order ${payload.orderId} (was ${payload.previousStatus}, reason: ${payload.reason})`,
+    );
     await this.messageBus.publish('order.cancelled', payload);
   }
 }

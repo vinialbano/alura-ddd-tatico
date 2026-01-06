@@ -86,9 +86,7 @@ export class CheckoutService {
     await this.cartRepository.save(cart);
 
     // 6. Publish domain events (OrderPlaced) to message bus
-    await this.eventPublisher.publishDomainEvents([
-      ...order.getDomainEvents(),
-    ]);
+    await this.eventPublisher.publishDomainEvents([...order.getDomainEvents()]);
 
     return this.mapToDto(order);
   }

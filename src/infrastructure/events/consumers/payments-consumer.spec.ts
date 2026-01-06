@@ -9,8 +9,12 @@ import {
 describe('PaymentsConsumer', () => {
   let consumer: PaymentsConsumer;
   let mockMessageBus: jest.Mocked<IMessageBus>;
-  let orderPlacedHandler: (message: IntegrationMessage<OrderPlacedPayload>) => Promise<void>;
-  let orderCancelledHandler: (message: IntegrationMessage<OrderCancelledPayload>) => Promise<void>;
+  let orderPlacedHandler: (
+    message: IntegrationMessage<OrderPlacedPayload>,
+  ) => Promise<void>;
+  let orderCancelledHandler: (
+    message: IntegrationMessage<OrderCancelledPayload>,
+  ) => Promise<void>;
 
   beforeEach(() => {
     mockMessageBus = {
@@ -152,9 +156,7 @@ describe('PaymentsConsumer', () => {
       expect(loggerSpy).toHaveBeenCalledWith(
         expect.stringContaining('[PAYMENTS BC]'),
       );
-      expect(loggerSpy).toHaveBeenCalledWith(
-        expect.stringContaining('REFUND'),
-      );
+      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('REFUND'));
     });
   });
 });

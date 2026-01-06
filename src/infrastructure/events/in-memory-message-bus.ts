@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import {
   IMessageBus,
@@ -16,24 +16,29 @@ type MessageHandler<T = any> = (
  */
 @Injectable()
 export class InMemoryMessageBus implements IMessageBus {
+  private readonly logger = new Logger(InMemoryMessageBus.name);
   private readonly subscribers = new Map<string, Set<MessageHandler>>();
 
   publish<T>(topic: string, payload: T): Promise<void> {
     const handlers = this.subscribers.get(topic);
     if (!handlers || handlers.size === 0) {
       // No subscribers, message is dropped (fire-and-forget)
+      this.logger.debug(`No subscribers for topic '${topic}', message dropped`);
       return Promise.resolve();
     }
 
     const message = this.createEnvelope(topic, payload);
+    this.logger.log(
+      `Publishing message ${message.messageId} to topic '${topic}' (${handlers.size} subscriber(s))`,
+    );
 
     // Simulate async processing with setTimeout to preserve call stack for errors
     handlers.forEach((handler) => {
       setTimeout(() => {
         handler(message).catch((error) => {
-          console.error(
-            `[MessageBus] Error in handler for topic '${topic}':`,
-            error,
+          this.logger.error(
+            `Error in handler for topic '${topic}' message ${message.messageId}:`,
+            error.stack,
           );
         });
       }, 0);
@@ -50,6 +55,9 @@ export class InMemoryMessageBus implements IMessageBus {
       this.subscribers.set(topic, new Set());
     }
     this.subscribers.get(topic)!.add(handler as MessageHandler);
+    this.logger.log(
+      `Subscriber registered for topic '${topic}' (${this.subscribers.get(topic)!.size} total)`,
+    );
   }
 
   private createEnvelope<T>(topic: string, payload: T): IntegrationMessage<T> {

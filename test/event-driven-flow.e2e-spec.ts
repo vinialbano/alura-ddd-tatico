@@ -353,7 +353,10 @@ describe('Event-Driven Integration Flow E2E', () => {
 
       // Publish duplicate message through message bus
       const messageBus = app.get(MESSAGE_BUS);
-      await messageBus.publish('payment.approved', duplicatePaymentMessage.payload);
+      await messageBus.publish(
+        'payment.approved',
+        duplicatePaymentMessage.payload,
+      );
 
       // Wait for processing
       await new Promise((resolve) => setTimeout(resolve, 50));
@@ -590,7 +593,9 @@ describe('Event-Driven Integration Flow E2E', () => {
       order = await orderRepository.findById(OrderId.fromString(orderId));
       expect(order).not.toBeNull();
       // The invalid message should have been rejected, order continues normal flow
-      expect(['AWAITING_PAYMENT', 'PAID', 'STOCK_RESERVED']).toContain(order!.status.toString());
+      expect(['AWAITING_PAYMENT', 'PAID', 'STOCK_RESERVED']).toContain(
+        order!.status.toString(),
+      );
     });
   });
 });
