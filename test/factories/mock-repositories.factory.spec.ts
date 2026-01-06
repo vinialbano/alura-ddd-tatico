@@ -1,14 +1,12 @@
-import { OrderRepository } from '../../src/domain/order/order.repository';
-import { ShoppingCartRepository } from '../../src/domain/shopping-cart/shopping-cart.repository';
-import {
-  createMockOrderRepository,
-  createMockCartRepository,
-} from './mock-repositories.factory';
-import { OrderId } from '../../src/domain/order/value-objects/order-id';
-import { CartId } from '../../src/domain/shopping-cart/value-objects/cart-id';
-import { CustomerId } from '../../src/domain/shared/value-objects/customer-id';
 import { Order } from '../../src/domain/order/order';
+import { OrderId } from '../../src/domain/order/value-objects/order-id';
+import { CustomerId } from '../../src/domain/shared/value-objects/customer-id';
 import { ShoppingCart } from '../../src/domain/shopping-cart/shopping-cart';
+import { CartId } from '../../src/domain/shopping-cart/value-objects/cart-id';
+import {
+  createMockCartRepository,
+  createMockOrderRepository,
+} from './mock-repositories.factory';
 
 describe('Mock Repository Factories', () => {
   describe('createMockOrderRepository', () => {

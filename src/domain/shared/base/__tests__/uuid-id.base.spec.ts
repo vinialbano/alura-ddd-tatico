@@ -44,9 +44,7 @@ describe('UuidId Base Class', () => {
     });
 
     it('should throw error for whitespace-only string', () => {
-      expect(() => TestUuidId.create('   ')).toThrow(
-        'ID cannot be empty',
-      );
+      expect(() => TestUuidId.create('   ')).toThrow('ID cannot be empty');
     });
   });
 

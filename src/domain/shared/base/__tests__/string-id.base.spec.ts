@@ -22,15 +22,11 @@ describe('StringId Base Class', () => {
     });
 
     it('should throw error for empty string', () => {
-      expect(() => TestStringId.create('')).toThrow(
-        'ID cannot be empty',
-      );
+      expect(() => TestStringId.create('')).toThrow('ID cannot be empty');
     });
 
     it('should throw error for whitespace-only string', () => {
-      expect(() => TestStringId.create('   ')).toThrow(
-        'ID cannot be empty',
-      );
+      expect(() => TestStringId.create('   ')).toThrow('ID cannot be empty');
     });
 
     it('should throw error for null value', () => {

@@ -130,9 +130,7 @@ describe('StockReservedHandler', () => {
     it('should throw error when order cannot reserve stock (invalid state)', async () => {
       // Arrange
       const orderId = OrderId.generate();
-      const order = OrderBuilder.create()
-        .withOrderId(orderId)
-        .build();
+      const order = OrderBuilder.create().withOrderId(orderId).build();
 
       // Order is still in AWAITING_PAYMENT state (not PAID)
 

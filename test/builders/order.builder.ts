@@ -94,7 +94,7 @@ export class OrderBuilder {
 
     const totalAmount = new Money(
       itemsTotal - this.orderLevelDiscount.amount,
-      TEST_CURRENCY
+      TEST_CURRENCY,
     );
 
     // Create order using factory method (always starts as AwaitingPayment)
@@ -111,6 +111,7 @@ export class OrderBuilder {
     // Use reflection to set non-default status for test purposes
     // This is acceptable for test-only code to avoid complex state machine logic
     if (this.status !== OrderStatus.AwaitingPayment) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       (order as any)._status = this.status;
     }
 

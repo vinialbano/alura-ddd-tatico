@@ -55,9 +55,7 @@ describe('InMemoryOrderRepository', () => {
   describe('findByCartId', () => {
     it('should return order when found by cart ID', async () => {
       const cartId = CartId.create();
-      const order = OrderBuilder.create()
-        .withCartId(cartId)
-        .build();
+      const order = OrderBuilder.create().withCartId(cartId).build();
       await repository.save(order);
 
       const foundOrder = await repository.findByCartId(cartId);
@@ -77,12 +75,8 @@ describe('InMemoryOrderRepository', () => {
     it('should return the correct order when multiple orders exist', async () => {
       const cartId1 = CartId.create();
       const cartId2 = CartId.create();
-      const order1 = OrderBuilder.create()
-        .withCartId(cartId1)
-        .build();
-      const order2 = OrderBuilder.create()
-        .withCartId(cartId2)
-        .build();
+      const order1 = OrderBuilder.create().withCartId(cartId1).build();
+      const order2 = OrderBuilder.create().withCartId(cartId2).build();
 
       await repository.save(order1);
       await repository.save(order2);

@@ -4,17 +4,11 @@ import { CartId } from '../../shopping-cart/value-objects/cart-id';
 import { CustomerId } from '../../shared/value-objects/customer-id';
 import { OrderStatus } from '../value-objects/order-status';
 import { Money } from '../value-objects/money';
-import { ShippingAddress } from '../value-objects/shipping-address';
-import { OrderItem } from '../order-item';
-import { ProductSnapshot } from '../value-objects/product-snapshot';
-import { Quantity } from '../../shared/value-objects/quantity';
 import { InvalidOrderStateTransitionError } from '../exceptions/invalid-order-state-transition.error';
 import { OrderPaid } from '../events/order-paid.event';
 import { OrderCancelled } from '../events/order-cancelled.event';
 import { OrderPlaced } from '../events/order-placed.event';
 import { EventId } from '../../shared/value-objects/event-id';
-import { PaymentId } from '../../shared/value-objects/payment-id';
-import { ReservationId } from '../../shared/value-objects/reservation-id';
 import { OrderBuilder } from '../../../../test/builders/order.builder';
 import { OrderItemBuilder } from '../../../../test/builders/order-item.builder';
 import { TEST_ADDRESS_US } from '../../../../test/fixtures/common-values';
@@ -79,9 +73,22 @@ describe('Order Aggregate', () => {
       const cartId = CartId.create();
       const customerId = CustomerId.fromString('customer-123');
       const items = [
-        OrderItemBuilder.create().withProductName('Product A').withQuantity(2).withUnitPrice(new Money(50.0, 'USD')).build(),
-        OrderItemBuilder.create().withProductName('Product B').withQuantity(1).withUnitPrice(new Money(30.0, 'USD')).build(),
-        OrderItemBuilder.create().withProductName('Product C').withQuantity(3).withUnitPrice(new Money(20.0, 'USD')).withItemDiscount(new Money(5.0, 'USD')).build(),
+        OrderItemBuilder.create()
+          .withProductName('Product A')
+          .withQuantity(2)
+          .withUnitPrice(new Money(50.0, 'USD'))
+          .build(),
+        OrderItemBuilder.create()
+          .withProductName('Product B')
+          .withQuantity(1)
+          .withUnitPrice(new Money(30.0, 'USD'))
+          .build(),
+        OrderItemBuilder.create()
+          .withProductName('Product C')
+          .withQuantity(3)
+          .withUnitPrice(new Money(20.0, 'USD'))
+          .withItemDiscount(new Money(5.0, 'USD'))
+          .build(),
       ];
       const orderLevelDiscount = new Money(10.0, 'USD');
       const totalAmount = new Money(175.0, 'USD');
@@ -166,8 +173,17 @@ describe('Order Aggregate', () => {
       const cartId = CartId.create();
       const customerId = CustomerId.fromString('customer-123');
       const items = [
-        OrderItemBuilder.create().withProductName('Product A').withQuantity(2).withUnitPrice(new Money(50.0, 'USD')).withItemDiscount(new Money(5.0, 'USD')).build(),
-        OrderItemBuilder.create().withProductName('Product B').withQuantity(1).withUnitPrice(new Money(30.0, 'USD')).build(),
+        OrderItemBuilder.create()
+          .withProductName('Product A')
+          .withQuantity(2)
+          .withUnitPrice(new Money(50.0, 'USD'))
+          .withItemDiscount(new Money(5.0, 'USD'))
+          .build(),
+        OrderItemBuilder.create()
+          .withProductName('Product B')
+          .withQuantity(1)
+          .withUnitPrice(new Money(30.0, 'USD'))
+          .build(),
       ];
       const orderLevelDiscount = new Money(10.0, 'USD');
       const totalAmount = new Money(115.0, 'USD');
@@ -262,7 +278,13 @@ describe('Order Aggregate', () => {
 
     it('should emit OrderPlaced with empty order-level discount', () => {
       // Arrange
-      const items = [OrderItemBuilder.create().withProductName('Product').withQuantity(1).withUnitPrice(new Money(100.0, 'USD')).build()];
+      const items = [
+        OrderItemBuilder.create()
+          .withProductName('Product')
+          .withQuantity(1)
+          .withUnitPrice(new Money(100.0, 'USD'))
+          .build(),
+      ];
       const orderId = OrderId.generate();
       const cartId = CartId.create();
       const customerId = CustomerId.fromString('customer-123');
@@ -730,7 +752,13 @@ describe('Order Aggregate', () => {
       // This is a business rule that should be enforced at creation time
       // For now, we trust the pricing service to provide correct totals
       // Future enhancement: Add invariant validation in Order.create()
-      const items = [OrderItemBuilder.create().withProductName('Product A').withQuantity(2).withUnitPrice(new Money(50.0, 'USD')).build()]; // 100.00
+      const items = [
+        OrderItemBuilder.create()
+          .withProductName('Product A')
+          .withQuantity(2)
+          .withUnitPrice(new Money(50.0, 'USD'))
+          .build(),
+      ]; // 100.00
       const orderLevelDiscount = new Money(10.0, 'USD');
       const totalAmount = new Money(90.0, 'USD'); // Correct: 100 - 10
 

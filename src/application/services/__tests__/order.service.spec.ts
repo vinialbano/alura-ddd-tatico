@@ -1,6 +1,5 @@
 import { OrderService } from '../order.service';
 import { OrderRepository } from '../../../domain/order/order.repository';
-import { Order } from '../../../domain/order/order';
 import { OrderId } from '../../../domain/order/value-objects/order-id';
 import { OrderNotFoundException } from '../../exceptions/order-not-found.exception';
 import { InvalidOrderStateTransitionError } from '../../../domain/order/exceptions/invalid-order-state-transition.error';
@@ -55,9 +54,7 @@ describe('OrderService', () => {
 
     it('should throw InvalidOrderStateTransitionError when order is already paid', async () => {
       // Arrange
-      const order = OrderBuilder.create()
-        .withStatus(OrderStatus.Paid)
-        .build();
+      const order = OrderBuilder.create().withStatus(OrderStatus.Paid).build();
       const orderId = order.id.getValue();
 
       mockOrderRepository.findById.mockResolvedValue(order);
@@ -113,9 +110,7 @@ describe('OrderService', () => {
 
     it('should cancel order when order is in Paid state', async () => {
       // Arrange
-      const order = OrderBuilder.create()
-        .withStatus(OrderStatus.Paid)
-        .build();
+      const order = OrderBuilder.create().withStatus(OrderStatus.Paid).build();
       const orderId = order.id.getValue();
       const reason = 'Refund requested';
 

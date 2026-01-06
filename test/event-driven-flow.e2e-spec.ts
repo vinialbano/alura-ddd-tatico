@@ -1,11 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { OrderRepository } from '../src/domain/order/order.repository';
-import { ORDER_REPOSITORY } from '../src/infrastructure/modules/order.module';
-import { OrderId } from '../src/domain/order/value-objects/order-id';
 import { MESSAGE_BUS } from '../src/application/events/message-bus.interface';
+import { OrderRepository } from '../src/domain/order/order.repository';
+import { OrderId } from '../src/domain/order/value-objects/order-id';
+import { ORDER_REPOSITORY } from '../src/infrastructure/modules/order.module';
+import { CartResponseDto } from '../src/application/dtos/cart-response.dto';
 
 /**
  * Event-Driven Integration Flow E2E Tests
@@ -55,7 +56,7 @@ describe('Event-Driven Integration Flow E2E', () => {
       .send({ customerId: 'customer-123' })
       .expect(201);
 
-    createdCartId = createCartResponse.body.cartId;
+    createdCartId = (createCartResponse.body as CartResponseDto).cartId;
 
     // Add an item to the cart
     await request(app.getHttpServer())

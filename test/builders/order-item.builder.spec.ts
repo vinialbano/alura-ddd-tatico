@@ -1,6 +1,5 @@
 import { OrderItemBuilder } from './order-item.builder';
 import { Money } from '../../src/domain/order/value-objects/money';
-import { Quantity } from '../../src/domain/shared/value-objects/quantity';
 import { ProductSnapshot } from '../../src/domain/order/value-objects/product-snapshot';
 
 describe('OrderItemBuilder', () => {
@@ -20,27 +19,21 @@ describe('OrderItemBuilder', () => {
 
   describe('customization', () => {
     it('should allow customizing quantity', () => {
-      const item = OrderItemBuilder.create()
-        .withQuantity(5)
-        .build();
+      const item = OrderItemBuilder.create().withQuantity(5).build();
 
       expect(item.quantity.getValue()).toBe(5);
     });
 
     it('should allow customizing unit price', () => {
       const customPrice = new Money(99.99, 'USD');
-      const item = OrderItemBuilder.create()
-        .withUnitPrice(customPrice)
-        .build();
+      const item = OrderItemBuilder.create().withUnitPrice(customPrice).build();
 
       expect(item.unitPrice).toBe(customPrice);
     });
 
     it('should allow customizing item discount', () => {
       const discount = new Money(5.0, 'USD');
-      const item = OrderItemBuilder.create()
-        .withItemDiscount(discount)
-        .build();
+      const item = OrderItemBuilder.create().withItemDiscount(discount).build();
 
       expect(item.itemDiscount).toBe(discount);
     });
@@ -57,14 +50,14 @@ describe('OrderItemBuilder', () => {
       const item = OrderItemBuilder.create()
         .withProductName('Premium Coffee')
         .withQuantity(3)
-        .withUnitPrice(new Money(25.50, 'USD'))
-        .withItemDiscount(new Money(2.50, 'USD'))
+        .withUnitPrice(new Money(25.5, 'USD'))
+        .withItemDiscount(new Money(2.5, 'USD'))
         .build();
 
       expect(item.productSnapshot.name).toBe('Premium Coffee');
       expect(item.quantity.getValue()).toBe(3);
-      expect(item.unitPrice.amount).toBe(25.50);
-      expect(item.itemDiscount.amount).toBe(2.50);
+      expect(item.unitPrice.amount).toBe(25.5);
+      expect(item.itemDiscount.amount).toBe(2.5);
     });
   });
 

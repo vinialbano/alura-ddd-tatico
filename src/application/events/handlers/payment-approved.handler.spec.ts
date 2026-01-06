@@ -9,7 +9,10 @@ import {
   PaymentApprovedPayload,
 } from '../integration-message';
 import { OrderBuilder } from '../../../../test/builders/order.builder';
-import { createMockOrderRepository, createMockEventPublisher } from '../../../../test/factories/mock-repositories.factory';
+import {
+  createMockOrderRepository,
+  createMockEventPublisher,
+} from '../../../../test/factories/mock-repositories.factory';
 
 describe('PaymentApprovedHandler', () => {
   let handler: PaymentApprovedHandler;
@@ -41,9 +44,7 @@ describe('PaymentApprovedHandler', () => {
     it('should mark order as paid when order exists and is in AWAITING_PAYMENT state', async () => {
       // Arrange
       const orderId = OrderId.generate();
-      const order = OrderBuilder.create()
-        .withOrderId(orderId)
-        .build();
+      const order = OrderBuilder.create().withOrderId(orderId).build();
 
       mockOrderRepository.findById.mockResolvedValue(order);
       mockOrderRepository.save.mockResolvedValue(undefined);
@@ -77,9 +78,7 @@ describe('PaymentApprovedHandler', () => {
     it('should handle duplicate payment.approved messages idempotently', async () => {
       // Arrange
       const orderId = OrderId.generate();
-      const order = OrderBuilder.create()
-        .withOrderId(orderId)
-        .build();
+      const order = OrderBuilder.create().withOrderId(orderId).build();
 
       // First payment approval
       order.markAsPaid('payment-123');
@@ -143,9 +142,7 @@ describe('PaymentApprovedHandler', () => {
     it('should throw error when order cannot be paid (invalid state)', async () => {
       // Arrange
       const orderId = OrderId.generate();
-      const order = OrderBuilder.create()
-        .withOrderId(orderId)
-        .build();
+      const order = OrderBuilder.create().withOrderId(orderId).build();
 
       // Cancel the order so it can't be paid
       order.cancel('Customer cancelled');

@@ -51,18 +51,14 @@ describe('OrderBuilder', () => {
 
   describe('customization', () => {
     it('should allow customizing status', () => {
-      const order = OrderBuilder.create()
-        .withStatus(OrderStatus.Paid)
-        .build();
+      const order = OrderBuilder.create().withStatus(OrderStatus.Paid).build();
 
       expect(order.status).toBe(OrderStatus.Paid);
     });
 
     it('should allow customizing customer ID', () => {
       const customerId = CustomerId.fromString('customer-jane-456');
-      const order = OrderBuilder.create()
-        .withCustomerId(customerId)
-        .build();
+      const order = OrderBuilder.create().withCustomerId(customerId).build();
 
       expect(order.customerId).toBe(customerId);
     });
@@ -85,9 +81,7 @@ describe('OrderBuilder', () => {
         ),
       ];
 
-      const order = OrderBuilder.create()
-        .withItems(customItems)
-        .build();
+      const order = OrderBuilder.create().withItems(customItems).build();
 
       expect(order.items).toHaveLength(1);
       expect(order.items[0].productSnapshot.name).toBe('Custom Product');
@@ -137,9 +131,7 @@ describe('OrderBuilder', () => {
         ),
       ];
 
-      const order = OrderBuilder.create()
-        .withItems(customItems)
-        .build();
+      const order = OrderBuilder.create().withItems(customItems).build();
 
       expect(order.totalAmount.amount).toBe(100.0);
     });

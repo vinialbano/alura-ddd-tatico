@@ -1,14 +1,12 @@
-import { OrderPricingService } from '../../src/domain/order/services/order-pricing.service';
-import { OrderCreationService } from '../../src/domain/order/services/order-creation.service';
-import { DomainEventPublisher } from '../../src/infrastructure/events/domain-event-publisher';
-import {
-  createMockPricingService,
-  createMockOrderCreationService,
-  createMockEventPublisher,
-} from './mock-services.factory';
+import { DomainEvent } from '../../src/domain/shared/domain-event';
 import { CartItem } from '../../src/domain/shopping-cart/cart-item';
 import { ShoppingCart } from '../../src/domain/shopping-cart/shopping-cart';
-import { DomainEvent } from '../../src/domain/shared/domain-event';
+import { Money } from '../../src/domain/order/value-objects/money';
+import {
+  createMockEventPublisher,
+  createMockOrderCreationService,
+  createMockPricingService,
+} from './mock-services.factory';
 
 describe('Mock Service Factories', () => {
   describe('createMockPricingService', () => {
@@ -30,8 +28,8 @@ describe('Mock Service Factories', () => {
     it('should allow overriding price method', async () => {
       const testPricedData = {
         items: [],
-        orderLevelDiscount: {} as any,
-        orderTotal: {} as any,
+        orderLevelDiscount: new Money(0, 'USD'),
+        orderTotal: new Money(0, 'USD'),
       };
 
       const mock = createMockPricingService({

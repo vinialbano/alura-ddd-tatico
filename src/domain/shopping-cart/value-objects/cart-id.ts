@@ -1,8 +1,12 @@
 import { UuidId } from '../../shared/base/uuid-id.base';
 
 export class CartId extends UuidId {
-  static create(): CartId {
-    return super.generate.call(this);
+  constructor(value: string) {
+    super(value);
+  }
+
+  static create() {
+    return super.generate.call(this) as CartId;
   }
 
   static fromString(value: string): CartId {
