@@ -55,6 +55,11 @@ export class OrderBuilder {
     return this;
   }
 
+  withCartId(cartId: CartId): OrderBuilder {
+    this.cartId = cartId;
+    return this;
+  }
+
   withStatus(status: OrderStatus): OrderBuilder {
     this.status = status;
     return this;
