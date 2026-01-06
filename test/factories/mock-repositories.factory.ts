@@ -1,5 +1,6 @@
 import { OrderRepository } from '../../src/domain/order/order.repository';
 import { ShoppingCartRepository } from '../../src/domain/shopping-cart/shopping-cart.repository';
+import { DomainEventPublisher } from '../../src/infrastructure/events/domain-event-publisher';
 
 /**
  * Creates a properly typed mock OrderRepository with sensible defaults
@@ -48,6 +49,28 @@ export function createMockCartRepository(
     findByCustomerId: jest.fn().mockResolvedValue([]),
     delete: jest.fn().mockResolvedValue(undefined),
   };
+
+  return {
+    ...defaults,
+    ...overrides,
+  };
+}
+
+/**
+ * Creates a properly typed mock DomainEventPublisher with sensible defaults
+ *
+ * Default behavior:
+ * - publishDomainEvents: resolves to undefined
+ *
+ * @param overrides - Optional partial mock to override specific methods
+ * @returns Jest-mocked DomainEventPublisher
+ */
+export function createMockEventPublisher(
+  overrides?: Partial<jest.Mocked<DomainEventPublisher>>,
+): jest.Mocked<DomainEventPublisher> {
+  const defaults: jest.Mocked<DomainEventPublisher> = {
+    publishDomainEvents: jest.fn().mockResolvedValue(undefined),
+  } as jest.Mocked<DomainEventPublisher>;
 
   return {
     ...defaults,
