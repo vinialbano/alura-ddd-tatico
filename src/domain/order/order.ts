@@ -9,6 +9,8 @@ import { InvalidOrderStateTransitionError } from './exceptions/invalid-order-sta
 import { DomainEvent } from '../shared/domain-event';
 import { OrderPaid } from './events/order-paid.event';
 import { OrderCancelled } from './events/order-cancelled.event';
+import { OrderPlaced } from './events/order-placed.event';
+import { EventId } from '../shared/value-objects/event-id';
 
 /**
  * Order Aggregate Root
@@ -38,6 +40,8 @@ import { OrderCancelled } from './events/order-cancelled.event';
  */
 export class Order {
   private readonly _domainEvents: DomainEvent[] = [];
+  private readonly _processedPaymentIds: Set<string> = new Set();
+  private readonly _processedReservationIds: Set<string> = new Set();
 
   private constructor(
     private readonly _id: OrderId,
@@ -77,7 +81,8 @@ export class Order {
     orderLevelDiscount: Money,
     totalAmount: Money,
   ): Order {
-    return new Order(
+    const createdAt = new Date();
+    const order = new Order(
       id,
       cartId,
       customerId,
@@ -88,19 +93,41 @@ export class Order {
       totalAmount,
       null, // paymentId
       null, // cancellationReason
-      new Date(),
+      createdAt,
     );
+
+    // Emit OrderPlaced domain event
+    order._domainEvents.push(
+      new OrderPlaced(
+        EventId.generate(),
+        id,
+        customerId,
+        cartId,
+        items,
+        totalAmount,
+        shippingAddress,
+        createdAt,
+      ),
+    );
+
+    return order;
   }
 
   /**
    * Transition order from AwaitingPayment to Paid status
    *
-   * Raises OrderPaid domain event when successful
+   * Idempotent: Multiple calls with the same paymentId are safe and won't cause state changes or duplicate events.
+   * Raises OrderPaid domain event when successful (only on first call per paymentId).
    *
    * @param paymentId - Payment transaction identifier
-   * @throws InvalidOrderStateTransitionError if not in AwaitingPayment status
+   * @throws InvalidOrderStateTransitionError if not in AwaitingPayment status or if already paid with different paymentId
    */
   markAsPaid(paymentId: string): void {
+    // Idempotency check: If we've already processed this payment ID, return early
+    if (this._processedPaymentIds.has(paymentId)) {
+      return;
+    }
+
     if (!this.canBePaid()) {
       throw new InvalidOrderStateTransitionError(
         `Cannot mark order as paid: order is in ${this._status.toString()} state`,
@@ -109,17 +136,52 @@ export class Order {
 
     this._status = OrderStatus.Paid;
     this._paymentId = paymentId;
+    this._processedPaymentIds.add(paymentId);
 
     // Raise domain event
     this._domainEvents.push(
-      new OrderPaid(this._id.getValue(), new Date(), paymentId),
+      new OrderPaid(
+        EventId.generate(),
+        this._id.getValue(),
+        new Date(),
+        paymentId,
+      ),
     );
+  }
+
+  /**
+   * Transition order from Paid to StockReserved status
+   *
+   * Idempotent: Multiple calls with the same reservationId are safe and won't cause state changes.
+   * Only transitions from Paid status to StockReserved.
+   *
+   * @param reservationId - Stock reservation identifier from Inventory bounded context
+   * @throws InvalidOrderStateTransitionError if not in Paid status or if already reserved with different reservationId
+   */
+  reserveStock(reservationId: string): void {
+    // Idempotency check: If we've already processed this reservation ID, return early
+    if (this._processedReservationIds.has(reservationId)) {
+      return;
+    }
+
+    // Only allow stock reservation from Paid status
+    if (!this._status.equals(OrderStatus.Paid)) {
+      throw new InvalidOrderStateTransitionError(
+        `Cannot reserve stock: order is in ${this._status.toString()} state (must be PAID)`,
+      );
+    }
+
+    this._status = OrderStatus.StockReserved;
+    this._processedReservationIds.add(reservationId);
   }
 
   /**
    * Transition order to Cancelled status with reason
    *
-   * Can be called from AwaitingPayment (cancellation) or Paid (refund scenario)
+   * Can be called from AwaitingPayment, Paid, or StockReserved states
+   * - AwaitingPayment: Simple cancellation (no refund or stock release needed)
+   * - Paid: Requires refund processing
+   * - StockReserved: Requires refund and stock release
    *
    * Raises OrderCancelled domain event with previous state for subscriber context
    *
@@ -147,6 +209,7 @@ export class Order {
     // Raise domain event
     this._domainEvents.push(
       new OrderCancelled(
+        EventId.generate(),
         this._id.getValue(),
         new Date(),
         reason,
@@ -167,13 +230,34 @@ export class Order {
   /**
    * Check if order can be cancelled
    *
-   * @returns true if order is in AwaitingPayment or Paid status
+   * @returns true if order is in AwaitingPayment, Paid, or StockReserved status
    */
   canBeCancelled(): boolean {
     return (
       this._status.equals(OrderStatus.AwaitingPayment) ||
-      this._status.equals(OrderStatus.Paid)
+      this._status.equals(OrderStatus.Paid) ||
+      this._status.equals(OrderStatus.StockReserved)
     );
+  }
+
+  /**
+   * Check if a payment ID has been processed (for idempotency)
+   *
+   * @param paymentId - Payment transaction identifier to check
+   * @returns true if this payment ID has already been processed
+   */
+  hasProcessedPayment(paymentId: string): boolean {
+    return this._processedPaymentIds.has(paymentId);
+  }
+
+  /**
+   * Check if a reservation ID has been processed (for idempotency)
+   *
+   * @param reservationId - Stock reservation identifier to check
+   * @returns true if this reservation ID has already been processed
+   */
+  hasProcessedReservation(reservationId: string): boolean {
+    return this._processedReservationIds.has(reservationId);
   }
 
   /**

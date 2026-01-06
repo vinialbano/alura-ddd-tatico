@@ -141,7 +141,10 @@ export class OrderController {
         throw new ConflictException(error.message);
       }
       // Handle domain validation errors (empty/whitespace reason)
-      if (error instanceof Error && error.message.includes('Cancellation reason cannot be empty')) {
+      if (
+        error instanceof Error &&
+        error.message.includes('Cancellation reason cannot be empty')
+      ) {
         throw new UnprocessableEntityException(error.message);
       }
       throw error;

@@ -14,6 +14,7 @@ import { StubCatalogGateway } from '../gateways/stub-catalog.gateway';
 import { StubPricingGateway } from '../gateways/stub-pricing.gateway';
 import { StubbedPaymentGateway } from '../order/gateways/stubbed-payment.gateway';
 import { InMemoryOrderRepository } from '../repositories/in-memory-order.repository';
+import { DomainEventPublisher } from '../events/domain-event-publisher';
 import { CartModule, SHOPPING_CART_REPOSITORY } from './cart.module';
 
 // Injection tokens for interfaces
@@ -78,12 +79,14 @@ export const PAYMENT_GATEWAY = 'PaymentGateway';
         orderRepository: OrderRepository,
         pricingService: OrderPricingService,
         orderCreationService: OrderCreationService,
+        eventPublisher: DomainEventPublisher,
       ) => {
         return new CheckoutService(
           cartRepository,
           orderRepository,
           pricingService,
           orderCreationService,
+          eventPublisher,
         );
       },
       inject: [
@@ -91,6 +94,7 @@ export const PAYMENT_GATEWAY = 'PaymentGateway';
         ORDER_REPOSITORY,
         OrderPricingService,
         OrderCreationService,
+        DomainEventPublisher,
       ],
     },
     {

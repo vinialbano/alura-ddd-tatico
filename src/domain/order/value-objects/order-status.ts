@@ -3,6 +3,7 @@ export class OrderStatus {
 
   static readonly AwaitingPayment = new OrderStatus('AWAITING_PAYMENT');
   static readonly Paid = new OrderStatus('PAID');
+  static readonly StockReserved = new OrderStatus('STOCK_RESERVED');
   static readonly Cancelled = new OrderStatus('CANCELLED');
 
   equals(other: OrderStatus): boolean {

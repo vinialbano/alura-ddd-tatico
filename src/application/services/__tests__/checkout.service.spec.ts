@@ -17,6 +17,7 @@ import { Order } from '../../../domain/order/order';
 import { OrderId } from '../../../domain/order/value-objects/order-id';
 import { ShippingAddress } from '../../../domain/order/value-objects/shipping-address';
 import { EmptyCartError } from '../../../domain/shopping-cart/exceptions/empty-cart.error';
+import { DomainEventPublisher } from '../../../infrastructure/events/domain-event-publisher';
 
 const createCheckoutDto = (cartId: string): CheckoutDTO => ({
   cartId,
@@ -35,6 +36,7 @@ describe('CheckoutService', () => {
   let mockOrderRepository: jest.Mocked<OrderRepository>;
   let mockPricingService: jest.Mocked<OrderPricingService>;
   let mockOrderCreationService: jest.Mocked<OrderCreationService>;
+  let mockEventPublisher: jest.Mocked<DomainEventPublisher>;
 
   const testCustomerId = CustomerId.fromString('customer-123');
   const testCartId = CartId.create();
@@ -62,11 +64,16 @@ describe('CheckoutService', () => {
       canConvertCart: jest.fn(),
     } as any;
 
+    mockEventPublisher = {
+      publishDomainEvents: jest.fn().mockResolvedValue(undefined),
+    } as any;
+
     service = new CheckoutService(
       mockCartRepository,
       mockOrderRepository,
       mockPricingService,
       mockOrderCreationService,
+      mockEventPublisher,
     );
   });
 
