@@ -3,9 +3,7 @@ import { CartId } from './value-objects/cart-id';
 import { CustomerId } from '../shared/value-objects/customer-id';
 import { ProductId } from '../shared/value-objects/product-id';
 import { Quantity } from '../shared/value-objects/quantity';
-import { CartAlreadyConvertedError } from './exceptions/cart-already-converted.error';
-import { MaxProductsExceededError } from './exceptions/max-products-exceeded.error';
-import { ProductNotInCartError } from './exceptions/product-not-in-cart.error';
+import { InvalidCartOperationError } from './exceptions/invalid-cart-operation.error';
 import { EmptyCartError } from './exceptions/empty-cart.error';
 
 /**
@@ -58,9 +56,9 @@ export class ShoppingCart {
    * Adds new item or consolidates quantity if product exists
    * @param productId - Product to add
    * @param quantity - Quantity to add
-   * @throws CartAlreadyConvertedError if cart is converted
-   * @throws MaxProductsExceededError if adding would exceed 20 products
-   * @throws InvalidQuantityError if consolidation exceeds 10
+   * @throws InvalidCartOperationError if cart is converted
+   * @throws InvalidCartOperationError if adding would exceed 20 products
+   * @throws InvalidCartOperationError if consolidation exceeds 10
    */
   addItem(productId: ProductId, quantity: Quantity): void {
     this.ensureNotConverted();
@@ -132,8 +130,8 @@ export class ShoppingCart {
    * Updates quantity of an existing item in the cart
    * @param productId - Product identifier
    * @param quantity - New quantity (replaces current quantity)
-   * @throws CartAlreadyConvertedError if cart is converted
-   * @throws ProductNotInCartError if product is not in cart
+   * @throws InvalidCartOperationError if cart is converted
+   * @throws InvalidCartOperationError if product is not in cart
    */
   updateItemQuantity(productId: ProductId, quantity: Quantity): void {
     this.ensureNotConverted();
@@ -142,7 +140,9 @@ export class ShoppingCart {
     const existingItem = this.items.get(productKey);
 
     if (!existingItem) {
-      throw new ProductNotInCartError(productId);
+      throw new InvalidCartOperationError(
+        `Product ${productId.getValue()} is not in the cart`,
+      );
     }
 
     existingItem.updateQuantity(quantity);
@@ -151,8 +151,8 @@ export class ShoppingCart {
   /**
    * Removes an item from the cart
    * @param productId - Product identifier to remove
-   * @throws CartAlreadyConvertedError if cart is converted
-   * @throws ProductNotInCartError if product is not in cart
+   * @throws InvalidCartOperationError if cart is converted
+   * @throws InvalidCartOperationError if product is not in cart
    */
   removeItem(productId: ProductId): void {
     this.ensureNotConverted();
@@ -161,7 +161,9 @@ export class ShoppingCart {
     const existingItem = this.items.get(productKey);
 
     if (!existingItem) {
-      throw new ProductNotInCartError(productId);
+      throw new InvalidCartOperationError(
+        `Product ${productId.getValue()} is not in the cart`,
+      );
     }
 
     this.items.delete(productKey);
@@ -181,13 +183,17 @@ export class ShoppingCart {
 
   private ensureNotConverted(): void {
     if (this.isConverted()) {
-      throw new CartAlreadyConvertedError(this.cartId);
+      throw new InvalidCartOperationError(
+        `Cart ${this.cartId.getValue()} has already been converted and cannot be modified`,
+      );
     }
   }
 
   private ensureWithinProductLimit(): void {
     if (this.items.size >= ShoppingCart.MAX_PRODUCTS) {
-      throw new MaxProductsExceededError();
+      throw new InvalidCartOperationError(
+        'Cart cannot contain more than 20 unique products',
+      );
     }
   }
 
