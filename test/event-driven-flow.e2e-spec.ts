@@ -11,6 +11,7 @@ import { OrderId } from '../src/domain/order/value-objects/order-id';
 import { ORDER_REPOSITORY } from '../src/infrastructure/modules/order.module';
 import { CartResponseDto } from '../src/application/dtos/cart-response.dto';
 import { OrderResponseDTO } from '../src/application/dtos/order-response.dto';
+import { Server } from 'net';
 
 /**
  * Event-Driven Integration Flow E2E Tests
@@ -25,7 +26,7 @@ import { OrderResponseDTO } from '../src/application/dtos/order-response.dto';
  * This validates eventual consistency and async bounded context integration.
  */
 describe('Event-Driven Integration Flow E2E', () => {
-  let app: INestApplication;
+  let app: INestApplication<Server>;
   let orderRepository: OrderRepository;
   let createdCartId: string;
 

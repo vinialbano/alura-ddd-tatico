@@ -1,5 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Server } from 'net';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { CartResponseDto } from '../src/application/dtos/cart-response.dto';
@@ -13,7 +14,7 @@ interface ErrorResponse {
 }
 
 describe('Order E2E Tests', () => {
-  let app: INestApplication;
+  let app: INestApplication<Server>;
   let createdCartId: string;
 
   beforeAll(async () => {
