@@ -19,7 +19,6 @@ import {
 import { CheckoutDTO } from '../../application/dtos/checkout.dto';
 import { MarkPaidDTO } from '../../application/dtos/mark-paid.dto';
 import { CancelOrderDTO } from '../../application/dtos/cancel-order.dto';
-import { PayOrderDto } from '../../application/order/dtos/pay-order.dto';
 import { OrderResponseDTO } from '../../application/dtos/order-response.dto';
 import { DomainExceptionFilter } from '../filters/domain-exception.filter';
 import { InvalidOrderStateTransitionError } from '../../domain/order/exceptions/invalid-order-state-transition.error';

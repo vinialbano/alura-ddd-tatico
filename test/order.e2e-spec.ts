@@ -407,6 +407,8 @@ describe('Order E2E Tests', () => {
         .send({});
 
       // Assert - Either succeeds (200) or rejected (422)
+      // Note: Conditional expects are intentional here since orderId is random
+      /* eslint-disable jest/no-conditional-expect */
       if (orderId.endsWith('5')) {
         expect(response.status).toBe(422);
         const body = response.body as { message: string; reason: string };
@@ -420,6 +422,7 @@ describe('Order E2E Tests', () => {
       } else {
         expect(response.status).toBe(200);
       }
+      /* eslint-enable jest/no-conditional-expect */
     });
 
     it('should return 409 when trying to pay already paid order', async () => {

@@ -2,11 +2,13 @@ import { DomainEvent } from '../../src/domain/shared/domain-event';
 import { CartItem } from '../../src/domain/shopping-cart/cart-item';
 import { ShoppingCart } from '../../src/domain/shopping-cart/shopping-cart';
 import { Money } from '../../src/domain/order/value-objects/money';
+import { Order } from '../../src/domain/order/order';
 import {
   createMockEventPublisher,
   createMockOrderCreationService,
   createMockPricingService,
 } from './mock-services.factory';
+import { OrderBuilder } from '../builders/order.builder';
 
 describe('Mock Service Factories', () => {
   describe('createMockPricingService', () => {
@@ -74,7 +76,7 @@ describe('Mock Service Factories', () => {
     });
 
     it('should allow overriding createFromCart method', () => {
-      const testOrder = {} as any;
+      const testOrder: Order = OrderBuilder.create().build();
       const mock = createMockOrderCreationService({
         createFromCart: jest.fn().mockReturnValue(testOrder),
       });
@@ -99,7 +101,7 @@ describe('Mock Service Factories', () => {
     });
 
     it('should maintain default behavior for non-overridden methods', () => {
-      const testOrder = {} as any;
+      const testOrder: Order = OrderBuilder.create().build();
       const mock = createMockOrderCreationService({
         createFromCart: jest.fn().mockReturnValue(testOrder),
       });

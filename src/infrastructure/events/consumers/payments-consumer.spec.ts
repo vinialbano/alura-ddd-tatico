@@ -19,14 +19,18 @@ describe('PaymentsConsumer', () => {
   beforeEach(() => {
     mockMessageBus = {
       publish: jest.fn().mockResolvedValue(undefined),
-      subscribe: jest.fn((topic, handler) => {
+      subscribe: jest.fn((topic: string, handler: any) => {
         if (topic === 'order.placed') {
-          orderPlacedHandler = handler;
+          orderPlacedHandler = handler as (
+            message: IntegrationMessage<OrderPlacedPayload>,
+          ) => Promise<void>;
         } else if (topic === 'order.cancelled') {
-          orderCancelledHandler = handler;
+          orderCancelledHandler = handler as (
+            message: IntegrationMessage<OrderCancelledPayload>,
+          ) => Promise<void>;
         }
       }),
-    } as any;
+    } as IMessageBus;
 
     consumer = new PaymentsConsumer(mockMessageBus);
     consumer.initialize();
@@ -85,8 +89,8 @@ describe('PaymentsConsumer', () => {
           orderId: 'order-123',
           approvedAmount: 49.98,
           currency: 'USD',
-          paymentId: expect.stringMatching(/^payment-/),
-          timestamp: expect.any(String),
+          paymentId: expect.stringMatching(/^payment-/) as string,
+          timestamp: expect.any(String) as string,
         }),
       );
     });
