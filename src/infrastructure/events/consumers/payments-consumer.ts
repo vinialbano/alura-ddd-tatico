@@ -108,7 +108,7 @@ export class PaymentsConsumer {
     );
 
     // Determine if refund is needed based on previous state
-    if (previousStatus === 'PAID' || previousStatus === 'STOCK_RESERVED') {
+    if (previousStatus === 'PAID') {
       this.logger.log(
         `[PAYMENTS BC] REFUND triggered for order ${orderId} (was ${previousStatus}, reason: ${reason})`,
       );

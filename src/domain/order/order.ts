@@ -41,7 +41,6 @@ import { EventId } from '../shared/value-objects/event-id';
 export class Order {
   private readonly _domainEvents: DomainEvent[] = [];
   private readonly _processedPaymentIds: Set<string> = new Set();
-  private readonly _processedReservationIds: Set<string> = new Set();
 
   private constructor(
     private readonly _id: OrderId,
@@ -149,39 +148,13 @@ export class Order {
     );
   }
 
-  /**
-   * Transition order from Paid to StockReserved status
-   *
-   * Idempotent: Multiple calls with the same reservationId are safe and won't cause state changes.
-   * Only transitions from Paid status to StockReserved.
-   *
-   * @param reservationId - Stock reservation identifier from Inventory bounded context
-   * @throws InvalidOrderStateTransitionError if not in Paid status or if already reserved with different reservationId
-   */
-  reserveStock(reservationId: string): void {
-    // Idempotency check: If we've already processed this reservation ID, return early
-    if (this._processedReservationIds.has(reservationId)) {
-      return;
-    }
-
-    // Only allow stock reservation from Paid status
-    if (!this._status.equals(OrderStatus.Paid)) {
-      throw new InvalidOrderStateTransitionError(
-        `Cannot reserve stock: order is in ${this._status.toString()} state (must be PAID)`,
-      );
-    }
-
-    this._status = OrderStatus.StockReserved;
-    this._processedReservationIds.add(reservationId);
-  }
 
   /**
    * Transition order to Cancelled status with reason
    *
-   * Can be called from AwaitingPayment, Paid, or StockReserved states
-   * - AwaitingPayment: Simple cancellation (no refund or stock release needed)
+   * Can be called from AwaitingPayment or Paid states
+   * - AwaitingPayment: Simple cancellation (no refund needed)
    * - Paid: Requires refund processing
-   * - StockReserved: Requires refund and stock release
    *
    * Raises OrderCancelled domain event with previous state for subscriber context
    *
@@ -230,13 +203,12 @@ export class Order {
   /**
    * Check if order can be cancelled
    *
-   * @returns true if order is in AwaitingPayment, Paid, or StockReserved status
+   * @returns true if order is in AwaitingPayment or Paid status
    */
   canBeCancelled(): boolean {
     return (
       this._status.equals(OrderStatus.AwaitingPayment) ||
-      this._status.equals(OrderStatus.Paid) ||
-      this._status.equals(OrderStatus.StockReserved)
+      this._status.equals(OrderStatus.Paid)
     );
   }
 
@@ -250,15 +222,6 @@ export class Order {
     return this._processedPaymentIds.has(paymentId);
   }
 
-  /**
-   * Check if a reservation ID has been processed (for idempotency)
-   *
-   * @param reservationId - Stock reservation identifier to check
-   * @returns true if this reservation ID has already been processed
-   */
-  hasProcessedReservation(reservationId: string): boolean {
-    return this._processedReservationIds.has(reservationId);
-  }
 
   /**
    * Validate aggregate invariants
