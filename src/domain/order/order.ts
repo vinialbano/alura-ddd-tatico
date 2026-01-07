@@ -148,6 +148,13 @@ export class Order {
     );
   }
 
+  // TODO: Student exercise - implement stock reservation
+  // applyStockReserved(reservationId: ReservationId): void {
+  //   // Validate current status is Paid
+  //   // Transition to StockReserved
+  //   // Store reservationId
+  //   // Raise StockReserved domain event if needed
+  // }
 
   /**
    * Transition order to Cancelled status with reason
@@ -221,7 +228,6 @@ export class Order {
   hasProcessedPayment(paymentId: string): boolean {
     return this._processedPaymentIds.has(paymentId);
   }
-
 
   /**
    * Validate aggregate invariants
