@@ -76,9 +76,12 @@ export class PaymentApprovedHandler {
         `Order ${orderId} marked as paid with payment ${paymentId} (amount: ${approvedAmount} ${currency})`,
       );
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Failed to mark order ${orderId} as paid: ${error.message}`,
-        error.stack,
+        `Failed to mark order ${orderId} as paid: ${errorMessage}`,
+        errorStack,
       );
       throw error;
     }

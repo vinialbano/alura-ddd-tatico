@@ -29,9 +29,9 @@ describe('InMemoryMessageBus', () => {
         expect.objectContaining({
           topic,
           payload,
-          messageId: expect.any(String),
-          timestamp: expect.any(Date),
-          correlationId: expect.any(String),
+          messageId: expect.any(String) as string,
+          timestamp: expect.any(Date) as Date,
+          correlationId: expect.any(String) as string,
         }),
       );
     });

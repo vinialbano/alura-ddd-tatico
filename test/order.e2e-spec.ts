@@ -1,10 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { Server } from 'net';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { CartResponseDto } from '../src/application/dtos/cart-response.dto';
+import { OrderResponseDTO } from '../src/application/dtos/order-response.dto';
+
+// Type for NestJS error responses
+interface ErrorResponse {
+  statusCode: number;
+  message: string | string[];
+  error?: string;
+}
 
 describe('Order E2E Tests', () => {
-  let app: INestApplication;
+  let app: INestApplication<Server>;
   let createdCartId: string;
 
   beforeAll(async () => {
@@ -37,7 +47,7 @@ describe('Order E2E Tests', () => {
       .send({ customerId: 'customer-123' })
       .expect(201);
 
-    createdCartId = createCartResponse.body.cartId;
+    createdCartId = (createCartResponse.body as CartResponseDto).cartId;
 
     // Add an item to the cart
     await request(app.getHttpServer())
@@ -67,24 +77,22 @@ describe('Order E2E Tests', () => {
         .expect(201);
 
       // Assert
-      expect(response.body).toHaveProperty('id');
-      expect(response.body).toHaveProperty('cartId', createdCartId);
-      expect(response.body).toHaveProperty('status', 'AWAITING_PAYMENT');
-      expect(response.body).toHaveProperty('items');
-      expect(response.body.items).toHaveLength(1);
-      expect(response.body.items[0]).toHaveProperty('productSnapshot');
-      expect(response.body.items[0].productSnapshot).toHaveProperty(
+      const body = response.body as OrderResponseDTO;
+      expect(body).toHaveProperty('id');
+      expect(body).toHaveProperty('cartId', createdCartId);
+      expect(body).toHaveProperty('status', 'AWAITING_PAYMENT');
+      expect(body).toHaveProperty('items');
+      expect(body.items).toHaveLength(1);
+      expect(body.items[0]).toHaveProperty('productSnapshot');
+      expect(body.items[0].productSnapshot).toHaveProperty(
         'name',
         'Premium Coffee Beans',
       );
-      expect(response.body).toHaveProperty('totalAmount');
-      expect(response.body.totalAmount).toHaveProperty('amount');
-      expect(response.body.totalAmount).toHaveProperty('currency', 'USD');
-      expect(response.body).toHaveProperty('shippingAddress');
-      expect(response.body.shippingAddress).toHaveProperty(
-        'street',
-        '123 Main St',
-      );
+      expect(body).toHaveProperty('totalAmount');
+      expect(body.totalAmount).toHaveProperty('amount');
+      expect(body.totalAmount).toHaveProperty('currency', 'USD');
+      expect(body).toHaveProperty('shippingAddress');
+      expect(body.shippingAddress).toHaveProperty('street', '123 Main St');
     });
 
     it('should reject checkout with missing cart ID', async () => {
@@ -103,7 +111,8 @@ describe('Order E2E Tests', () => {
         .expect(400);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
     });
 
     it('should reject checkout with invalid shipping address', async () => {
@@ -120,7 +129,8 @@ describe('Order E2E Tests', () => {
         .expect(400);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
     });
 
     it('should reject checkout with non-existent cart', async () => {
@@ -140,7 +150,8 @@ describe('Order E2E Tests', () => {
         .expect(404);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
     });
 
     it('should reject checkout with empty cart', async () => {
@@ -150,7 +161,7 @@ describe('Order E2E Tests', () => {
         .send({ customerId: 'customer-456' })
         .expect(201);
 
-      const emptyCartId = emptyCartResponse.body.cartId;
+      const emptyCartId = (emptyCartResponse.body as CartResponseDto).cartId;
 
       // Act - Attempt to checkout empty cart
       const response = await request(app.getHttpServer())
@@ -168,8 +179,9 @@ describe('Order E2E Tests', () => {
         .expect(400);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('empty');
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
+      expect(body.message).toContain('empty');
     });
 
     it('should return existing order on duplicate checkout attempt', async () => {
@@ -188,7 +200,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const firstOrderId = firstResponse.body.id;
+      const firstOrderId = (firstResponse.body as OrderResponseDTO).id;
 
       // Second checkout attempt
       const secondResponse = await request(app.getHttpServer())
@@ -206,7 +218,7 @@ describe('Order E2E Tests', () => {
         .expect(201);
 
       // Assert - should return the same order
-      expect(secondResponse.body.id).toBe(firstOrderId);
+      expect((secondResponse.body as OrderResponseDTO).id).toBe(firstOrderId);
     });
   });
 
@@ -227,7 +239,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Act
       const response = await request(app.getHttpServer())
@@ -235,10 +247,11 @@ describe('Order E2E Tests', () => {
         .expect(200);
 
       // Assert
-      expect(response.body).toHaveProperty('id', orderId);
-      expect(response.body).toHaveProperty('status', 'AWAITING_PAYMENT');
-      expect(response.body).toHaveProperty('items');
-      expect(response.body.items).toHaveLength(1);
+      const body = response.body as OrderResponseDTO;
+      expect(body).toHaveProperty('id', orderId);
+      expect(body).toHaveProperty('status', 'AWAITING_PAYMENT');
+      expect(body).toHaveProperty('items');
+      expect(body.items).toHaveLength(1);
     });
 
     it('should return 404 for non-existent order', async () => {
@@ -248,7 +261,8 @@ describe('Order E2E Tests', () => {
         .expect(404);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
     });
   });
 
@@ -269,7 +283,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Act
       const response = await request(app.getHttpServer())
@@ -278,9 +292,10 @@ describe('Order E2E Tests', () => {
         .expect(200);
 
       // Assert
-      expect(response.body).toHaveProperty('id', orderId);
-      expect(response.body).toHaveProperty('status', 'PAID');
-      expect(response.body).toHaveProperty('paymentId', 'pay_123456');
+      const body = response.body as OrderResponseDTO;
+      expect(body).toHaveProperty('id', orderId);
+      expect(body).toHaveProperty('status', 'PAID');
+      expect(body).toHaveProperty('paymentId', 'pay_123456');
     });
 
     it('should reject marking already paid order as paid', async () => {
@@ -299,7 +314,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       await request(app.getHttpServer())
         .post(`/orders/${orderId}/mark-paid`)
@@ -313,7 +328,8 @@ describe('Order E2E Tests', () => {
         .expect(409);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
     });
 
     it('should return 404 for non-existent order', async () => {
@@ -324,7 +340,8 @@ describe('Order E2E Tests', () => {
         .expect(404);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
     });
   });
 
@@ -349,7 +366,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Act - Process payment through gateway
       const response = await request(app.getHttpServer())
@@ -358,10 +375,11 @@ describe('Order E2E Tests', () => {
         .expect(200);
 
       // Assert
-      expect(response.body).toHaveProperty('id', orderId);
-      expect(response.body).toHaveProperty('status', 'PAID');
-      expect(response.body).toHaveProperty('paymentId');
-      expect(response.body.paymentId).toMatch(/^PAY-/); // Gateway generates "PAY-{orderId}"
+      const body = response.body as OrderResponseDTO;
+      expect(body).toHaveProperty('id', orderId);
+      expect(body).toHaveProperty('status', 'PAID');
+      expect(body).toHaveProperty('paymentId');
+      expect(body.paymentId).toMatch(/^PAY-/); // Gateway generates "PAY-{orderId}"
     });
 
     it('should reject payment with 422 for order with ID ending in 5 (insufficient funds)', async () => {
@@ -382,7 +400,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Act - Process payment (may succeed or fail depending on orderId)
       const response = await request(app.getHttpServer())
@@ -390,17 +408,22 @@ describe('Order E2E Tests', () => {
         .send({});
 
       // Assert - Either succeeds (200) or rejected (422)
+      // Note: Conditional expects are intentional here since orderId is random
+      /* eslint-disable jest/no-conditional-expect */
       if (orderId.endsWith('5')) {
         expect(response.status).toBe(422);
-        expect(response.body).toHaveProperty('message', 'Payment declined');
-        expect(response.body).toHaveProperty('reason', 'Insufficient funds');
+        const body = response.body as { message: string; reason: string };
+        expect(body).toHaveProperty('message', 'Payment declined');
+        expect(body).toHaveProperty('reason', 'Insufficient funds');
       } else if (orderId.endsWith('9')) {
         expect(response.status).toBe(422);
-        expect(response.body).toHaveProperty('message', 'Payment declined');
-        expect(response.body).toHaveProperty('reason', 'Card declined');
+        const body = response.body as { message: string; reason: string };
+        expect(body).toHaveProperty('message', 'Payment declined');
+        expect(body).toHaveProperty('reason', 'Card declined');
       } else {
         expect(response.status).toBe(200);
       }
+      /* eslint-enable jest/no-conditional-expect */
     });
 
     it('should return 409 when trying to pay already paid order', async () => {
@@ -419,7 +442,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // First payment
       await request(app.getHttpServer())
@@ -434,9 +457,10 @@ describe('Order E2E Tests', () => {
         .expect(409);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('Cannot mark order as paid');
-      expect(response.body.message).toContain('PAID');
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
+      expect(body.message).toContain('Cannot mark order as paid');
+      expect(body.message).toContain('PAID');
     });
 
     it('should return 409 when trying to pay cancelled order', async () => {
@@ -455,7 +479,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Cancel order first
       await request(app.getHttpServer())
@@ -470,9 +494,10 @@ describe('Order E2E Tests', () => {
         .expect(409);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('Cannot mark order as paid');
-      expect(response.body.message).toContain('CANCELLED');
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
+      expect(body.message).toContain('Cannot mark order as paid');
+      expect(body.message).toContain('CANCELLED');
     });
 
     it('should return 404 for non-existent order', async () => {
@@ -483,7 +508,8 @@ describe('Order E2E Tests', () => {
         .expect(404);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
     });
 
     it('should handle payment gateway timeout gracefully', async () => {
@@ -502,7 +528,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Act - Process payment (stubbed gateway simulates 500ms-2s latency)
       const startTime = Date.now();
@@ -535,7 +561,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Act
       const response = await request(app.getHttpServer())
@@ -544,9 +570,10 @@ describe('Order E2E Tests', () => {
         .expect(200);
 
       // Assert
-      expect(response.body).toHaveProperty('id', orderId);
-      expect(response.body).toHaveProperty('status', 'CANCELLED');
-      expect(response.body).toHaveProperty(
+      const body = response.body as OrderResponseDTO;
+      expect(body).toHaveProperty('id', orderId);
+      expect(body).toHaveProperty('status', 'CANCELLED');
+      expect(body).toHaveProperty(
         'cancellationReason',
         'Customer requested cancellation',
       );
@@ -568,7 +595,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       await request(app.getHttpServer())
         .post(`/orders/${orderId}/mark-paid`)
@@ -582,9 +609,10 @@ describe('Order E2E Tests', () => {
         .expect(200);
 
       // Assert
-      expect(response.body).toHaveProperty('id', orderId);
-      expect(response.body).toHaveProperty('status', 'CANCELLED');
-      expect(response.body).toHaveProperty(
+      const body = response.body as OrderResponseDTO;
+      expect(body).toHaveProperty('id', orderId);
+      expect(body).toHaveProperty('status', 'CANCELLED');
+      expect(body).toHaveProperty(
         'cancellationReason',
         'Product defect - refund requested',
       );
@@ -606,7 +634,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       await request(app.getHttpServer())
         .post(`/orders/${orderId}/cancel`)
@@ -620,7 +648,8 @@ describe('Order E2E Tests', () => {
         .expect(409);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
     });
 
     it('should return 404 for non-existent order', async () => {
@@ -631,7 +660,8 @@ describe('Order E2E Tests', () => {
         .expect(404);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
     });
 
     it('should return 400 when cancelling with empty reason (T042)', async () => {
@@ -650,7 +680,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Act - Try to cancel with empty reason
       const response = await request(app.getHttpServer())
@@ -659,8 +689,9 @@ describe('Order E2E Tests', () => {
         .expect(400);
 
       // Assert
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toEqual(
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
+      expect(body.message).toEqual(
         expect.arrayContaining([expect.stringContaining('reason')]),
       );
     });
@@ -681,7 +712,7 @@ describe('Order E2E Tests', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Act - Try to cancel with whitespace-only reason
       const response = await request(app.getHttpServer())
@@ -690,10 +721,9 @@ describe('Order E2E Tests', () => {
         .expect(422); // Domain validation returns 422 Unprocessable Entity
 
       // Assert
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain(
-        'Cancellation reason cannot be empty',
-      );
+      const body = response.body as ErrorResponse;
+      expect(body).toHaveProperty('message');
+      expect(body.message).toContain('Cancellation reason cannot be empty');
     });
   });
 });

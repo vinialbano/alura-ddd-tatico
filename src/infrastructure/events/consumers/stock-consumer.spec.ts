@@ -19,14 +19,18 @@ describe('StockConsumer', () => {
   beforeEach(() => {
     mockMessageBus = {
       publish: jest.fn().mockResolvedValue(undefined),
-      subscribe: jest.fn((topic, handler) => {
+      subscribe: jest.fn((topic: string, handler: any) => {
         if (topic === 'order.paid') {
-          orderPaidHandler = handler;
+          orderPaidHandler = handler as (
+            message: IntegrationMessage<OrderPaidPayload>,
+          ) => Promise<void>;
         } else if (topic === 'order.cancelled') {
-          orderCancelledHandler = handler;
+          orderCancelledHandler = handler as (
+            message: IntegrationMessage<OrderCancelledPayload>,
+          ) => Promise<void>;
         }
       }),
-    } as any;
+    } as IMessageBus;
 
     consumer = new StockConsumer(mockMessageBus);
     consumer.initialize();
@@ -67,9 +71,12 @@ describe('StockConsumer', () => {
         'stock.reserved',
         expect.objectContaining({
           orderId: 'order-123',
-          reservationId: expect.stringMatching(/^reservation-/),
-          items: expect.any(Array),
-          timestamp: expect.any(String),
+          reservationId: expect.stringMatching(/^reservation-/) as string,
+          items: expect.any(Array) as Array<{
+            productId: string;
+            quantity: number;
+          }>,
+          timestamp: expect.any(String) as string,
         }),
       );
     });

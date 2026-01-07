@@ -1,83 +1,27 @@
 import { OrderService } from '../order.service';
 import { OrderRepository } from '../../../domain/order/order.repository';
-import { Order } from '../../../domain/order/order';
 import { OrderId } from '../../../domain/order/value-objects/order-id';
-import { CartId } from '../../../domain/shopping-cart/value-objects/cart-id';
-import { CustomerId } from '../../../domain/shared/value-objects/customer-id';
-import { Money } from '../../../domain/order/value-objects/money';
-import { ShippingAddress } from '../../../domain/order/value-objects/shipping-address';
-import { OrderItem } from '../../../domain/order/order-item';
-import { ProductSnapshot } from '../../../domain/order/value-objects/product-snapshot';
-import { Quantity } from '../../../domain/shared/value-objects/quantity';
 import { OrderNotFoundException } from '../../exceptions/order-not-found.exception';
 import { InvalidOrderStateTransitionError } from '../../../domain/order/exceptions/invalid-order-state-transition.error';
 import { OrderStatus } from '../../../domain/order/value-objects/order-status';
+import { createMockOrderRepository } from '../../../../test/factories/mock-repositories.factory';
+import { OrderBuilder } from '../../../../test/builders/order.builder';
 
 describe('OrderService', () => {
   let service: OrderService;
   let mockOrderRepository: jest.Mocked<OrderRepository>;
 
-  const createTestOrder = (
-    status: OrderStatus = OrderStatus.AwaitingPayment,
-  ): Order => {
-    const testOrderId = OrderId.generate();
-    const testCartId = CartId.create();
-    const testCustomerId = CustomerId.fromString('customer-123');
-    const shippingAddress = new ShippingAddress({
-      street: '123 Main St',
-      city: 'Springfield',
-      stateOrProvince: 'IL',
-      postalCode: '62701',
-      country: 'USA',
-    });
-
-    const orderItem = OrderItem.create(
-      new ProductSnapshot({
-        name: 'Test Product',
-        description: 'Test Description',
-        sku: 'TEST-001',
-      }),
-      Quantity.of(1),
-      new Money(10.0, 'USD'),
-      new Money(0, 'USD'),
-    );
-
-    const order = Order.create(
-      testOrderId,
-      testCartId,
-      testCustomerId,
-      [orderItem],
-      shippingAddress,
-      new Money(0, 'USD'),
-      new Money(10.0, 'USD'),
-    );
-
-    // Manually set status if needed (for testing different states)
-    if (status !== OrderStatus.AwaitingPayment) {
-      if (status === OrderStatus.Paid) {
-        order.markAsPaid('test-payment-id');
-      } else if (status === OrderStatus.Cancelled) {
-        order.cancel('Test cancellation');
-      }
-    }
-
-    return order;
-  };
-
   beforeEach(() => {
-    mockOrderRepository = {
-      save: jest.fn(),
-      findById: jest.fn(),
-      findByCartId: jest.fn(),
-    } as any;
-
+    mockOrderRepository = createMockOrderRepository();
     service = new OrderService(mockOrderRepository);
   });
 
   describe('markAsPaid', () => {
     it('should mark order as paid when order is in AwaitingPayment state', async () => {
       // Arrange
-      const order = createTestOrder(OrderStatus.AwaitingPayment);
+      const order = OrderBuilder.create()
+        .withStatus(OrderStatus.AwaitingPayment)
+        .build();
       const orderId = order.id.getValue();
       const paymentId = 'payment-123';
 
@@ -110,7 +54,7 @@ describe('OrderService', () => {
 
     it('should throw InvalidOrderStateTransitionError when order is already paid', async () => {
       // Arrange
-      const order = createTestOrder(OrderStatus.Paid);
+      const order = OrderBuilder.create().withStatus(OrderStatus.Paid).build();
       const orderId = order.id.getValue();
 
       mockOrderRepository.findById.mockResolvedValue(order);
@@ -125,7 +69,9 @@ describe('OrderService', () => {
 
     it('should throw InvalidOrderStateTransitionError when order is cancelled', async () => {
       // Arrange
-      const order = createTestOrder(OrderStatus.Cancelled);
+      const order = OrderBuilder.create()
+        .withStatus(OrderStatus.Cancelled)
+        .build();
       const orderId = order.id.getValue();
 
       mockOrderRepository.findById.mockResolvedValue(order);
@@ -142,7 +88,9 @@ describe('OrderService', () => {
   describe('cancel', () => {
     it('should cancel order when order is in AwaitingPayment state', async () => {
       // Arrange
-      const order = createTestOrder(OrderStatus.AwaitingPayment);
+      const order = OrderBuilder.create()
+        .withStatus(OrderStatus.AwaitingPayment)
+        .build();
       const orderId = order.id.getValue();
       const reason = 'Customer requested cancellation';
 
@@ -162,7 +110,7 @@ describe('OrderService', () => {
 
     it('should cancel order when order is in Paid state', async () => {
       // Arrange
-      const order = createTestOrder(OrderStatus.Paid);
+      const order = OrderBuilder.create().withStatus(OrderStatus.Paid).build();
       const orderId = order.id.getValue();
       const reason = 'Refund requested';
 
@@ -195,7 +143,9 @@ describe('OrderService', () => {
 
     it('should throw InvalidOrderStateTransitionError when order is already cancelled', async () => {
       // Arrange
-      const order = createTestOrder(OrderStatus.Cancelled);
+      const order = OrderBuilder.create()
+        .withStatus(OrderStatus.Cancelled)
+        .build();
       const orderId = order.id.getValue();
 
       mockOrderRepository.findById.mockResolvedValue(order);
@@ -212,7 +162,7 @@ describe('OrderService', () => {
   describe('findById', () => {
     it('should return order when found', async () => {
       // Arrange
-      const order = createTestOrder();
+      const order = OrderBuilder.create().build();
       const orderId = order.id.getValue();
 
       mockOrderRepository.findById.mockResolvedValue(order);

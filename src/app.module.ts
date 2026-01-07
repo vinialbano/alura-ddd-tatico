@@ -46,7 +46,7 @@ export class AppModule implements OnModuleInit {
    * 1. Consumers subscribe to external events (order.placed → order.paid)
    * 2. Handlers subscribe to integration events (payment.approved, stock.reserved)
    */
-  async onModuleInit(): Promise<void> {
+  onModuleInit(): void {
     // Initialize external bounded context consumers
     this.paymentsConsumer.initialize();
     this.stockConsumer.initialize();

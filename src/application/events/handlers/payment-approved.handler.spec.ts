@@ -1,21 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentApprovedHandler } from './payment-approved.handler';
 import type { OrderRepository } from '../../../domain/order/order.repository';
-import { Order } from '../../../domain/order/order';
 import { OrderId } from '../../../domain/order/value-objects/order-id';
-import { CartId } from '../../../domain/shopping-cart/value-objects/cart-id';
-import { CustomerId } from '../../../domain/shared/value-objects/customer-id';
-import { Money } from '../../../domain/order/value-objects/money';
-import { ShippingAddress } from '../../../domain/order/value-objects/shipping-address';
-import { OrderItem } from '../../../domain/order/order-item';
-import { ProductSnapshot } from '../../../domain/order/value-objects/product-snapshot';
-import { Quantity } from '../../../domain/shared/value-objects/quantity';
 import { ORDER_REPOSITORY } from '../../../infrastructure/modules/order.module';
 import { DomainEventPublisher } from '../../../infrastructure/events/domain-event-publisher';
 import {
   IntegrationMessage,
   PaymentApprovedPayload,
 } from '../integration-message';
+import { OrderBuilder } from '../../../../test/builders/order.builder';
+import {
+  createMockOrderRepository,
+  createMockEventPublisher,
+} from '../../../../test/factories/mock-repositories.factory';
 
 describe('PaymentApprovedHandler', () => {
   let handler: PaymentApprovedHandler;
@@ -23,14 +20,8 @@ describe('PaymentApprovedHandler', () => {
   let mockEventPublisher: jest.Mocked<DomainEventPublisher>;
 
   beforeEach(async () => {
-    mockOrderRepository = {
-      findById: jest.fn(),
-      save: jest.fn(),
-    } as any;
-
-    mockEventPublisher = {
-      publishDomainEvents: jest.fn(),
-    } as any;
+    mockOrderRepository = createMockOrderRepository();
+    mockEventPublisher = createMockEventPublisher();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -53,32 +44,7 @@ describe('PaymentApprovedHandler', () => {
     it('should mark order as paid when order exists and is in AWAITING_PAYMENT state', async () => {
       // Arrange
       const orderId = OrderId.generate();
-      const order = Order.create(
-        orderId,
-        CartId.create(),
-        CustomerId.fromString('customer-123'),
-        [
-          OrderItem.create(
-            new ProductSnapshot({
-              name: 'Test Product',
-              description: 'Description',
-              sku: 'SKU-123',
-            }),
-            Quantity.of(2),
-            new Money(10, 'USD'),
-            new Money(0, 'USD'),
-          ),
-        ],
-        new ShippingAddress({
-          street: '123 Main St',
-          city: 'Springfield',
-          stateOrProvince: 'IL',
-          postalCode: '62701',
-          country: 'USA',
-        }),
-        new Money(0, 'USD'),
-        new Money(20, 'USD'),
-      );
+      const order = OrderBuilder.create().withOrderId(orderId).build();
 
       mockOrderRepository.findById.mockResolvedValue(order);
       mockOrderRepository.save.mockResolvedValue(undefined);
@@ -112,32 +78,7 @@ describe('PaymentApprovedHandler', () => {
     it('should handle duplicate payment.approved messages idempotently', async () => {
       // Arrange
       const orderId = OrderId.generate();
-      const order = Order.create(
-        orderId,
-        CartId.create(),
-        CustomerId.fromString('customer-123'),
-        [
-          OrderItem.create(
-            new ProductSnapshot({
-              name: 'Test Product',
-              description: 'Description',
-              sku: 'SKU-123',
-            }),
-            Quantity.of(2),
-            new Money(10, 'USD'),
-            new Money(0, 'USD'),
-          ),
-        ],
-        new ShippingAddress({
-          street: '123 Main St',
-          city: 'Springfield',
-          stateOrProvince: 'IL',
-          postalCode: '62701',
-          country: 'USA',
-        }),
-        new Money(0, 'USD'),
-        new Money(20, 'USD'),
-      );
+      const order = OrderBuilder.create().withOrderId(orderId).build();
 
       // First payment approval
       order.markAsPaid('payment-123');
@@ -201,32 +142,7 @@ describe('PaymentApprovedHandler', () => {
     it('should throw error when order cannot be paid (invalid state)', async () => {
       // Arrange
       const orderId = OrderId.generate();
-      const order = Order.create(
-        orderId,
-        CartId.create(),
-        CustomerId.fromString('customer-123'),
-        [
-          OrderItem.create(
-            new ProductSnapshot({
-              name: 'Test Product',
-              description: 'Description',
-              sku: 'SKU-123',
-            }),
-            Quantity.of(2),
-            new Money(10, 'USD'),
-            new Money(0, 'USD'),
-          ),
-        ],
-        new ShippingAddress({
-          street: '123 Main St',
-          city: 'Springfield',
-          stateOrProvince: 'IL',
-          postalCode: '62701',
-          country: 'USA',
-        }),
-        new Money(0, 'USD'),
-        new Money(20, 'USD'),
-      );
+      const order = OrderBuilder.create().withOrderId(orderId).build();
 
       // Cancel the order so it can't be paid
       order.cancel('Customer cancelled');

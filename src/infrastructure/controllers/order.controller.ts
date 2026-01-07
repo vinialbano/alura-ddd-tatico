@@ -19,7 +19,6 @@ import {
 import { CheckoutDTO } from '../../application/dtos/checkout.dto';
 import { MarkPaidDTO } from '../../application/dtos/mark-paid.dto';
 import { CancelOrderDTO } from '../../application/dtos/cancel-order.dto';
-import { PayOrderDto } from '../../application/order/dtos/pay-order.dto';
 import { OrderResponseDTO } from '../../application/dtos/order-response.dto';
 import { DomainExceptionFilter } from '../filters/domain-exception.filter';
 import { InvalidOrderStateTransitionError } from '../../domain/order/exceptions/invalid-order-state-transition.error';
@@ -67,10 +66,7 @@ export class OrderController {
    */
   @Post(':id/pay')
   @HttpCode(HttpStatus.OK)
-  async pay(
-    @Param('id') id: string,
-    @Body() dto: PayOrderDto,
-  ): Promise<OrderResponseDTO> {
+  async pay(@Param('id') id: string): Promise<OrderResponseDTO> {
     try {
       return await this.confirmPaymentService.execute(id);
     } catch (error) {
