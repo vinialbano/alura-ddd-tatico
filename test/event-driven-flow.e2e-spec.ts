@@ -2,11 +2,15 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { MESSAGE_BUS } from '../src/application/events/message-bus.interface';
+import {
+  MESSAGE_BUS,
+  IMessageBus,
+} from '../src/application/events/message-bus.interface';
 import { OrderRepository } from '../src/domain/order/order.repository';
 import { OrderId } from '../src/domain/order/value-objects/order-id';
 import { ORDER_REPOSITORY } from '../src/infrastructure/modules/order.module';
 import { CartResponseDto } from '../src/application/dtos/cart-response.dto';
+import { OrderResponseDTO } from '../src/application/dtos/order-response.dto';
 
 /**
  * Event-Driven Integration Flow E2E Tests
@@ -85,10 +89,12 @@ describe('Event-Driven Integration Flow E2E', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Verify initial state
-      expect(checkoutResponse.body.status).toBe('AWAITING_PAYMENT');
+      expect((checkoutResponse.body as OrderResponseDTO).status).toBe(
+        'AWAITING_PAYMENT',
+      );
 
       // Step 2: Wait for async event processing chain
       // order.placed → payment.approved → order.paid → stock.reserved
@@ -132,7 +138,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Step 2: Poll for STOCK_RESERVED state (max 5 seconds)
       let order: Awaited<ReturnType<typeof orderRepository.findById>> = null;
@@ -172,7 +178,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         .send({ customerId: 'customer-123' })
         .expect(201);
 
-      const testCartId = createCartResponse.body.cartId;
+      const testCartId = (createCartResponse.body as CartResponseDto).cartId;
 
       // Add an item to the cart
       await request(app.getHttpServer())
@@ -198,7 +204,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Wait for order to reach STOCK_RESERVED state
       await new Promise((resolve) => setTimeout(resolve, 150));
@@ -238,7 +244,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         .send({ customerId: 'customer-123' })
         .expect(201);
 
-      const testCartId = createCartResponse.body.cartId;
+      const testCartId = (createCartResponse.body as CartResponseDto).cartId;
 
       // Add an item to the cart
       await request(app.getHttpServer())
@@ -264,7 +270,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Step 2: Cancel immediately (before payment processing)
       await request(app.getHttpServer())
@@ -297,7 +303,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         .send({ customerId: 'customer-123' })
         .expect(201);
 
-      const testCartId = createCartResponse.body.cartId;
+      const testCartId = (createCartResponse.body as CartResponseDto).cartId;
 
       // Add an item to the cart
       await request(app.getHttpServer())
@@ -323,7 +329,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Step 2: Wait for payment processing but not stock reservation
       // Payment happens ~10ms after checkout, stock happens ~10ms after payment
@@ -353,7 +359,7 @@ describe('Event-Driven Integration Flow E2E', () => {
       };
 
       // Publish duplicate message through message bus
-      const messageBus = app.get(MESSAGE_BUS);
+      const messageBus = app.get<IMessageBus>(MESSAGE_BUS);
       await messageBus.publish(
         'payment.approved',
         duplicatePaymentMessage.payload,
@@ -380,7 +386,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         .send({ customerId: 'customer-123' })
         .expect(201);
 
-      const testCartId = createCartResponse.body.cartId;
+      const testCartId = (createCartResponse.body as CartResponseDto).cartId;
 
       // Add an item to the cart
       await request(app.getHttpServer())
@@ -406,7 +412,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Wait for complete flow
       await new Promise((resolve) => setTimeout(resolve, 150));
@@ -432,7 +438,7 @@ describe('Event-Driven Integration Flow E2E', () => {
       };
 
       // Publish duplicate message through message bus
-      const messageBus = app.get(MESSAGE_BUS);
+      const messageBus = app.get<IMessageBus>(MESSAGE_BUS);
 
       // First send with one ID
       await messageBus.publish('stock.reserved', duplicateStockMessage.payload);
@@ -457,7 +463,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         .send({ customerId: 'customer-123' })
         .expect(201);
 
-      const testCartId = createCartResponse.body.cartId;
+      const testCartId = (createCartResponse.body as CartResponseDto).cartId;
 
       // Add an item to the cart
       await request(app.getHttpServer())
@@ -483,7 +489,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Step 2: Cancel the order immediately
       await request(app.getHttpServer())
@@ -515,7 +521,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         },
       };
 
-      const messageBus = app.get(MESSAGE_BUS);
+      const messageBus = app.get<IMessageBus>(MESSAGE_BUS);
 
       // This should be logged as error but not crash
       await messageBus.publish('payment.approved', paymentMessage.payload);
@@ -535,7 +541,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         .send({ customerId: 'customer-123' })
         .expect(201);
 
-      const testCartId = createCartResponse.body.cartId;
+      const testCartId = (createCartResponse.body as CartResponseDto).cartId;
 
       // Add an item to the cart
       await request(app.getHttpServer())
@@ -561,7 +567,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         })
         .expect(201);
 
-      const orderId = checkoutResponse.body.id;
+      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
 
       // Step 2: Immediately check order is AWAITING_PAYMENT before automatic flow
       let order = await orderRepository.findById(OrderId.fromString(orderId));
@@ -582,7 +588,7 @@ describe('Event-Driven Integration Flow E2E', () => {
         },
       };
 
-      const messageBus = app.get(MESSAGE_BUS);
+      const messageBus = app.get<IMessageBus>(MESSAGE_BUS);
 
       // This should be logged as error but not crash
       await messageBus.publish('stock.reserved', stockMessage.payload);

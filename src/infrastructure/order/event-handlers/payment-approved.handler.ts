@@ -47,9 +47,12 @@ export class PaymentApprovedInfrastructureHandler {
     try {
       await this.paymentApprovedHandler.handle(message);
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `[Infrastructure] Failed to handle payment.approved message ${messageId}: ${error.message}`,
-        error.stack,
+        `[Infrastructure] Failed to handle payment.approved message ${messageId}: ${errorMessage}`,
+        errorStack,
       );
       // In production, this might publish to a dead-letter queue
       throw error;

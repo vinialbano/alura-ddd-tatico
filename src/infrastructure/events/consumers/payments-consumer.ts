@@ -59,7 +59,7 @@ export class PaymentsConsumer {
   private async handleOrderPlaced(
     message: IntegrationMessage<OrderPlacedPayload>,
   ): Promise<void> {
-    const { payload, messageId, correlationId } = message;
+    const { payload, messageId } = message;
     const { orderId, totalAmount, currency } = payload;
 
     this.logger.log(
@@ -97,9 +97,9 @@ export class PaymentsConsumer {
    *
    * @param message - Integration message with order cancellation details
    */
-  private async handleOrderCancelled(
+  private handleOrderCancelled(
     message: IntegrationMessage<OrderCancelledPayload>,
-  ): Promise<void> {
+  ): void {
     const { payload, messageId } = message;
     const { orderId, reason, previousStatus } = payload;
 

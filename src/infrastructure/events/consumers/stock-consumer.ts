@@ -59,8 +59,8 @@ export class StockConsumer {
   private async handleOrderPaid(
     message: IntegrationMessage<OrderPaidPayload>,
   ): Promise<void> {
-    const { payload, messageId, correlationId } = message;
-    const { orderId, paymentId, amount, currency } = payload;
+    const { payload, messageId } = message;
+    const { orderId, paymentId } = payload;
 
     this.logger.log(
       `[INVENTORY BC] Received order.paid message ${messageId} for order ${orderId} with payment ${paymentId}`,
@@ -102,9 +102,9 @@ export class StockConsumer {
    *
    * @param message - Integration message with order cancellation details
    */
-  private async handleOrderCancelled(
+  private handleOrderCancelled(
     message: IntegrationMessage<OrderCancelledPayload>,
-  ): Promise<void> {
+  ): void {
     const { payload, messageId } = message;
     const { orderId, reason, previousStatus } = payload;
 

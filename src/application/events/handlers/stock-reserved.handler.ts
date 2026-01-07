@@ -73,9 +73,12 @@ export class StockReservedHandler {
         `Stock reserved for order ${orderId} with reservation ${reservationId} (${items.length} items)`,
       );
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Failed to reserve stock for order ${orderId}: ${error.message}`,
-        error.stack,
+        `Failed to reserve stock for order ${orderId}: ${errorMessage}`,
+        errorStack,
       );
       throw error;
     }

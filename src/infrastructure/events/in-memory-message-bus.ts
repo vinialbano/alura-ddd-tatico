@@ -36,9 +36,10 @@ export class InMemoryMessageBus implements IMessageBus {
     handlers.forEach((handler) => {
       setTimeout(() => {
         handler(message).catch((error) => {
+          const errorStack = error instanceof Error ? error.stack : undefined;
           this.logger.error(
             `Error in handler for topic '${topic}' message ${message.messageId}:`,
-            error.stack,
+            errorStack,
           );
         });
       }, 0);

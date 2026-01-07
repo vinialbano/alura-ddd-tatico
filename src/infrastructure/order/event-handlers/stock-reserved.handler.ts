@@ -43,9 +43,12 @@ export class StockReservedInfrastructureHandler {
     try {
       await this.stockReservedHandler.handle(message);
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `[Infrastructure] Failed to handle stock.reserved message ${messageId}: ${error.message}`,
-        error.stack,
+        `[Infrastructure] Failed to handle stock.reserved message ${messageId}: ${errorMessage}`,
+        errorStack,
       );
       // In production, this might publish to a dead-letter queue
       throw error;

@@ -67,10 +67,7 @@ export class OrderController {
    */
   @Post(':id/pay')
   @HttpCode(HttpStatus.OK)
-  async pay(
-    @Param('id') id: string,
-    @Body() dto: PayOrderDto,
-  ): Promise<OrderResponseDTO> {
+  async pay(@Param('id') id: string): Promise<OrderResponseDTO> {
     try {
       return await this.confirmPaymentService.execute(id);
     } catch (error) {
