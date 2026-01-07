@@ -149,7 +149,7 @@ export class Order {
   }
 
   // TODO: Student exercise - implement stock reservation
-  // applyStockReserved(reservationId: ReservationId): void {
+  // applyStockReserved(reservationId: string): void {
   //   // Validate current status is Paid
   //   // Transition to StockReserved
   //   // Store reservationId
