@@ -9,14 +9,53 @@ import { OrderPaid } from '../events/order-paid.event';
 import { OrderCancelled } from '../events/order-cancelled.event';
 import { OrderPlaced } from '../events/order-placed.event';
 import { EventId } from '../../shared/value-objects/event-id';
-import { OrderBuilder } from '../../../../test/builders/order.builder';
-import { OrderItemBuilder } from '../../../../test/builders/order-item.builder';
-import { TEST_ADDRESS_US } from '../../../../test/fixtures/common-values';
+import { OrderItem } from '../order-item';
+import { ProductSnapshot } from '../value-objects/product-snapshot';
+import { Quantity } from '../../shared/value-objects/quantity';
+import { ShippingAddress } from '../value-objects/shipping-address';
+
+// Test helper functions for inline test data creation
+const createTestShippingAddress = () =>
+  new ShippingAddress({
+    street: '123 Main St',
+    city: 'Springfield',
+    stateOrProvince: 'IL',
+    postalCode: '62701',
+    country: 'USA',
+  });
+
+const createTestOrderItem = (overrides?: {
+  name?: string;
+  quantity?: number;
+  unitPrice?: Money;
+  itemDiscount?: Money;
+}) =>
+  OrderItem.create(
+    new ProductSnapshot({
+      name: overrides?.name || 'Test Product',
+      description: 'Test product description',
+      sku: 'TEST-SKU-001',
+    }),
+    Quantity.of(overrides?.quantity || 1),
+    overrides?.unitPrice || new Money(100.0, 'USD'),
+    overrides?.itemDiscount || new Money(0, 'USD'),
+  );
+
+const createTestOrder = () =>
+  Order.create(
+    OrderId.generate(),
+    CartId.create(),
+    CustomerId.fromString('customer-123'),
+    [createTestOrderItem()],
+    createTestShippingAddress(),
+    new Money(0, 'USD'),
+    new Money(100.0, 'USD'),
+  );
 
 describe('Order Aggregate', () => {
   describe('Factory Method: create', () => {
     it('should create an Order in AwaitingPayment status with valid parameters', () => {
-      const items = [OrderItemBuilder.create().build()];
+      const items = [createTestOrderItem()];
       const orderId = OrderId.generate();
       const cartId = CartId.create();
       const customerId = CustomerId.fromString('customer-123');
@@ -28,7 +67,7 @@ describe('Order Aggregate', () => {
         cartId,
         customerId,
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         orderLevelDiscount,
         totalAmount,
       );
@@ -38,7 +77,7 @@ describe('Order Aggregate', () => {
       expect(order.cartId).toBe(cartId);
       expect(order.customerId).toBe(customerId);
       expect(order.items).toEqual(items);
-      expect(order.shippingAddress).toBe(TEST_ADDRESS_US);
+      expect(order.shippingAddress.street).toBe('123 Main St');
       expect(order.status).toBe(OrderStatus.AwaitingPayment);
       expect(order.orderLevelDiscount).toBe(orderLevelDiscount);
       expect(order.totalAmount).toBe(totalAmount);
@@ -61,7 +100,7 @@ describe('Order Aggregate', () => {
           cartId,
           customerId,
           emptyItems,
-          TEST_ADDRESS_US,
+          createTestShippingAddress(),
           orderLevelDiscount,
           totalAmount,
         );
@@ -73,22 +112,22 @@ describe('Order Aggregate', () => {
       const cartId = CartId.create();
       const customerId = CustomerId.fromString('customer-123');
       const items = [
-        OrderItemBuilder.create()
-          .withProductName('Product A')
-          .withQuantity(2)
-          .withUnitPrice(new Money(50.0, 'USD'))
-          .build(),
-        OrderItemBuilder.create()
-          .withProductName('Product B')
-          .withQuantity(1)
-          .withUnitPrice(new Money(30.0, 'USD'))
-          .build(),
-        OrderItemBuilder.create()
-          .withProductName('Product C')
-          .withQuantity(3)
-          .withUnitPrice(new Money(20.0, 'USD'))
-          .withItemDiscount(new Money(5.0, 'USD'))
-          .build(),
+        createTestOrderItem({
+          name: 'Product A',
+          quantity: 2,
+          unitPrice: new Money(50.0, 'USD'),
+        }),
+        createTestOrderItem({
+          name: 'Product B',
+          quantity: 1,
+          unitPrice: new Money(30.0, 'USD'),
+        }),
+        createTestOrderItem({
+          name: 'Product C',
+          quantity: 3,
+          unitPrice: new Money(20.0, 'USD'),
+          itemDiscount: new Money(5.0, 'USD'),
+        }),
       ];
       const orderLevelDiscount = new Money(10.0, 'USD');
       const totalAmount = new Money(175.0, 'USD');
@@ -98,7 +137,7 @@ describe('Order Aggregate', () => {
         cartId,
         customerId,
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         orderLevelDiscount,
         totalAmount,
       );
@@ -113,7 +152,7 @@ describe('Order Aggregate', () => {
   describe('Domain Events: OrderPlaced (T015)', () => {
     it('should emit OrderPlaced event when order is created', () => {
       // Arrange
-      const items = [OrderItemBuilder.create().build()];
+      const items = [createTestOrderItem()];
       const orderId = OrderId.generate();
       const cartId = CartId.create();
       const customerId = CustomerId.fromString('customer-123');
@@ -126,7 +165,7 @@ describe('Order Aggregate', () => {
         cartId,
         customerId,
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         orderLevelDiscount,
         totalAmount,
       );
@@ -139,7 +178,7 @@ describe('Order Aggregate', () => {
 
     it('should include valid EventId in OrderPlaced event', () => {
       // Arrange
-      const items = [OrderItemBuilder.create().build()];
+      const items = [createTestOrderItem()];
       const orderId = OrderId.generate();
       const cartId = CartId.create();
       const customerId = CustomerId.fromString('customer-123');
@@ -152,7 +191,7 @@ describe('Order Aggregate', () => {
         cartId,
         customerId,
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         orderLevelDiscount,
         totalAmount,
       );
@@ -173,17 +212,17 @@ describe('Order Aggregate', () => {
       const cartId = CartId.create();
       const customerId = CustomerId.fromString('customer-123');
       const items = [
-        OrderItemBuilder.create()
-          .withProductName('Product A')
-          .withQuantity(2)
-          .withUnitPrice(new Money(50.0, 'USD'))
-          .withItemDiscount(new Money(5.0, 'USD'))
-          .build(),
-        OrderItemBuilder.create()
-          .withProductName('Product B')
-          .withQuantity(1)
-          .withUnitPrice(new Money(30.0, 'USD'))
-          .build(),
+        createTestOrderItem({
+          name: 'Product A',
+          quantity: 2,
+          unitPrice: new Money(50.0, 'USD'),
+          itemDiscount: new Money(5.0, 'USD'),
+        }),
+        createTestOrderItem({
+          name: 'Product B',
+          quantity: 1,
+          unitPrice: new Money(30.0, 'USD'),
+        }),
       ];
       const orderLevelDiscount = new Money(10.0, 'USD');
       const totalAmount = new Money(115.0, 'USD');
@@ -194,7 +233,7 @@ describe('Order Aggregate', () => {
         cartId,
         customerId,
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         orderLevelDiscount,
         totalAmount,
       );
@@ -208,13 +247,13 @@ describe('Order Aggregate', () => {
       expect(orderPlacedEvent.cartId).toBe(cartId);
       expect(orderPlacedEvent.items).toEqual(items);
       expect(orderPlacedEvent.totalAmount).toBe(totalAmount);
-      expect(orderPlacedEvent.shippingAddress).toBe(TEST_ADDRESS_US);
+      expect(orderPlacedEvent.shippingAddress.street).toBe('123 Main St');
       expect(orderPlacedEvent.timestamp).toBeInstanceOf(Date);
     });
 
     it('should set aggregateId to orderId in OrderPlaced event', () => {
       // Arrange
-      const items = [OrderItemBuilder.create().build()];
+      const items = [createTestOrderItem()];
       const orderId = OrderId.generate();
       const cartId = CartId.create();
       const customerId = CustomerId.fromString('customer-123');
@@ -227,7 +266,7 @@ describe('Order Aggregate', () => {
         cartId,
         customerId,
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         orderLevelDiscount,
         totalAmount,
       );
@@ -241,7 +280,7 @@ describe('Order Aggregate', () => {
 
     it('should set occurredAt timestamp in OrderPlaced event', () => {
       // Arrange
-      const items = [OrderItemBuilder.create().build()];
+      const items = [createTestOrderItem()];
       const orderId = OrderId.generate();
       const cartId = CartId.create();
       const customerId = CustomerId.fromString('customer-123');
@@ -256,7 +295,7 @@ describe('Order Aggregate', () => {
         cartId,
         customerId,
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         orderLevelDiscount,
         totalAmount,
       );
@@ -279,11 +318,11 @@ describe('Order Aggregate', () => {
     it('should emit OrderPlaced with empty order-level discount', () => {
       // Arrange
       const items = [
-        OrderItemBuilder.create()
-          .withProductName('Product')
-          .withQuantity(1)
-          .withUnitPrice(new Money(100.0, 'USD'))
-          .build(),
+        createTestOrderItem({
+          name: 'Product',
+          quantity: 1,
+          unitPrice: new Money(100.0, 'USD'),
+        }),
       ];
       const orderId = OrderId.generate();
       const cartId = CartId.create();
@@ -297,7 +336,7 @@ describe('Order Aggregate', () => {
         cartId,
         customerId,
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         orderLevelDiscount,
         totalAmount,
       );
@@ -313,7 +352,7 @@ describe('Order Aggregate', () => {
 
   describe('State Machine: markAsPaid', () => {
     it('should transition from AwaitingPayment to Paid with payment ID', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       const paymentId = 'pay_123456789';
       order.markAsPaid(paymentId);
@@ -323,7 +362,7 @@ describe('Order Aggregate', () => {
     });
 
     it('should throw error when marking already paid order as paid', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       order.markAsPaid('pay_123');
 
@@ -333,7 +372,7 @@ describe('Order Aggregate', () => {
     });
 
     it('should throw error when marking cancelled order as paid', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       order.cancel('Customer requested cancellation');
 
@@ -343,7 +382,7 @@ describe('Order Aggregate', () => {
     });
 
     it('should preserve order state when markAsPaid fails', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       order.cancel('Test cancellation');
       const statusBeforeAttempt = order.status;
@@ -361,13 +400,13 @@ describe('Order Aggregate', () => {
 
     it('should raise OrderPaid domain event when marking as paid', () => {
       const orderId = OrderId.generate();
-      const items = [OrderItemBuilder.create().build()];
+      const items = [createTestOrderItem()];
       const order = Order.create(
         orderId,
         CartId.create(),
         CustomerId.fromString('customer-123'),
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         new Money(0, 'USD'),
         new Money(100.0, 'USD'),
       );
@@ -386,7 +425,7 @@ describe('Order Aggregate', () => {
     });
 
     it('should record payment ID when marking as paid', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       const paymentId = 'PAY-XYZ-789';
       order.markAsPaid(paymentId);
@@ -399,7 +438,7 @@ describe('Order Aggregate', () => {
   describe('Idempotency: markAsPaid (T016)', () => {
     it('should handle duplicate payment approval for same payment ID (idempotent)', () => {
       // Arrange
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
       const paymentId = 'PAY-12345';
 
       // Act - First call should succeed
@@ -420,7 +459,7 @@ describe('Order Aggregate', () => {
 
     it('should reject duplicate payment approval with different payment ID', () => {
       // Arrange
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
       const firstPaymentId = 'PAY-11111';
       const secondPaymentId = 'PAY-22222';
 
@@ -438,7 +477,7 @@ describe('Order Aggregate', () => {
 
     it('should track multiple processed payment IDs from duplicate approvals', () => {
       // Arrange
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
       const paymentId = 'PAY-12345';
 
       // Act - Process same payment ID multiple times
@@ -453,7 +492,7 @@ describe('Order Aggregate', () => {
 
     it('should allow idempotent calls before and after state transition', () => {
       // Arrange
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
       const paymentId = 'PAY-99999';
 
       // Act & Assert
@@ -472,10 +511,9 @@ describe('Order Aggregate', () => {
     });
   });
 
-
   describe('State Machine: cancel', () => {
     it('should transition from AwaitingPayment to Cancelled with reason', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       const cancellationReason = 'Customer requested cancellation';
       order.cancel(cancellationReason);
@@ -485,7 +523,7 @@ describe('Order Aggregate', () => {
     });
 
     it('should transition from Paid to Cancelled with reason (refund scenario)', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       order.markAsPaid('pay_123');
       const cancellationReason = 'Product defect - customer requested refund';
@@ -498,13 +536,13 @@ describe('Order Aggregate', () => {
 
     it('should raise OrderCancelled event when cancelling from AwaitingPayment (T037)', () => {
       const orderId = OrderId.generate();
-      const items = [OrderItemBuilder.create().build()];
+      const items = [createTestOrderItem()];
       const order = Order.create(
         orderId,
         CartId.create(),
         CustomerId.fromString('customer-123'),
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         new Money(0, 'USD'),
         new Money(100.0, 'USD'),
       );
@@ -528,13 +566,13 @@ describe('Order Aggregate', () => {
 
     it('should raise OrderCancelled event when cancelling from Paid (T050)', () => {
       const orderId = OrderId.generate();
-      const items = [OrderItemBuilder.create().build()];
+      const items = [createTestOrderItem()];
       const order = Order.create(
         orderId,
         CartId.create(),
         CustomerId.fromString('customer-123'),
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         new Money(0, 'USD'),
         new Money(100.0, 'USD'),
       );
@@ -561,7 +599,7 @@ describe('Order Aggregate', () => {
     });
 
     it('should throw error when cancelling already cancelled order', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       order.cancel('First cancellation');
 
@@ -571,7 +609,7 @@ describe('Order Aggregate', () => {
     });
 
     it('should throw error when cancelling with empty reason (T039)', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       // Test empty string
       expect(() => {
@@ -593,7 +631,7 @@ describe('Order Aggregate', () => {
     });
 
     it('should preserve order state when cancel fails', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       order.cancel('First cancellation');
       const statusBeforeAttempt = order.status;
@@ -612,13 +650,13 @@ describe('Order Aggregate', () => {
 
   describe('State Machine Validation Methods', () => {
     it('canBePaid should return true for AwaitingPayment status', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       expect(order.canBePaid()).toBe(true);
     });
 
     it('canBePaid should return false for Paid status', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       order.markAsPaid('pay_123');
 
@@ -626,7 +664,7 @@ describe('Order Aggregate', () => {
     });
 
     it('canBePaid should return false for Cancelled status', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       order.cancel('Test cancellation');
 
@@ -634,13 +672,13 @@ describe('Order Aggregate', () => {
     });
 
     it('canBeCancelled should return true for AwaitingPayment status', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       expect(order.canBeCancelled()).toBe(true);
     });
 
     it('canBeCancelled should return true for Paid status', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       order.markAsPaid('pay_123');
 
@@ -648,7 +686,7 @@ describe('Order Aggregate', () => {
     });
 
     it('canBeCancelled should return false for Cancelled status', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       order.cancel('Test cancellation');
 
@@ -662,11 +700,11 @@ describe('Order Aggregate', () => {
       // For now, we trust the pricing service to provide correct totals
       // Future enhancement: Add invariant validation in Order.create()
       const items = [
-        OrderItemBuilder.create()
-          .withProductName('Product A')
-          .withQuantity(2)
-          .withUnitPrice(new Money(50.0, 'USD'))
-          .build(),
+        createTestOrderItem({
+          name: 'Product A',
+          quantity: 2,
+          unitPrice: new Money(50.0, 'USD'),
+        }),
       ]; // 100.00
       const orderLevelDiscount = new Money(10.0, 'USD');
       const totalAmount = new Money(90.0, 'USD'); // Correct: 100 - 10
@@ -676,7 +714,7 @@ describe('Order Aggregate', () => {
         CartId.create(),
         CustomerId.fromString('customer-123'),
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         orderLevelDiscount,
         totalAmount,
       );
@@ -685,7 +723,7 @@ describe('Order Aggregate', () => {
     });
 
     it('should preserve immutability of order items collection', () => {
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
 
       const originalLength = order.items.length;
 
@@ -695,7 +733,7 @@ describe('Order Aggregate', () => {
     });
 
     it('should maintain createdAt timestamp consistency', () => {
-      const items = [OrderItemBuilder.create().build()];
+      const items = [createTestOrderItem()];
 
       const beforeCreation = new Date();
       const order = Order.create(
@@ -703,7 +741,7 @@ describe('Order Aggregate', () => {
         CartId.create(),
         CustomerId.fromString('customer-123'),
         items,
-        TEST_ADDRESS_US,
+        createTestShippingAddress(),
         new Money(0, 'USD'),
         new Money(100.0, 'USD'),
       );

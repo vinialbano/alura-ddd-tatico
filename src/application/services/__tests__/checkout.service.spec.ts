@@ -18,12 +18,30 @@ import { OrderId } from '../../../domain/order/value-objects/order-id';
 import { ShippingAddress } from '../../../domain/order/value-objects/shipping-address';
 import { EmptyCartError } from '../../../domain/shopping-cart/exceptions/empty-cart.error';
 import { DomainEventPublisher } from '../../../infrastructure/events/domain-event-publisher';
-import { createMockCartRepository } from '../../../../test/factories/mock-repositories.factory';
-import { createMockOrderRepository } from '../../../../test/factories/mock-repositories.factory';
-import { createMockPricingService } from '../../../../test/factories/mock-services.factory';
-import { createMockOrderCreationService } from '../../../../test/factories/mock-services.factory';
-import { createMockEventPublisher } from '../../../../test/factories/mock-services.factory';
-import { OrderBuilder } from '../../../../test/builders/order.builder';
+
+// Inline mock factory functions
+const createMockCartRepository = (): jest.Mocked<ShoppingCartRepository> => ({
+  save: jest.fn(),
+  findById: jest.fn(),
+});
+
+const createMockOrderRepository = (): jest.Mocked<OrderRepository> => ({
+  save: jest.fn(),
+  findById: jest.fn(),
+  findByCartId: jest.fn(),
+});
+
+const createMockPricingService = (): jest.Mocked<OrderPricingService> => ({
+  price: jest.fn(),
+} as any);
+
+const createMockOrderCreationService = (): jest.Mocked<OrderCreationService> => ({
+  createFromCart: jest.fn(),
+} as any);
+
+const createMockEventPublisher = (): jest.Mocked<DomainEventPublisher> => ({
+  publishDomainEvents: jest.fn(),
+} as any);
 
 const createCheckoutDto = (cartId: string): CheckoutDTO => ({
   cartId,
@@ -184,19 +202,32 @@ describe('CheckoutService', () => {
       cart.addItem(testProductId, Quantity.of(2));
 
       const existingOrderId = OrderId.generate();
-      const existingOrder = OrderBuilder.create()
-        .withOrderId(existingOrderId)
-        .withCustomerId(testCustomerId)
-        .withShippingAddress(
-          new ShippingAddress({
-            street: '123 Main St',
-            city: 'Springfield',
-            stateOrProvince: 'IL',
-            postalCode: '62701',
-            country: 'USA',
-          }),
-        )
-        .build();
+      const existingOrder = Order.create(
+        existingOrderId,
+        testCartId,
+        testCustomerId,
+        [
+          OrderItem.create(
+            new ProductSnapshot({
+              name: 'Test Product',
+              description: 'Test description',
+              sku: 'TEST-SKU-001',
+            }),
+            Quantity.of(2),
+            new Money(24.99, 'USD'),
+            new Money(0, 'USD'),
+          ),
+        ],
+        new ShippingAddress({
+          street: '123 Main St',
+          city: 'Springfield',
+          stateOrProvince: 'IL',
+          postalCode: '62701',
+          country: 'USA',
+        }),
+        new Money(0, 'USD'),
+        new Money(49.98, 'USD'),
+      );
 
       // Mark cart as converted
       cart.markAsConverted();

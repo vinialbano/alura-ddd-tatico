@@ -450,6 +450,5 @@ describe('Event-Driven Integration Flow E2E', () => {
       expect(order!.status.toString()).toBe('CANCELLED');
       expect(order!.paymentId).toBeNull();
     });
-
   });
 });

@@ -5,8 +5,51 @@ import {
 import { OrderRepository } from '../../../../domain/order/order.repository';
 import { IPaymentGateway } from '../../gateways/payment-gateway.interface';
 import { OrderStatus } from '../../../../domain/order/value-objects/order-status';
-import { OrderBuilder } from '../../../../../test/builders/order.builder';
-import { createMockOrderRepository } from '../../../../../test/factories/mock-repositories.factory';
+import { Order } from '../../../../domain/order/order';
+import { OrderId } from '../../../../domain/order/value-objects/order-id';
+import { CartId } from '../../../../domain/shopping-cart/value-objects/cart-id';
+import { CustomerId } from '../../../../domain/shared/value-objects/customer-id';
+import { OrderItem } from '../../../../domain/order/order-item';
+import { ProductSnapshot } from '../../../../domain/order/value-objects/product-snapshot';
+import { Quantity } from '../../../../domain/shared/value-objects/quantity';
+import { Money } from '../../../../domain/order/value-objects/money';
+import { ShippingAddress } from '../../../../domain/order/value-objects/shipping-address';
+
+// Inline mock factory
+const createMockOrderRepository = (): jest.Mocked<OrderRepository> => ({
+  save: jest.fn(),
+  findById: jest.fn(),
+  findByCartId: jest.fn(),
+});
+
+// Test helper to create order
+const createTestOrder = () =>
+  Order.create(
+    OrderId.generate(),
+    CartId.create(),
+    CustomerId.fromString('customer-123'),
+    [
+      OrderItem.create(
+        new ProductSnapshot({
+          name: 'Test Product',
+          description: 'Test description',
+          sku: 'TEST-SKU-001',
+        }),
+        Quantity.of(1),
+        new Money(100.0, 'USD'),
+        new Money(0, 'USD'),
+      ),
+    ],
+    new ShippingAddress({
+      street: '123 Main St',
+      city: 'Springfield',
+      stateOrProvince: 'IL',
+      postalCode: '62701',
+      country: 'USA',
+    }),
+    new Money(0, 'USD'),
+    new Money(100.0, 'USD'),
+  );
 
 describe('ConfirmPaymentService', () => {
   let service: ConfirmPaymentService;
@@ -31,7 +74,7 @@ describe('ConfirmPaymentService', () => {
   describe('execute', () => {
     it('should successfully confirm payment when gateway approves (T015)', async () => {
       // Arrange
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
       const orderId = order.id.getValue();
 
       mockOrderRepository.findById.mockResolvedValue(order);
@@ -64,7 +107,7 @@ describe('ConfirmPaymentService', () => {
 
     it('should throw PaymentDeclinedError when gateway declines payment (T023)', async () => {
       // Arrange
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
       const orderId = order.id.getValue();
 
       mockOrderRepository.findById.mockResolvedValue(order);
@@ -88,7 +131,7 @@ describe('ConfirmPaymentService', () => {
 
     it('should throw PaymentDeclinedError with correct reason for card declined', async () => {
       // Arrange
-      const order = OrderBuilder.create().build();
+      const order = createTestOrder();
       const orderId = order.id.getValue();
 
       mockOrderRepository.findById.mockResolvedValue(order);
