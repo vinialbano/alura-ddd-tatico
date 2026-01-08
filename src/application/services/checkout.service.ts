@@ -18,6 +18,7 @@ import {
   ShippingAddressResponseDTO,
 } from '../dtos/order-response.dto';
 import { CartNotFoundException } from '../exceptions/cart-not-found.exception';
+import { EmptyCartError } from '../../domain/shopping-cart/exceptions/empty-cart.error';
 
 /**
  * CheckoutService
@@ -61,7 +62,12 @@ export class CheckoutService {
       throw new CartNotFoundException(cartId);
     }
 
-    // 2. Check if already converted (idempotent behavior - application concern)
+    // 2. Validate cart is not empty (fail fast before external calls)
+    if (cart.isEmpty()) {
+      throw new EmptyCartError();
+    }
+
+    // 3. Check if already converted (idempotent behavior - application concern)
     if (cart.isConverted()) {
       const existingOrder = await this.orderRepository.findByCartId(cartId);
       if (existingOrder) {
@@ -69,22 +75,22 @@ export class CheckoutService {
       }
     }
 
-    // 3. Price cart items (domain service)
+    // 4. Price cart items (domain service)
     const pricedData = await this.pricingService.price(cart.getItems());
 
-    // 4. Create order (domain service - enforces business rules like empty cart validation)
+    // 5. Create order (domain service)
     const order = this.orderCreationService.createFromCart(
       cart,
       pricedData,
       shippingAddress,
     );
 
-    // 5. Persist order and update cart (infrastructure coordination)
+    // 6. Persist order and update cart (infrastructure coordination)
     await this.orderRepository.save(order);
     cart.markAsConverted();
     await this.cartRepository.save(cart);
 
-    // 6. Publish domain events (OrderPlaced) to message bus
+    // 7. Publish domain events (OrderPlaced) to message bus
     await this.eventPublisher.publishDomainEvents([...order.getDomainEvents()]);
 
     return this.mapToDto(order);
