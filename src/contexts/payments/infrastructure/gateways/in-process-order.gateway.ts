@@ -1,11 +1,20 @@
 import { Injectable } from '@nestjs/common';
+import { PaymentApprovedHandler } from '../../../orders/application/events/handlers/payment-approved.handler';
 import { IOrderGateway } from '../../application/gateways/order-gateway.interface';
 
 @Injectable()
 export class InProcessOrderGateway implements IOrderGateway {
-  // Will inject PaymentApprovedHandler after Orders BC is set up
+  constructor(
+    private readonly paymentApprovedHandler: PaymentApprovedHandler,
+  ) {}
+
   async markOrderAsPaid(orderId: string, paymentId: string): Promise<void> {
-    // TODO: Wire to PaymentApprovedHandler
-    throw new Error('Not yet implemented - will be wired in Phase 4');
+    await this.paymentApprovedHandler.handle({
+      orderId,
+      paymentId,
+      approvedAmount: 0,
+      currency: 'USD',
+      timestamp: new Date().toISOString(),
+    });
   }
 }
