@@ -111,27 +111,6 @@ describe('CartService (Integration)', () => {
       ).rejects.toThrow();
     });
 
-    it('should throw error when exceeding max products', async () => {
-      const createDto: CreateCartDto = { customerId: 'customer-1' };
-      const cartResponse = await service.createCart(createDto);
-
-      // Add 20 unique products
-      for (let i = 1; i <= 20; i++) {
-        await service.addItem(cartResponse.cartId, {
-          productId: `product-${i}`,
-          quantity: 1,
-        });
-      }
-
-      // Attempt to add 21st product
-      await expect(
-        service.addItem(cartResponse.cartId, {
-          productId: 'product-21',
-          quantity: 1,
-        }),
-      ).rejects.toThrow('Cart cannot contain more than 20 unique products');
-    });
-
     it('should throw error when consolidation exceeds max quantity', async () => {
       const createDto: CreateCartDto = { customerId: 'customer-1' };
       const cartResponse = await service.createCart(createDto);

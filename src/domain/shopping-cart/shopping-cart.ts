@@ -23,8 +23,6 @@ export type ShoppingCartParams = {
  * Transaction boundary for all cart operations.
  */
 export class ShoppingCart {
-  private static readonly MAX_PRODUCTS = 20;
-
   private readonly cartId: CartId;
   private readonly customerId: CustomerId;
   private readonly items: Map<string, CartItem>;
@@ -57,7 +55,6 @@ export class ShoppingCart {
    * @param productId - Product to add
    * @param quantity - Quantity to add
    * @throws InvalidCartOperationError if cart is converted
-   * @throws InvalidCartOperationError if adding would exceed 20 products
    * @throws InvalidCartOperationError if consolidation exceeds 10
    */
   addItem(productId: ProductId, quantity: Quantity): void {
@@ -70,8 +67,6 @@ export class ShoppingCart {
       // Consolidate quantity (may throw if exceeds 10)
       existingItem.addQuantity(quantity);
     } else {
-      // Check max products limit before adding new product
-      this.ensureWithinProductLimit();
       const newItem = CartItem.create(productId, quantity);
       this.items.set(productKey, newItem);
     }
@@ -189,14 +184,6 @@ export class ShoppingCart {
     }
   }
 
-  private ensureWithinProductLimit(): void {
-    if (this.items.size >= ShoppingCart.MAX_PRODUCTS) {
-      throw new InvalidCartOperationError(
-        'Cart cannot contain more than 20 unique products',
-      );
-    }
-  }
-
   /**
    * Ensures empty carts cannot be restored with converted status
    * @throws Error if cart is empty and status is converted
@@ -228,14 +215,12 @@ export class ShoppingCart {
    * Called during construction to ensure aggregate is always in a valid state
    *
    * Delegates to specific validation methods:
-   * - ensureWithinProductLimit: Maximum 20 unique products
    * - ensureConvertedCartNotEmpty: No empty converted carts
    * - ensureValidConversionStatus: Valid status enum value
    *
    * @throws Error if any invariant is violated
    */
   private validate(): void {
-    this.ensureWithinProductLimit();
     this.ensureConvertedCartNotEmpty();
     this.ensureValidConversionStatus();
   }
