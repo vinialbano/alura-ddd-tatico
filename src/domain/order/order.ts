@@ -12,32 +12,9 @@ import { OrderCancelled } from './events/order-cancelled.event';
 import { OrderPlaced } from './events/order-placed.event';
 import { EventId } from '../shared/value-objects/event-id';
 
-/**
- * Order Aggregate Root
- *
- * Represents a customer's purchase intent and manages the complete order lifecycle
- * through a state machine: AwaitingPayment → Paid → Cancelled
- *
- * Key Responsibilities:
- * - Enforce order state machine invariants
- * - Own and manage OrderItems collection
- * - Capture product snapshots and pricing at checkout time
- * - Track payment and cancellation information
- *
- * State Machine:
- * - AwaitingPayment (initial): Order created, waiting for payment
- * - Paid: Payment received and recorded
- * - Cancelled: Order cancelled (from either AwaitingPayment or Paid)
- *
- * Invariants:
- * - Must have at least one OrderItem
- * - All OrderItems must share same currency as Order totalAmount
- * - Can only transition to Paid from AwaitingPayment
- * - Can only transition to Cancelled from AwaitingPayment or Paid
- * - Cannot transition from Cancelled to any other state
- * - PaymentId must be provided when marking as Paid
- * - CancellationReason must be provided when marking as Cancelled
- */
+// Order Aggregate Root - manages order lifecycle through state machine
+// State transitions: AwaitingPayment → Paid → Cancelled
+// Invariants: min 1 item, currency consistency, valid state transitions
 export class Order {
   private readonly _domainEvents: DomainEvent[] = [];
   private readonly _processedPaymentIds: Set<string> = new Set();
@@ -58,19 +35,7 @@ export class Order {
     this.validateInvariants();
   }
 
-  /**
-   * Factory method to create a new Order in AwaitingPayment status
-   *
-   * @param id - Unique order identifier
-   * @param cartId - Reference to source shopping cart
-   * @param customerId - Customer who created the order
-   * @param items - Collection of order items (min 1 required)
-   * @param shippingAddress - Delivery address
-   * @param orderLevelDiscount - Cart-wide discount applied
-   * @param totalAmount - Total order amount after all discounts
-   * @returns New Order instance in AwaitingPayment status
-   * @throws Error if items array is empty
-   */
+  // Creates new order in AwaitingPayment status
   static create(
     id: OrderId,
     cartId: CartId,
@@ -112,15 +77,7 @@ export class Order {
     return order;
   }
 
-  /**
-   * Transition order from AwaitingPayment to Paid status
-   *
-   * Idempotent: Multiple calls with the same paymentId are safe and won't cause state changes or duplicate events.
-   * Raises OrderPaid domain event when successful (only on first call per paymentId).
-   *
-   * @param paymentId - Payment transaction identifier
-   * @throws InvalidOrderStateTransitionError if not in AwaitingPayment status or if already paid with different paymentId
-   */
+  // Marks order as paid - idempotent per paymentId
   markAsPaid(paymentId: string): void {
     // Idempotency check: If we've already processed this payment ID, return early
     if (this._processedPaymentIds.has(paymentId)) {
@@ -156,18 +113,7 @@ export class Order {
   //   // Raise StockReserved domain event if needed
   // }
 
-  /**
-   * Transition order to Cancelled status with reason
-   *
-   * Can be called from AwaitingPayment or Paid states
-   * - AwaitingPayment: Simple cancellation (no refund needed)
-   * - Paid: Requires refund processing
-   *
-   * Raises OrderCancelled domain event with previous state for subscriber context
-   *
-   * @param reason - Cancellation reason (min 1 character)
-   * @throws InvalidOrderStateTransitionError if already cancelled
-   */
+  // Cancels order - from AwaitingPayment (no refund) or Paid (refund needed)
   cancel(reason: string): void {
     if (!this.canBeCancelled()) {
       throw new InvalidOrderStateTransitionError(
@@ -198,20 +144,10 @@ export class Order {
     );
   }
 
-  /**
-   * Check if order can accept payment
-   *
-   * @returns true if order is in AwaitingPayment status
-   */
   canBePaid(): boolean {
     return this._status.equals(OrderStatus.AwaitingPayment);
   }
 
-  /**
-   * Check if order can be cancelled
-   *
-   * @returns true if order is in AwaitingPayment or Paid status
-   */
   canBeCancelled(): boolean {
     return (
       this._status.equals(OrderStatus.AwaitingPayment) ||
@@ -219,28 +155,17 @@ export class Order {
     );
   }
 
-  /**
-   * Check if a payment ID has been processed (for idempotency)
-   *
-   * @param paymentId - Payment transaction identifier to check
-   * @returns true if this payment ID has already been processed
-   */
+  // Idempotency check for payment processing
   hasProcessedPayment(paymentId: string): boolean {
     return this._processedPaymentIds.has(paymentId);
   }
 
-  /**
-   * Validate aggregate invariants
-   *
-   * @throws Error if invariants are violated
-   */
   private validateInvariants(): void {
     if (this._items.length === 0) {
       throw new Error('Order must have at least one item');
     }
 
-    // Additional invariant: All items must share same currency as order total
-    // This is enforced by the pricing service, but we validate here as well
+    // Currency consistency enforced by pricing service, validated here for defense
     const orderCurrency = this._totalAmount.currency;
     const allSameCurrency = this._items.every(
       (item) =>
@@ -307,21 +232,11 @@ export class Order {
     return this._createdAt;
   }
 
-  /**
-   * Get all domain events raised by this aggregate
-   *
-   * @returns Readonly array of domain events
-   */
   getDomainEvents(): readonly DomainEvent[] {
     return this._domainEvents;
   }
 
-  /**
-   * Clear all domain events after they have been published
-   *
-   * Should be called by the application service after successfully
-   * publishing events to the event bus
-   */
+  // Called after publishing events to bus
   clearDomainEvents(): void {
     this._domainEvents.length = 0;
   }
