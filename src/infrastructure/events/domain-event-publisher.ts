@@ -9,7 +9,7 @@ import {
   OrderPlacedPayload,
   OrderPaidPayload,
   OrderCancelledPayload,
-} from '../../application/events/integration-message';
+} from '../../shared/events/integration-message';
 
 /**
  * Domain Event Publisher

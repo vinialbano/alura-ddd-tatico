@@ -3,7 +3,7 @@ import type { OrderRepository } from '../../../domain/order/order.repository';
 import { OrderId } from '../../../shared/value-objects/order-id';
 import { DomainEventPublisher } from '../../../infrastructure/events/domain-event-publisher';
 import { ORDER_REPOSITORY } from '../../../infrastructure/modules/order.module';
-import { PaymentApprovedPayload } from '../integration-message';
+import { PaymentApprovedPayload } from '../../../shared/events/integration-message';
 
 /**
  * PaymentApprovedHandler

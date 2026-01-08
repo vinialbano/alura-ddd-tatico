@@ -1,4 +1,4 @@
-import type { IntegrationMessage } from './integration-message';
+import type { IntegrationMessage } from '../../shared/events/integration-message';
 
 // Re-export for convenience
 export type { IntegrationMessage };

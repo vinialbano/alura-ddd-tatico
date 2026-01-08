@@ -6,7 +6,7 @@ import {
   OrderPlacedPayload,
   OrderCancelledPayload,
   PaymentApprovedPayload,
-} from '../../../application/events/integration-message';
+} from '../../../shared/events/integration-message';
 import { MESSAGE_BUS } from '../../../application/events/message-bus.interface';
 
 /**
