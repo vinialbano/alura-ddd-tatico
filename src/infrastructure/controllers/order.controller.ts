@@ -15,7 +15,7 @@ import { OrderService } from '../../application/services/order.service';
 import {
   ConfirmPaymentService,
   PaymentDeclinedError,
-} from '../../application/order/services/confirm-payment.service';
+} from '../../application/services/confirm-payment.service';
 import { CheckoutDTO } from '../../application/dtos/checkout.dto';
 import { MarkPaidDTO } from '../../application/dtos/mark-paid.dto';
 import { CancelOrderDTO } from '../../application/dtos/cancel-order.dto';

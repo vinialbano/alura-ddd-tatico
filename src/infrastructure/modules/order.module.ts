@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { CatalogGateway } from 'src/application/gateways/catalog.gateway.interface';
 import { PricingGateway } from 'src/application/gateways/pricing.gateway.interface';
-import { IPaymentGateway } from 'src/application/order/gateways/payment-gateway.interface';
+import { IPaymentGateway } from 'src/application/gateways/payment-gateway.interface';
 import { OrderRepository } from 'src/domain/order/order.repository';
 import { ShoppingCartRepository } from 'src/domain/shopping-cart/shopping-cart.repository';
-import { ConfirmPaymentService } from '../../application/order/services/confirm-payment.service';
+import { ConfirmPaymentService } from '../../application/services/confirm-payment.service';
 import { CheckoutService } from '../../application/services/checkout.service';
 import { OrderService } from '../../application/services/order.service';
 import { OrderCreationService } from '../../domain/order/services/order-creation.service';

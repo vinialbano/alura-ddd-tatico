@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { IPaymentGateway } from '../../../application/order/gateways/payment-gateway.interface';
-import { PaymentResult } from '../../../application/order/gateways/payment-result';
+import { IPaymentGateway } from '../../../application/gateways/payment-gateway.interface';
+import { PaymentResult } from '../../../application/gateways/payment-result';
 import { OrderId } from '../../../domain/order/value-objects/order-id';
 import { Money } from '../../../domain/order/value-objects/money';
 

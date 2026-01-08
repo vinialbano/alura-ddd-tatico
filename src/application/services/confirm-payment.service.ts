@@ -1,18 +1,18 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Order } from 'src/domain/order/order';
-import type { OrderRepository } from '../../../domain/order/order.repository';
-import { OrderId } from '../../../domain/order/value-objects/order-id';
+import type { OrderRepository } from '../../domain/order/order.repository';
+import { OrderId } from '../../domain/order/value-objects/order-id';
 import {
   ORDER_REPOSITORY,
   PAYMENT_GATEWAY,
-} from '../../../infrastructure/modules/order.module';
+} from '../../infrastructure/modules/order.module';
 import {
   MoneyDTO,
   OrderItemDTO,
   OrderResponseDTO,
   ProductSnapshotDTO,
   ShippingAddressResponseDTO,
-} from '../../dtos/order-response.dto';
+} from '../dtos/order-response.dto';
 import type { IPaymentGateway } from '../gateways/payment-gateway.interface';
 
 /**
