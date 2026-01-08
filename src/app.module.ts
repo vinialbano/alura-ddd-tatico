@@ -1,73 +1,32 @@
-import { Inject, Logger, Module, OnModuleInit } from '@nestjs/common';
-
-import { PaymentApprovedHandler } from './application/events/handlers/payment-approved.handler';
-import { PaymentApprovedPayload } from './shared/events/integration-message';
-import type { IMessageBus } from './shared/message-bus/message-bus.interface';
+import { Module, OnModuleInit } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
+import { CartModule } from './contexts/orders/infrastructure/modules/cart.module';
+import { OrderModule } from './contexts/orders/infrastructure/modules/order.module';
+import { PaymentModule } from './contexts/payments/infrastructure/modules/payment.module';
+import { DomainExceptionFilter } from './contexts/orders/infrastructure/filters/domain-exception.filter';
+import { DomainEventPublisher } from './contexts/orders/infrastructure/events/domain-event-publisher';
+import { InMemoryMessageBus } from './shared/message-bus/in-memory-message-bus';
 import { MESSAGE_BUS } from './shared/message-bus/message-bus.interface';
-import { PaymentsConsumer } from './infrastructure/events/consumers/payments-consumer';
-import { CartModule } from './infrastructure/modules/cart.module';
-import { EventsModule } from './infrastructure/modules/events.module';
-import { OrderModule } from './infrastructure/modules/order.module';
+import { PaymentsConsumer } from './contexts/payments/infrastructure/events/consumers/payments-consumer';
 
 @Module({
-  imports: [
-    EventsModule, // Global module providing MESSAGE_BUS and DomainEventPublisher
-    CartModule,
-    OrderModule,
-  ],
+  imports: [CartModule, OrderModule, PaymentModule],
   providers: [
-    // Consumers (simulate external bounded contexts)
-    PaymentsConsumer,
-    // Application handlers
-    PaymentApprovedHandler,
+    {
+      provide: MESSAGE_BUS,
+      useClass: InMemoryMessageBus,
+    },
+    DomainEventPublisher,
+    {
+      provide: APP_FILTER,
+      useClass: DomainExceptionFilter,
+    },
   ],
 })
 export class AppModule implements OnModuleInit {
-  private readonly logger = new Logger(AppModule.name);
+  constructor(private readonly paymentsConsumer: PaymentsConsumer) {}
 
-  constructor(
-    @Inject(MESSAGE_BUS)
-    private readonly messageBus: IMessageBus,
-    private readonly paymentsConsumer: PaymentsConsumer,
-    private readonly paymentApprovedHandler: PaymentApprovedHandler,
-  ) {}
-
-  /**
-   * Initialize message bus subscriptions during application startup
-   * This wires up the event-driven integration flow:
-   *
-   * 1. Consumers subscribe to external events (order.placed)
-   * 2. Handlers subscribe to integration events (payment.approved)
-   */
-  onModuleInit(): void {
-    // Initialize external bounded context consumers
+  onModuleInit() {
     this.paymentsConsumer.initialize();
-
-    // Subscribe application handlers to integration events
-    this.messageBus.subscribe<PaymentApprovedPayload>(
-      'payment.approved',
-      async (message) => {
-        const { messageId, payload } = message;
-        const { orderId, paymentId } = payload;
-
-        this.logger.debug(
-          `[Infrastructure] Routing payment.approved message ${messageId} to application handler (order: ${orderId}, payment: ${paymentId})`,
-        );
-
-        try {
-          await this.paymentApprovedHandler.handle(message.payload);
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : 'Unknown error';
-          const errorStack = error instanceof Error ? error.stack : undefined;
-          this.logger.error(
-            `[Infrastructure] Failed to handle payment.approved message ${messageId}: ${errorMessage}`,
-            errorStack,
-          );
-          // In production, this might publish to a dead-letter queue
-          throw error;
-        }
-      },
-    );
   }
 }

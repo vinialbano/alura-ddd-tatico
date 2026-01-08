@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Money } from '../../../../shared/value-objects/money';
-import { IOrderGateway, ORDER_GATEWAY } from '../gateways/order-gateway.interface';
+import type { IOrderGateway } from '../gateways/order-gateway.interface';
+import { ORDER_GATEWAY } from '../gateways/order-gateway.interface';
 import { PaymentResult } from './payment-result';
 
 @Injectable()

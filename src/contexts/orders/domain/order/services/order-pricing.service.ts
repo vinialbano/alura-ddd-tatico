@@ -6,7 +6,7 @@ import {
 import { CartItem } from '../../shopping-cart/cart-item';
 import { OrderItem } from '../order-item';
 import { ProductSnapshot } from '../value-objects/product-snapshot';
-import { Money } from '../../../shared/value-objects/money';
+import { Money } from '../../../../../shared/value-objects/money';
 
 /**
  * PricedOrderData
