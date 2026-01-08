@@ -6,11 +6,11 @@ import {
   MESSAGE_BUS,
   IMessageBus,
 } from '../src/shared/message-bus/message-bus.interface';
-import { OrderRepository } from '../src/domain/order/order.repository';
+import { OrderRepository } from '../src/contexts/orders/domain/order/order.repository';
 import { OrderId } from '../src/shared/value-objects/order-id';
-import { ORDER_REPOSITORY } from '../src/infrastructure/modules/order.module';
-import { CartResponseDto } from '../src/application/dtos/cart-response.dto';
-import { OrderResponseDTO } from '../src/application/dtos/order-response.dto';
+import { ORDER_REPOSITORY } from '../src/contexts/orders/infrastructure/modules/order.module';
+import { CartResponseDto } from '../src/contexts/orders/application/dtos/cart-response.dto';
+import { OrderResponseDTO } from '../src/contexts/orders/application/dtos/order-response.dto';
 import { Server } from 'net';
 
 /**
