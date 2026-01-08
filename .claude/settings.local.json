@@ -8,7 +8,9 @@
       "Bash(npm run test)",
       "Bash(npm run format:*)",
       "Bash(npm run build:*)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "Bash(find:*)",
+      "Bash(git show:*)"
     ]
   }
 }

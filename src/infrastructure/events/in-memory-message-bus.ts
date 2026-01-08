@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import {
   IMessageBus,
   IntegrationMessage,
-} from '../../application/events/message-bus.interface';
+} from '../../shared/message-bus/message-bus.interface';
 
 type MessageHandler<T = any> = (
   message: IntegrationMessage<T>,

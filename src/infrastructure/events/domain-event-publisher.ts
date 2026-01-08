@@ -1,6 +1,6 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import type { IMessageBus } from '../../application/events/message-bus.interface';
-import { MESSAGE_BUS } from '../../application/events/message-bus.interface';
+import type { IMessageBus } from '../../shared/message-bus/message-bus.interface';
+import { MESSAGE_BUS } from '../../shared/message-bus/message-bus.interface';
 import { DomainEvent } from '../../domain/shared/domain-event';
 import { OrderPlaced } from '../../domain/order/events/order-placed.event';
 import { OrderPaid } from '../../domain/order/events/order-paid.event';

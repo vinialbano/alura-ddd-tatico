@@ -1,5 +1,5 @@
 import { Module, Global } from '@nestjs/common';
-import { MESSAGE_BUS } from '../../application/events/message-bus.interface';
+import { MESSAGE_BUS } from '../../shared/message-bus/message-bus.interface';
 import { InMemoryMessageBus } from '../events/in-memory-message-bus';
 import { DomainEventPublisher } from '../events/domain-event-publisher';
 

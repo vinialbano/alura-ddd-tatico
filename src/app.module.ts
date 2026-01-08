@@ -2,8 +2,8 @@ import { Inject, Logger, Module, OnModuleInit } from '@nestjs/common';
 
 import { PaymentApprovedHandler } from './application/events/handlers/payment-approved.handler';
 import { PaymentApprovedPayload } from './shared/events/integration-message';
-import type { IMessageBus } from './application/events/message-bus.interface';
-import { MESSAGE_BUS } from './application/events/message-bus.interface';
+import type { IMessageBus } from './shared/message-bus/message-bus.interface';
+import { MESSAGE_BUS } from './shared/message-bus/message-bus.interface';
 import { PaymentsConsumer } from './infrastructure/events/consumers/payments-consumer';
 import { CartModule } from './infrastructure/modules/cart.module';
 import { EventsModule } from './infrastructure/modules/events.module';

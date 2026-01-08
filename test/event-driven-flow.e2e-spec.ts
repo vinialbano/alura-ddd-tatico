@@ -5,7 +5,7 @@ import { AppModule } from '../src/app.module';
 import {
   MESSAGE_BUS,
   IMessageBus,
-} from '../src/application/events/message-bus.interface';
+} from '../src/shared/message-bus/message-bus.interface';
 import { OrderRepository } from '../src/domain/order/order.repository';
 import { OrderId } from '../src/shared/value-objects/order-id';
 import { ORDER_REPOSITORY } from '../src/infrastructure/modules/order.module';

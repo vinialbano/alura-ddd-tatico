@@ -1,13 +1,13 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { IMessageBus } from '../../../application/events/message-bus.interface';
+import type { IMessageBus } from '../../../shared/message-bus/message-bus.interface';
 import {
   IntegrationMessage,
   OrderPlacedPayload,
   OrderCancelledPayload,
   PaymentApprovedPayload,
 } from '../../../shared/events/integration-message';
-import { MESSAGE_BUS } from '../../../application/events/message-bus.interface';
+import { MESSAGE_BUS } from '../../../shared/message-bus/message-bus.interface';
 
 /**
  * PaymentsConsumer
