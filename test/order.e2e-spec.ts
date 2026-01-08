@@ -3,8 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Server } from 'net';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { CartResponseDto } from '../src/application/dtos/cart-response.dto';
-import { OrderResponseDTO } from '../src/application/dtos/order-response.dto';
+import { CartResponseDto } from '../src/contexts/orders/application/dtos/cart-response.dto';
+import { OrderResponseDTO } from '../src/contexts/orders/application/dtos/order-response.dto';
 
 // Type for NestJS error responses
 interface ErrorResponse {

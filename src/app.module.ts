@@ -4,19 +4,12 @@ import { CartModule } from './contexts/orders/infrastructure/modules/cart.module
 import { OrderModule } from './contexts/orders/infrastructure/modules/order.module';
 import { PaymentModule } from './contexts/payments/infrastructure/modules/payment.module';
 import { DomainExceptionFilter } from './contexts/orders/infrastructure/filters/domain-exception.filter';
-import { DomainEventPublisher } from './contexts/orders/infrastructure/events/domain-event-publisher';
-import { InMemoryMessageBus } from './shared/message-bus/in-memory-message-bus';
-import { MESSAGE_BUS } from './shared/message-bus/message-bus.interface';
+import { SharedModule } from './shared/shared.module';
 import { PaymentsConsumer } from './contexts/payments/infrastructure/events/consumers/payments-consumer';
 
 @Module({
-  imports: [CartModule, OrderModule, PaymentModule],
+  imports: [SharedModule, CartModule, OrderModule, PaymentModule],
   providers: [
-    {
-      provide: MESSAGE_BUS,
-      useClass: InMemoryMessageBus,
-    },
-    DomainEventPublisher,
     {
       provide: APP_FILTER,
       useClass: DomainExceptionFilter,

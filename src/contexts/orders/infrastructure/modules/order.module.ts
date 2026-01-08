@@ -32,6 +32,9 @@ export const PRICING_GATEWAY = 'PricingGateway';
   ],
   controllers: [OrderController],
   providers: [
+    // Infrastructure services
+    DomainEventPublisher,
+
     // Repositories (Infrastructure → Domain Interface)
     {
       provide: ORDER_REPOSITORY,
