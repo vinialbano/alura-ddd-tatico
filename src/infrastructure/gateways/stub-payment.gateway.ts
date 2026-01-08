@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { IPaymentGateway } from '../../../application/gateways/payment-gateway.interface';
-import { PaymentResult } from '../../../application/gateways/payment-result';
-import { OrderId } from '../../../domain/order/value-objects/order-id';
-import { Money } from '../../../domain/order/value-objects/money';
+import { IPaymentGateway } from '../../application/gateways/payment-gateway.interface';
+import { PaymentResult } from '../../application/gateways/payment-result';
+import { Money } from '../../domain/order/value-objects/money';
+import { OrderId } from '../../domain/order/value-objects/order-id';
 
 /**
  * Stubbed Payment Gateway Implementation
@@ -32,7 +32,7 @@ import { Money } from '../../../domain/order/value-objects/money';
  * ```
  */
 @Injectable()
-export class StubbedPaymentGateway implements IPaymentGateway {
+export class StubPaymentGateway implements IPaymentGateway {
   async processPayment(
     orderId: OrderId,
     amount: Money,
