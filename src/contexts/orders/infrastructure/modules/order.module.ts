@@ -14,6 +14,7 @@ import { StubPricingGateway } from '../gateways/stub-pricing.gateway';
 import { InMemoryOrderRepository } from '../repositories/in-memory-order.repository';
 import { CartModule, SHOPPING_CART_REPOSITORY } from './cart.module';
 import { PaymentApprovedHandler } from '../../application/events/handlers/payment-approved.handler';
+import { OrdersConsumer } from '../events/consumers/orders-consumer';
 
 // Injection tokens for interfaces
 export const ORDER_REPOSITORY = 'OrderRepository';
@@ -112,10 +113,14 @@ export const PRICING_GATEWAY = 'PricingGateway';
       },
       inject: [ORDER_REPOSITORY, DomainEventPublisher],
     },
+
+    // Event Consumers
+    OrdersConsumer,
   ],
   exports: [
     ORDER_REPOSITORY, // Export for potential use in other modules
     PaymentApprovedHandler, // Export for Payments BC
+    OrdersConsumer, // Export for AppModule initialization
   ],
 })
 export class OrderModule {}
