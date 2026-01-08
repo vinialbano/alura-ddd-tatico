@@ -12,10 +12,6 @@ import {
 } from '@nestjs/common';
 import { CheckoutService } from '../../application/services/checkout.service';
 import { OrderService } from '../../application/services/order.service';
-import {
-  ConfirmPaymentService,
-  PaymentDeclinedError,
-} from '../../application/services/confirm-payment.service';
 import { CheckoutDTO } from '../../application/dtos/checkout.dto';
 import { MarkPaidDTO } from '../../application/dtos/mark-paid.dto';
 import { CancelOrderDTO } from '../../application/dtos/cancel-order.dto';
@@ -35,7 +31,6 @@ export class OrderController {
   constructor(
     private readonly checkoutService: CheckoutService,
     private readonly orderService: OrderService,
-    private readonly confirmPaymentService: ConfirmPaymentService,
   ) {}
 
   /**
@@ -50,37 +45,6 @@ export class OrderController {
   @HttpCode(HttpStatus.CREATED)
   async checkout(@Body() dto: CheckoutDTO): Promise<OrderResponseDTO> {
     return await this.checkoutService.checkout(dto);
-  }
-
-  /**
-   * POST /orders/:id/pay
-   *
-   * Process payment for an order through payment gateway
-   *
-   * @param id - Order ID
-   * @param dto - Payment request (currently empty body)
-   * @returns Order response DTO with status=Paid
-   * @throws NotFoundException (404) if order doesn't exist
-   * @throws ConflictException (409) if order not in AwaitingPayment state
-   * @throws UnprocessableEntityException (422) if payment gateway declines
-   */
-  @Post(':id/pay')
-  @HttpCode(HttpStatus.OK)
-  async pay(@Param('id') id: string): Promise<OrderResponseDTO> {
-    try {
-      return await this.confirmPaymentService.execute(id);
-    } catch (error) {
-      if (error instanceof InvalidOrderStateTransitionError) {
-        throw new ConflictException(error.message);
-      }
-      if (error instanceof PaymentDeclinedError) {
-        throw new UnprocessableEntityException({
-          message: 'Payment declined',
-          reason: error.reason,
-        });
-      }
-      throw error;
-    }
   }
 
   /**
