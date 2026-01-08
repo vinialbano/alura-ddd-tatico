@@ -3,7 +3,7 @@ import { Order } from '../order';
 import { OrderId } from '../value-objects/order-id';
 import { ShippingAddress } from '../value-objects/shipping-address';
 import { OrderItem } from '../order-item';
-import { Money } from '../value-objects/money';
+import { Money } from '../../../shared/value-objects/money';
 import { EmptyCartError } from '../../shopping-cart/exceptions/empty-cart.error';
 
 /**

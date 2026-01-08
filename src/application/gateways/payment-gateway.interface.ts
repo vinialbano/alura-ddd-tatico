@@ -1,5 +1,5 @@
 import { OrderId } from '../../domain/order/value-objects/order-id';
-import { Money } from '../../domain/order/value-objects/money';
+import { Money } from '../../shared/value-objects/money';
 import { PaymentResult } from './payment-result';
 
 /**

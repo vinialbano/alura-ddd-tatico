@@ -4,7 +4,7 @@ import { OrderId } from '../value-objects/order-id';
 import { CustomerId } from '../../shared/value-objects/customer-id';
 import { CartId } from '../../shopping-cart/value-objects/cart-id';
 import { OrderItem } from '../order-item';
-import { Money } from '../value-objects/money';
+import { Money } from '../../../shared/value-objects/money';
 import { ShippingAddress } from '../value-objects/shipping-address';
 
 /**

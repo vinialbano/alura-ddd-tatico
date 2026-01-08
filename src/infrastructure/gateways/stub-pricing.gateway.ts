@@ -5,7 +5,7 @@ import {
   PricingResult,
   ItemPricing,
 } from '../../application/gateways/pricing.gateway.interface';
-import { Money } from '../../domain/order/value-objects/money';
+import { Money } from '../../shared/value-objects/money';
 
 /**
  * StubPricingGateway

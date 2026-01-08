@@ -1,6 +1,6 @@
 import { ProductSnapshot } from './value-objects/product-snapshot';
 import { Quantity } from '../shared/value-objects/quantity';
-import { Money } from './value-objects/money';
+import { Money } from '../../shared/value-objects/money';
 
 /**
  * OrderItem Entity

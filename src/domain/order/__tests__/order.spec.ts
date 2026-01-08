@@ -3,7 +3,7 @@ import { OrderId } from '../value-objects/order-id';
 import { CartId } from '../../shopping-cart/value-objects/cart-id';
 import { CustomerId } from '../../shared/value-objects/customer-id';
 import { OrderStatus } from '../value-objects/order-status';
-import { Money } from '../value-objects/money';
+import { Money } from '../../../shared/value-objects/money';
 import { InvalidOrderStateTransitionError } from '../exceptions/invalid-order-state-transition.error';
 import { OrderPaid } from '../events/order-paid.event';
 import { OrderCancelled } from '../events/order-cancelled.event';

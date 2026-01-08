@@ -1,6 +1,6 @@
 import { ProductId } from '../../domain/shared/value-objects/product-id';
 import { Quantity } from '../../domain/shared/value-objects/quantity';
-import { Money } from '../../domain/order/value-objects/money';
+import { Money } from '../../shared/value-objects/money';
 
 /**
  * PricingInput
