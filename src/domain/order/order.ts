@@ -1,4 +1,4 @@
-import { OrderId } from './value-objects/order-id';
+import { OrderId } from '../../shared/value-objects/order-id';
 import { CartId } from '../shopping-cart/value-objects/cart-id';
 import { CustomerId } from '../shared/value-objects/customer-id';
 import { OrderStatus } from './value-objects/order-status';

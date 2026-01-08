@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { OrderRepository } from '../../domain/order/order.repository';
 import { Order } from '../../domain/order/order';
-import { OrderId } from '../../domain/order/value-objects/order-id';
+import { OrderId } from '../../shared/value-objects/order-id';
 import { CartId } from '../../domain/shopping-cart/value-objects/cart-id';
 
 /**

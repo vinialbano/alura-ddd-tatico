@@ -1,6 +1,6 @@
 import { DomainEvent } from '../../shared/domain-event';
 import { EventId } from '../../shared/value-objects/event-id';
-import { OrderId } from '../value-objects/order-id';
+import { OrderId } from '../../../shared/value-objects/order-id';
 import { CustomerId } from '../../shared/value-objects/customer-id';
 import { CartId } from '../../shopping-cart/value-objects/cart-id';
 import { OrderItem } from '../order-item';

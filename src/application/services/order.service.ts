@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { OrderRepository } from '../../domain/order/order.repository';
-import { OrderId } from '../../domain/order/value-objects/order-id';
+import { OrderId } from '../../shared/value-objects/order-id';
 import { OrderNotFoundException } from '../exceptions/order-not-found.exception';
 import { ORDER_REPOSITORY } from '../../infrastructure/modules/order.module';
 import {

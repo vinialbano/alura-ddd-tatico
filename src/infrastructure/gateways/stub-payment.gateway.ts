@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IPaymentGateway } from '../../application/gateways/payment-gateway.interface';
 import { PaymentResult } from '../../application/gateways/payment-result';
 import { Money } from '../../shared/value-objects/money';
-import { OrderId } from '../../domain/order/value-objects/order-id';
+import { OrderId } from '../../shared/value-objects/order-id';
 
 /**
  * Stubbed Payment Gateway Implementation

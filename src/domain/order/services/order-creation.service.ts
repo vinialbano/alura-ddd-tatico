@@ -1,6 +1,6 @@
 import { ShoppingCart } from '../../shopping-cart/shopping-cart';
 import { Order } from '../order';
-import { OrderId } from '../value-objects/order-id';
+import { OrderId } from '../../../shared/value-objects/order-id';
 import { ShippingAddress } from '../value-objects/shipping-address';
 import { OrderItem } from '../order-item';
 import { Money } from '../../../shared/value-objects/money';

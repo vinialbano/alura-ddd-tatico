@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Order } from 'src/domain/order/order';
 import type { OrderRepository } from '../../domain/order/order.repository';
-import { OrderId } from '../../domain/order/value-objects/order-id';
+import { OrderId } from '../../shared/value-objects/order-id';
 import {
   ORDER_REPOSITORY,
   PAYMENT_GATEWAY,

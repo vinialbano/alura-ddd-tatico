@@ -7,7 +7,7 @@ import {
   IMessageBus,
 } from '../src/application/events/message-bus.interface';
 import { OrderRepository } from '../src/domain/order/order.repository';
-import { OrderId } from '../src/domain/order/value-objects/order-id';
+import { OrderId } from '../src/shared/value-objects/order-id';
 import { ORDER_REPOSITORY } from '../src/infrastructure/modules/order.module';
 import { CartResponseDto } from '../src/application/dtos/cart-response.dto';
 import { OrderResponseDTO } from '../src/application/dtos/order-response.dto';

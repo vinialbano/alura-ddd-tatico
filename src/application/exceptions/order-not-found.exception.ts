@@ -1,4 +1,4 @@
-import { OrderId } from '../../domain/order/value-objects/order-id';
+import { OrderId } from '../../shared/value-objects/order-id';
 
 /**
  * OrderNotFoundException

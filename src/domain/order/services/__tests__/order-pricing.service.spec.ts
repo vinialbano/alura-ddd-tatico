@@ -230,12 +230,12 @@ describe('OrderPricingService', () => {
           sku: 'SKU-1',
         })
         .mockRejectedValueOnce(
-          new Error('Failed to fetch product data from catalog: Product not found'),
+          new Error(
+            'Failed to fetch product data from catalog: Product not found',
+          ),
         );
 
-      await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        Error,
-      );
+      await expect(orderPricingService.price(cartItems)).rejects.toThrow(Error);
     });
 
     it('should throw Error when catalog times out', async () => {
@@ -245,9 +245,7 @@ describe('OrderPricingService', () => {
         new Error('Failed to fetch product data from catalog: Request timeout'),
       );
 
-      await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        Error,
-      );
+      await expect(orderPricingService.price(cartItems)).rejects.toThrow(Error);
       await expect(orderPricingService.price(cartItems)).rejects.toThrow(
         'Failed to fetch product data from catalog',
       );
@@ -257,12 +255,12 @@ describe('OrderPricingService', () => {
       const cartItems = [createCartItem('product-1', 1)];
 
       mockCatalogGateway.getProductData.mockRejectedValue(
-        new Error('Failed to fetch product data from catalog: Service unavailable'),
+        new Error(
+          'Failed to fetch product data from catalog: Service unavailable',
+        ),
       );
 
-      await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        Error,
-      );
+      await expect(orderPricingService.price(cartItems)).rejects.toThrow(Error);
     });
 
     it('should not call pricing gateway if catalog lookup fails', async () => {
@@ -293,9 +291,7 @@ describe('OrderPricingService', () => {
         new Error('Failed to calculate pricing: Pricing service unavailable'),
       );
 
-      await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        Error,
-      );
+      await expect(orderPricingService.price(cartItems)).rejects.toThrow(Error);
       await expect(orderPricingService.price(cartItems)).rejects.toThrow(
         'Failed to calculate pricing',
       );
@@ -314,9 +310,7 @@ describe('OrderPricingService', () => {
         new Error('Failed to calculate pricing: Request timeout'),
       );
 
-      await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        Error,
-      );
+      await expect(orderPricingService.price(cartItems)).rejects.toThrow(Error);
       await expect(orderPricingService.price(cartItems)).rejects.toThrow(
         'Failed to calculate pricing',
       );
