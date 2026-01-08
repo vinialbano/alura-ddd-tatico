@@ -5,17 +5,17 @@ import { PaymentApprovedPayload } from '../../../../../shared/events/integration
 import { PaymentApprovedHandler } from '../../../application/events/handlers/payment-approved.handler';
 
 /**
- * OrdersConsumer
+ * PaymentsConsumer (in Orders BC)
  *
- * Subscribes to integration events from other bounded contexts
- * that the Orders context needs to react to.
+ * Consumes integration events from the Payments bounded context.
+ * Subscribes to payment-related events that the Orders context needs to react to.
  *
  * Currently handles:
  * - payment.approved: Payment BC notifies that payment was approved
  */
 @Injectable()
-export class OrdersConsumer {
-  private readonly logger = new Logger(OrdersConsumer.name);
+export class PaymentsConsumer {
+  private readonly logger = new Logger(PaymentsConsumer.name);
 
   constructor(
     @Inject(MESSAGE_BUS)
@@ -61,7 +61,7 @@ export class OrdersConsumer {
     );
 
     this.logger.log(
-      'Subscribed to payment.approved events from Payment context',
+      'PaymentsConsumer (Orders BC) subscribed to payment.approved events from Payments context',
     );
   }
 }

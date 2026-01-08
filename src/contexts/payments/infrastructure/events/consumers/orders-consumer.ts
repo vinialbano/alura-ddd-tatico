@@ -10,10 +10,10 @@ import {
 import { MESSAGE_BUS } from '../../../../../shared/message-bus/message-bus.interface';
 
 /**
- * PaymentsConsumer
+ * OrdersConsumer (in Payments BC)
  *
- * Infrastructure service simulating the Payments bounded context.
- * In a real system, this would be a separate microservice.
+ * Consumes integration events from the Orders bounded context.
+ * In a real system, this would be part of a separate Payments microservice.
  *
  * Responsibilities:
  * 1. Subscribe to "order.placed" topic - process payments
@@ -24,8 +24,8 @@ import { MESSAGE_BUS } from '../../../../../shared/message-bus/message-bus.inter
  * This consumer demonstrates eventual consistency and async integration patterns.
  */
 @Injectable()
-export class PaymentsConsumer {
-  private readonly logger = new Logger(PaymentsConsumer.name);
+export class OrdersConsumer {
+  private readonly logger = new Logger(OrdersConsumer.name);
 
   constructor(
     @Inject(MESSAGE_BUS)
@@ -46,7 +46,7 @@ export class PaymentsConsumer {
       this.handleOrderCancelled.bind(this),
     );
     this.logger.log(
-      'PaymentsConsumer subscribed to order.placed and order.cancelled topics',
+      'OrdersConsumer (Payments BC) subscribed to order.placed and order.cancelled topics',
     );
   }
 
