@@ -1,12 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { OrderRepository } from '../../../domain/order/order.repository';
 import { OrderId } from '../../../domain/order/value-objects/order-id';
-import { ORDER_REPOSITORY } from '../../../infrastructure/modules/order.module';
 import { DomainEventPublisher } from '../../../infrastructure/events/domain-event-publisher';
-import {
-  IntegrationMessage,
-  PaymentApprovedPayload,
-} from '../integration-message';
+import { ORDER_REPOSITORY } from '../../../infrastructure/modules/order.module';
+import { PaymentApprovedPayload } from '../integration-message';
 
 /**
  * PaymentApprovedHandler
@@ -35,19 +32,12 @@ export class PaymentApprovedHandler {
   ) {}
 
   /**
-   * Handle payment.approved integration message
+   * Handle payment.approved payload
    *
-   * @param message - Integration message with payment approval details
+   * @param payload - payment approval details
    */
-  async handle(
-    message: IntegrationMessage<PaymentApprovedPayload>,
-  ): Promise<void> {
-    const { payload, messageId } = message;
+  async handle(payload: PaymentApprovedPayload): Promise<void> {
     const { orderId, paymentId, approvedAmount, currency } = payload;
-
-    this.logger.log(
-      `Handling payment.approved message ${messageId} for order ${orderId} with payment ${paymentId}`,
-    );
 
     // 1. Load order aggregate
     const order = await this.orderRepository.findById(
@@ -56,7 +46,7 @@ export class PaymentApprovedHandler {
 
     if (!order) {
       this.logger.warn(
-        `Order ${orderId} not found, ignoring payment.approved message ${messageId}`,
+        `Order ${orderId} not found, ignoring payment.approved message for payment ${paymentId}`,
       );
       return;
     }
@@ -64,7 +54,7 @@ export class PaymentApprovedHandler {
     // 2. Check idempotency - if this payment has already been processed, log and return
     if (order.hasProcessedPayment(paymentId)) {
       this.logger.log(
-        `Payment ${paymentId} already processed for order ${orderId}, ignoring duplicate message ${messageId}`,
+        `Payment ${paymentId} already processed for order ${orderId}, ignoring duplicate message`,
       );
       return;
     }

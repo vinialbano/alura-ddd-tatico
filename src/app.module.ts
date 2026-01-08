@@ -1,12 +1,13 @@
-import { Module, OnModuleInit, Inject } from '@nestjs/common';
-import { EventsModule } from './infrastructure/modules/events.module';
-import { CartModule } from './infrastructure/modules/cart.module';
-import { OrderModule } from './infrastructure/modules/order.module';
+import { Inject, Logger, Module, OnModuleInit } from '@nestjs/common';
+
+import { PaymentApprovedHandler } from './application/events/handlers/payment-approved.handler';
+import { PaymentApprovedPayload } from './application/events/integration-message';
 import type { IMessageBus } from './application/events/message-bus.interface';
 import { MESSAGE_BUS } from './application/events/message-bus.interface';
 import { PaymentsConsumer } from './infrastructure/events/consumers/payments-consumer';
-import { PaymentApprovedHandler } from './application/events/handlers/payment-approved.handler';
-import { PaymentApprovedInfrastructureHandler } from './infrastructure/order/event-handlers/payment-approved.handler';
+import { CartModule } from './infrastructure/modules/cart.module';
+import { EventsModule } from './infrastructure/modules/events.module';
+import { OrderModule } from './infrastructure/modules/order.module';
 
 @Module({
   imports: [
@@ -19,16 +20,16 @@ import { PaymentApprovedInfrastructureHandler } from './infrastructure/order/eve
     PaymentsConsumer,
     // Application handlers
     PaymentApprovedHandler,
-    // Infrastructure handler adapters
-    PaymentApprovedInfrastructureHandler,
   ],
 })
 export class AppModule implements OnModuleInit {
+  private readonly logger = new Logger(AppModule.name);
+
   constructor(
     @Inject(MESSAGE_BUS)
     private readonly messageBus: IMessageBus,
     private readonly paymentsConsumer: PaymentsConsumer,
-    private readonly paymentApprovedInfraHandler: PaymentApprovedInfrastructureHandler,
+    private readonly paymentApprovedHandler: PaymentApprovedHandler,
   ) {}
 
   /**
@@ -42,12 +43,31 @@ export class AppModule implements OnModuleInit {
     // Initialize external bounded context consumers
     this.paymentsConsumer.initialize();
 
-    // Subscribe infrastructure handlers to integration events
-    this.messageBus.subscribe(
+    // Subscribe application handlers to integration events
+    this.messageBus.subscribe<PaymentApprovedPayload>(
       'payment.approved',
-      this.paymentApprovedInfraHandler.handle.bind(
-        this.paymentApprovedInfraHandler,
-      ),
+      async (message) => {
+        const { messageId, payload } = message;
+        const { orderId, paymentId } = payload;
+
+        this.logger.debug(
+          `[Infrastructure] Routing payment.approved message ${messageId} to application handler (order: ${orderId}, payment: ${paymentId})`,
+        );
+
+        try {
+          await this.paymentApprovedHandler.handle(message.payload);
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          const errorStack = error instanceof Error ? error.stack : undefined;
+          this.logger.error(
+            `[Infrastructure] Failed to handle payment.approved message ${messageId}: ${errorMessage}`,
+            errorStack,
+          );
+          // In production, this might publish to a dead-letter queue
+          throw error;
+        }
+      },
     );
   }
 }
