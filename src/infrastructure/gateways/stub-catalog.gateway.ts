@@ -4,7 +4,6 @@ import {
   ProductData,
 } from '../../application/gateways/catalog.gateway.interface';
 import { ProductId } from '../../domain/shared/value-objects/product-id';
-import { ProductDataUnavailableError } from '../../domain/order/exceptions/product-data-unavailable.error';
 
 /**
  * StubCatalogGateway
@@ -58,7 +57,7 @@ export class StubCatalogGateway implements CatalogGateway {
    * Retrieve product data from catalog
    *
    * Simulates 100ms network latency
-   * Throws ProductDataUnavailableError if product not found
+   * Throws Error if product not found
    */
   async getProductData(productId: ProductId): Promise<ProductData> {
     // Simulate network latency
@@ -66,8 +65,8 @@ export class StubCatalogGateway implements CatalogGateway {
 
     const product = this.products.get(productId.getValue());
     if (!product) {
-      throw new ProductDataUnavailableError(
-        `Product with ID ${productId.getValue()} not found in catalog`,
+      throw new Error(
+        `Failed to fetch product data from catalog: Product with ID ${productId.getValue()} not found`,
       );
     }
 
@@ -87,8 +86,8 @@ export class StubCatalogGateway implements CatalogGateway {
     for (const productId of productIds) {
       const product = this.products.get(productId.getValue());
       if (!product) {
-        throw new ProductDataUnavailableError(
-          `Product with ID ${productId.getValue()} not found in catalog`,
+        throw new Error(
+          `Failed to fetch product data from catalog: Product with ID ${productId.getValue()} not found`,
         );
       }
       results.push(product);

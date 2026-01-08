@@ -48,8 +48,7 @@ export class CheckoutService {
    * @returns OrderResponseDTO with created order details
    * @throws CartNotFoundException if cart does not exist
    * @throws EmptyCartError if cart is empty (thrown by OrderCreationService)
-   * @throws ProductDataUnavailableError if product data unavailable
-   * @throws ProductPricingFailedError if pricing calculation fails
+   * @throws Error if product data unavailable or pricing calculation fails
    */
   async checkout(dto: CheckoutDTO): Promise<OrderResponseDTO> {
     // Convert DTO to domain value objects
