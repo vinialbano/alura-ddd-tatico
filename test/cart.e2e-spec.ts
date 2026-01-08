@@ -2,8 +2,8 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server } from 'node:net';
 import request from 'supertest';
-import type { CartResponseDto } from '../src/application/dtos/cart-response.dto';
-import { CartModule } from '../src/infrastructure/modules/cart.module';
+import type { CartResponseDto } from '../src/contexts/orders/application/dtos/cart-response.dto';
+import { CartModule } from '../src/contexts/orders/infrastructure/modules/cart.module';
 
 interface ErrorResponse {
   statusCode: number;
