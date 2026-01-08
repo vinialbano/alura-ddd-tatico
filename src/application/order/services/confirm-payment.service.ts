@@ -1,11 +1,19 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Order } from 'src/domain/order/order';
 import type { OrderRepository } from '../../../domain/order/order.repository';
-import type { IPaymentGateway } from '../gateways/payment-gateway.interface';
-import { OrderResponseDTO } from '../../dtos/order-response.dto';
 import { OrderId } from '../../../domain/order/value-objects/order-id';
-import { OrderMapper } from '../../mappers/order.mapper';
-import { PAYMENT_GATEWAY } from '../../../infrastructure/modules/order.module';
-import { ORDER_REPOSITORY } from '../../../infrastructure/modules/order.module';
+import {
+  ORDER_REPOSITORY,
+  PAYMENT_GATEWAY,
+} from '../../../infrastructure/modules/order.module';
+import {
+  MoneyDTO,
+  OrderItemDTO,
+  OrderResponseDTO,
+  ProductSnapshotDTO,
+  ShippingAddressResponseDTO,
+} from '../../dtos/order-response.dto';
+import type { IPaymentGateway } from '../gateways/payment-gateway.interface';
 
 /**
  * PaymentDeclinedError
@@ -85,6 +93,59 @@ export class ConfirmPaymentService {
     order.clearDomainEvents();
 
     // 7. Return DTO
-    return OrderMapper.toResponseDTO(order);
+    return this.toResponseDTO(order);
+  }
+
+  /**
+   * Map Order aggregate to OrderResponseDTO
+   *
+   * @param order - Order aggregate to map
+   * @returns OrderResponseDTO for HTTP responses
+   */
+  private toResponseDTO(order: Order): OrderResponseDTO {
+    const items: OrderItemDTO[] = order.items.map((item) => {
+      const lineTotal = item.getLineTotal();
+      return new OrderItemDTO(
+        new ProductSnapshotDTO(
+          item.productSnapshot.name,
+          item.productSnapshot.description,
+          item.productSnapshot.sku,
+        ),
+        item.quantity.getValue(),
+        new MoneyDTO(item.unitPrice.amount, item.unitPrice.currency),
+        new MoneyDTO(item.itemDiscount.amount, item.itemDiscount.currency),
+        new MoneyDTO(lineTotal.amount, lineTotal.currency),
+      );
+    });
+
+    const shippingAddress = new ShippingAddressResponseDTO({
+      street: order.shippingAddress.street,
+      addressLine2: order.shippingAddress.addressLine2,
+      city: order.shippingAddress.city,
+      stateOrProvince: order.shippingAddress.stateOrProvince,
+      postalCode: order.shippingAddress.postalCode,
+      country: order.shippingAddress.country,
+      deliveryInstructions: order.shippingAddress.deliveryInstructions,
+    });
+
+    return new OrderResponseDTO({
+      id: order.id.getValue(),
+      cartId: order.cartId.getValue(),
+      customerId: order.customerId.getValue(),
+      items,
+      shippingAddress,
+      status: order.status.toString(),
+      orderLevelDiscount: new MoneyDTO(
+        order.orderLevelDiscount.amount,
+        order.orderLevelDiscount.currency,
+      ),
+      totalAmount: new MoneyDTO(
+        order.totalAmount.amount,
+        order.totalAmount.currency,
+      ),
+      paymentId: order.paymentId,
+      cancellationReason: order.cancellationReason,
+      createdAt: order.createdAt,
+    });
   }
 }
