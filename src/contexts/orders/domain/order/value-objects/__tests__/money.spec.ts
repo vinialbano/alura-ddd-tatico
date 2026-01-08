@@ -1,4 +1,4 @@
-import { Money } from '../../../../shared/value-objects/money';
+import { Money } from '../../../../../../shared/value-objects/money';
 
 describe('Money', () => {
   describe('creation', () => {
