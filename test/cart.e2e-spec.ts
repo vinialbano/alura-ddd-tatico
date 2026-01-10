@@ -2,8 +2,8 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server } from 'node:net';
 import request from 'supertest';
-import type { CartResponseDto } from '../src/application/dtos/cart-response.dto';
-import { CartModule } from '../src/infrastructure/modules/cart.module';
+import { AppModule } from '../src/app.module';
+import type { CartResponseDto } from '../src/contexts/orders/application/dtos/cart-response.dto';
 
 interface ErrorResponse {
   statusCode: number;
@@ -16,7 +16,7 @@ describe('CartController (e2e)', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [CartModule],
+      imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -128,6 +128,42 @@ describe('CartController (e2e)', () => {
           );
         });
     });
+
+    it('should prevent adding cart items after checkout', async () => {
+      const createResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-1' });
+
+      const cartId = (createResponse.body as CartResponseDto).cartId;
+
+      await request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-1', quantity: 3 });
+
+      await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: cartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        });
+
+      return request(app.getHttpServer())
+        .post(`/carts/${cartId}/items`)
+        .send({ productId: 'product-2', quantity: 5 })
+        .expect(409)
+        .expect((res) => {
+          const body = res.body as ErrorResponse;
+          expect(body.message).toContain(
+            'has already been converted and cannot be modified',
+          );
+        });
+    });
   });
 
   describe('GET /carts/:id', () => {
@@ -178,102 +214,6 @@ describe('CartController (e2e)', () => {
           const body = res.body as CartResponseDto;
           expect(body.items).toHaveLength(2);
           expect(body.itemCount).toBe(2);
-        });
-    });
-  });
-
-  describe('POST /carts/:id/convert', () => {
-    it('should convert cart to order', async () => {
-      const createResponse = await request(app.getHttpServer())
-        .post('/carts')
-        .send({ customerId: 'customer-1' });
-
-      const cartId = (createResponse.body as CartResponseDto).cartId;
-
-      await request(app.getHttpServer())
-        .post(`/carts/${cartId}/items`)
-        .send({ productId: 'product-1', quantity: 3 });
-
-      return request(app.getHttpServer())
-        .post(`/carts/${cartId}/convert`)
-        .expect(200)
-        .expect((res) => {
-          const body = res.body as CartResponseDto;
-          expect(body.isConverted).toBe(true);
-          expect(body.cartId).toBe(cartId);
-          expect(body.items).toHaveLength(1);
-        });
-    });
-
-    it('should reject converting empty cart', async () => {
-      const createResponse = await request(app.getHttpServer())
-        .post('/carts')
-        .send({ customerId: 'customer-1' });
-
-      const cartId = (createResponse.body as CartResponseDto).cartId;
-
-      return request(app.getHttpServer())
-        .post(`/carts/${cartId}/convert`)
-        .expect(400)
-        .expect((res) => {
-          expect((res.body as { message: string }).message).toContain(
-            'Cannot convert empty cart',
-          );
-        });
-    });
-
-    it('should return 404 for non-existent cart', () => {
-      const nonExistentId = '00000000-0000-0000-0000-000000000000';
-
-      return request(app.getHttpServer())
-        .post(`/carts/${nonExistentId}/convert`)
-        .expect(404);
-    });
-
-    it('should prevent adding items after conversion', async () => {
-      const createResponse = await request(app.getHttpServer())
-        .post('/carts')
-        .send({ customerId: 'customer-1' });
-
-      const cartId = (createResponse.body as CartResponseDto).cartId;
-
-      await request(app.getHttpServer())
-        .post(`/carts/${cartId}/items`)
-        .send({ productId: 'product-1', quantity: 3 });
-
-      await request(app.getHttpServer()).post(`/carts/${cartId}/convert`);
-
-      return request(app.getHttpServer())
-        .post(`/carts/${cartId}/items`)
-        .send({ productId: 'product-2', quantity: 5 })
-        .expect(409)
-        .expect((res) => {
-          const body = res.body as ErrorResponse;
-          expect(body.message).toContain(
-            'has already been converted and cannot be modified',
-          );
-        });
-    });
-
-    it('should be idempotent - allow converting already converted cart', async () => {
-      const createResponse = await request(app.getHttpServer())
-        .post('/carts')
-        .send({ customerId: 'customer-1' });
-
-      const cartId = (createResponse.body as CartResponseDto).cartId;
-
-      await request(app.getHttpServer())
-        .post(`/carts/${cartId}/items`)
-        .send({ productId: 'product-1', quantity: 3 });
-
-      await request(app.getHttpServer()).post(`/carts/${cartId}/convert`);
-
-      return request(app.getHttpServer())
-        .post(`/carts/${cartId}/convert`)
-        .expect(200)
-        .expect((res) => {
-          const body = res.body as CartResponseDto;
-          expect(body.isConverted).toBe(true);
         });
     });
   });
@@ -409,7 +349,18 @@ describe('CartController (e2e)', () => {
         .post(`/carts/${cartId}/items`)
         .send({ productId: 'product-1', quantity: 3 });
 
-      await request(app.getHttpServer()).post(`/carts/${cartId}/convert`);
+      await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: cartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        });
 
       return request(app.getHttpServer())
         .put(`/carts/${cartId}/items/product-1`)
@@ -508,7 +459,18 @@ describe('CartController (e2e)', () => {
         .post(`/carts/${cartId}/items`)
         .send({ productId: 'product-1', quantity: 3 });
 
-      await request(app.getHttpServer()).post(`/carts/${cartId}/convert`);
+      await request(app.getHttpServer())
+        .post('/orders/checkout')
+        .send({
+          cartId: cartId,
+          shippingAddress: {
+            street: '123 Main St',
+            city: 'Springfield',
+            stateOrProvince: 'IL',
+            postalCode: '62701',
+            country: 'USA',
+          },
+        });
 
       return request(app.getHttpServer())
         .delete(`/carts/${cartId}/items/product-1`)

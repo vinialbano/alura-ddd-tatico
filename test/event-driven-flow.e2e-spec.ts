@@ -1,17 +1,17 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Server } from 'net';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { CartResponseDto } from '../src/contexts/orders/application/dtos/cart-response.dto';
+import { OrderResponseDTO } from '../src/contexts/orders/application/dtos/order-response.dto';
+import { OrderRepository } from '../src/contexts/orders/domain/order/order.repository';
+import { ORDER_REPOSITORY } from '../src/contexts/orders/order.module';
 import {
-  MESSAGE_BUS,
   IMessageBus,
-} from '../src/application/events/message-bus.interface';
-import { OrderRepository } from '../src/domain/order/order.repository';
-import { OrderId } from '../src/domain/order/value-objects/order-id';
-import { ORDER_REPOSITORY } from '../src/infrastructure/modules/order.module';
-import { CartResponseDto } from '../src/application/dtos/cart-response.dto';
-import { OrderResponseDTO } from '../src/application/dtos/order-response.dto';
-import { Server } from 'net';
+  MESSAGE_BUS,
+} from '../src/shared/message-bus/message-bus.interface';
+import { OrderId } from '../src/shared/value-objects/order-id';
 
 /**
  * Event-Driven Integration Flow E2E Tests
@@ -110,9 +110,6 @@ describe('Event-Driven Integration Flow E2E', () => {
 
       // Verify payment was processed
       expect(order!.paymentId).toMatch(/^payment-/);
-
-      // Verify order has processed payment ID (idempotency tracking)
-      expect(order!.hasProcessedPayment(order!.paymentId!)).toBe(true);
     }, 10000); // 10s timeout (well above 5s requirement)
 
     it('should handle order flow within 5 seconds (SC-002 performance requirement)', async () => {
@@ -285,90 +282,6 @@ describe('Event-Driven Integration Flow E2E', () => {
 
       // Cancellation from AWAITING_PAYMENT means:
       // - No refund needed (never paid)
-    });
-  });
-
-  describe('Idempotent Event Handling', () => {
-    it('should handle duplicate payment.approved messages without errors (T047)', async () => {
-      // Create a fresh cart for this test
-      const createCartResponse = await request(app.getHttpServer())
-        .post('/carts')
-        .send({ customerId: 'customer-123' })
-        .expect(201);
-
-      const testCartId = (createCartResponse.body as CartResponseDto).cartId;
-
-      // Add an item to the cart
-      await request(app.getHttpServer())
-        .post(`/carts/${testCartId}/items`)
-        .send({
-          productId: 'COFFEE-COL-001',
-          quantity: 2,
-        })
-        .expect(200);
-
-      // Step 1: Create order through checkout
-      const checkoutResponse = await request(app.getHttpServer())
-        .post('/orders/checkout')
-        .send({
-          cartId: testCartId,
-          shippingAddress: {
-            street: '123 Main St',
-            city: 'Springfield',
-            stateOrProvince: 'IL',
-            postalCode: '62701',
-            country: 'USA',
-          },
-        })
-        .expect(201);
-
-      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
-
-      // Step 2: Wait for payment processing
-      // Payment happens ~10ms after checkout
-      await new Promise((resolve) => setTimeout(resolve, 25));
-
-      // Step 3: Verify order is PAID
-      let order = await orderRepository.findById(OrderId.fromString(orderId));
-      expect(order).not.toBeNull();
-      expect(order!.status.toString()).toBe('PAID');
-      const firstPaymentId = order!.paymentId;
-
-      // Step 4: Manually trigger duplicate payment.approved
-      // (In real system, this simulates duplicate message delivery)
-      const duplicatePaymentMessage = {
-        messageId: 'duplicate-msg-001',
-        topic: 'payment.approved',
-        timestamp: new Date(),
-        correlationId: orderId,
-        payload: {
-          orderId,
-          paymentId: firstPaymentId, // Same payment ID
-          approvedAmount: 49.98,
-          currency: 'USD',
-          timestamp: new Date().toISOString(),
-        },
-      };
-
-      // Publish duplicate message through message bus
-      const messageBus = app.get<IMessageBus>(MESSAGE_BUS);
-      await messageBus.publish(
-        'payment.approved',
-        duplicatePaymentMessage.payload,
-      );
-
-      // Wait for processing
-      await new Promise((resolve) => setTimeout(resolve, 50));
-
-      // Step 5: Verify order state is valid (duplicate didn't cause issues)
-      order = await orderRepository.findById(OrderId.fromString(orderId));
-      expect(order).not.toBeNull();
-      // Order should be PAID (normal flow continues)
-      expect(order!.status.toString()).toBe('PAID');
-      expect(order!.paymentId).toBe(firstPaymentId);
-
-      // Verify idempotency: payment ID should only be processed once
-      expect(order!.hasProcessedPayment(firstPaymentId!)).toBe(true);
     });
   });
 

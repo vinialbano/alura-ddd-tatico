@@ -1,73 +1,46 @@
-import { Inject, Logger, Module, OnModuleInit } from '@nestjs/common';
-
-import { PaymentApprovedHandler } from './application/events/handlers/payment-approved.handler';
-import { PaymentApprovedPayload } from './application/events/integration-message';
-import type { IMessageBus } from './application/events/message-bus.interface';
-import { MESSAGE_BUS } from './application/events/message-bus.interface';
-import { PaymentsConsumer } from './infrastructure/events/consumers/payments-consumer';
-import { CartModule } from './infrastructure/modules/cart.module';
-import { EventsModule } from './infrastructure/modules/events.module';
-import { OrderModule } from './infrastructure/modules/order.module';
+import { Logger, Module, OnModuleInit } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
+import { CartModule } from './contexts/orders/cart.module';
+import { PaymentsConsumer } from './contexts/orders/infrastructure/events/consumers/payments-consumer';
+import { DomainExceptionFilter } from './contexts/orders/infrastructure/filters/domain-exception.filter';
+import { OrderModule } from './contexts/orders/order.module';
+import { OrdersConsumer } from './contexts/payments/infrastructure/orders-consumer';
+import { PaymentModule } from './contexts/payments/payment.module';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
-  imports: [
-    EventsModule, // Global module providing MESSAGE_BUS and DomainEventPublisher
-    CartModule,
-    OrderModule,
-  ],
+  imports: [SharedModule, CartModule, OrderModule, PaymentModule],
   providers: [
-    // Consumers (simulate external bounded contexts)
-    PaymentsConsumer,
-    // Application handlers
-    PaymentApprovedHandler,
+    {
+      provide: APP_FILTER,
+      useClass: DomainExceptionFilter,
+    },
   ],
 })
 export class AppModule implements OnModuleInit {
   private readonly logger = new Logger(AppModule.name);
 
   constructor(
-    @Inject(MESSAGE_BUS)
-    private readonly messageBus: IMessageBus,
+    private readonly ordersConsumer: OrdersConsumer,
     private readonly paymentsConsumer: PaymentsConsumer,
-    private readonly paymentApprovedHandler: PaymentApprovedHandler,
   ) {}
 
   /**
    * Initialize message bus subscriptions during application startup
    * This wires up the event-driven integration flow:
    *
-   * 1. Consumers subscribe to external events (order.placed)
-   * 2. Handlers subscribe to integration events (payment.approved)
+   * 1. OrdersConsumer (in Payments BC) subscribes to order.placed events
+   * 2. PaymentsConsumer (in Orders BC) subscribes to payment.approved events
    */
   onModuleInit(): void {
-    // Initialize external bounded context consumers
+    this.logger.log('Initializing bounded context consumers...');
+
+    // Initialize OrdersConsumer in Payments BC (subscribes to order.placed)
+    this.ordersConsumer.initialize();
+
+    // Initialize PaymentsConsumer in Orders BC (subscribes to payment.approved)
     this.paymentsConsumer.initialize();
 
-    // Subscribe application handlers to integration events
-    this.messageBus.subscribe<PaymentApprovedPayload>(
-      'payment.approved',
-      async (message) => {
-        const { messageId, payload } = message;
-        const { orderId, paymentId } = payload;
-
-        this.logger.debug(
-          `[Infrastructure] Routing payment.approved message ${messageId} to application handler (order: ${orderId}, payment: ${paymentId})`,
-        );
-
-        try {
-          await this.paymentApprovedHandler.handle(message.payload);
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : 'Unknown error';
-          const errorStack = error instanceof Error ? error.stack : undefined;
-          this.logger.error(
-            `[Infrastructure] Failed to handle payment.approved message ${messageId}: ${errorMessage}`,
-            errorStack,
-          );
-          // In production, this might publish to a dead-letter queue
-          throw error;
-        }
-      },
-    );
+    this.logger.log('All bounded context consumers initialized');
   }
 }

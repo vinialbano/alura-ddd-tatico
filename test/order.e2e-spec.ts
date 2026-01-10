@@ -3,8 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Server } from 'net';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { CartResponseDto } from '../src/application/dtos/cart-response.dto';
-import { OrderResponseDTO } from '../src/application/dtos/order-response.dto';
+import { CartResponseDto } from '../src/contexts/orders/application/dtos/cart-response.dto';
+import { OrderResponseDTO } from '../src/contexts/orders/application/dtos/order-response.dto';
 
 // Type for NestJS error responses
 interface ErrorResponse {
@@ -266,96 +266,36 @@ describe('Order E2E Tests', () => {
     });
   });
 
-  describe('POST /orders/:id/mark-paid', () => {
-    it('should mark order as paid with valid payment ID', async () => {
-      // Arrange - Create an order first
-      const checkoutResponse = await request(app.getHttpServer())
-        .post('/orders/checkout')
-        .send({
-          cartId: createdCartId,
-          shippingAddress: {
-            street: '123 Main St',
-            city: 'Springfield',
-            stateOrProvince: 'IL',
-            postalCode: '62701',
-            country: 'USA',
-          },
-        })
-        .expect(201);
-
-      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
-
-      // Act
-      const response = await request(app.getHttpServer())
-        .post(`/orders/${orderId}/mark-paid`)
-        .send({ paymentId: 'pay_123456' })
-        .expect(200);
-
-      // Assert
-      const body = response.body as OrderResponseDTO;
-      expect(body).toHaveProperty('id', orderId);
-      expect(body).toHaveProperty('status', 'PAID');
-      expect(body).toHaveProperty('paymentId', 'pay_123456');
-    });
-
-    it('should reject marking already paid order as paid', async () => {
-      // Arrange - Create and mark order as paid
-      const checkoutResponse = await request(app.getHttpServer())
-        .post('/orders/checkout')
-        .send({
-          cartId: createdCartId,
-          shippingAddress: {
-            street: '123 Main St',
-            city: 'Springfield',
-            stateOrProvince: 'IL',
-            postalCode: '62701',
-            country: 'USA',
-          },
-        })
-        .expect(201);
-
-      const orderId = (checkoutResponse.body as OrderResponseDTO).id;
-
-      await request(app.getHttpServer())
-        .post(`/orders/${orderId}/mark-paid`)
-        .send({ paymentId: 'pay_first' })
-        .expect(200);
-
-      // Act - Try to mark as paid again
-      const response = await request(app.getHttpServer())
-        .post(`/orders/${orderId}/mark-paid`)
-        .send({ paymentId: 'pay_second' })
-        .expect(409);
-
-      // Assert
-      const body = response.body as ErrorResponse;
-      expect(body).toHaveProperty('message');
-    });
-
-    it('should return 404 for non-existent order', async () => {
-      // Act
-      const response = await request(app.getHttpServer())
-        .post('/orders/00000000-0000-0000-0000-000000000000/mark-paid')
-        .send({ paymentId: 'pay_123' })
-        .expect(404);
-
-      // Assert
-      const body = response.body as ErrorResponse;
-      expect(body).toHaveProperty('message');
-    });
-  });
-
-  // NOTE: These tests are for Lesson 3 (synchronous payment gateway).
-  // In Lesson 4, payment processing is now event-driven and happens automatically after checkout.
-  // The /orders/:id/pay endpoint still exists but will conflict with automatic processing.
-  // Skipping these tests since event-driven-flow.e2e-spec.ts now provides comprehensive coverage.
-  describe.skip('POST /orders/:id/pay (Payment Gateway Flow)', () => {
+  // NOTE: These tests demonstrate synchronous payment processing via POST /payments.
+  // To use this flow, set ENABLE_AUTOMATIC_PAYMENT=false environment variable.
+  // This illustrates the application service pattern (before introducing event-driven architecture).
+  // For event-driven tests, see event-driven-flow.e2e-spec.ts
+  (process.env.ENABLE_AUTOMATIC_PAYMENT === 'false' ? describe : describe.skip)(
+    'POST /payments (Manual Payment Flow)',
+    () => {
     it('should process payment successfully for order with ID ending in 0', async () => {
-      // Arrange - Create an order with ID ending in 0 (approved by stubbed gateway)
+      // Arrange - Create a fresh cart for this test
+      const createCartResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-123' })
+        .expect(201);
+
+      const testCartId = (createCartResponse.body as CartResponseDto).cartId;
+
+      // Add item to cart
+      await request(app.getHttpServer())
+        .post(`/carts/${testCartId}/items`)
+        .send({
+          productId: 'COFFEE-COL-001',
+          quantity: 2,
+        })
+        .expect(200);
+
+      // Create order through checkout
       const checkoutResponse = await request(app.getHttpServer())
         .post('/orders/checkout')
         .send({
-          cartId: createdCartId,
+          cartId: testCartId,
           shippingAddress: {
             street: '123 Main St',
             city: 'Springfield',
@@ -367,22 +307,34 @@ describe('Order E2E Tests', () => {
         .expect(201);
 
       const orderId = (checkoutResponse.body as OrderResponseDTO).id;
+      const orderBody = checkoutResponse.body as OrderResponseDTO;
 
-      // Act - Process payment through gateway
+      // Act - Process payment through Payments BC
       const response = await request(app.getHttpServer())
-        .post(`/orders/${orderId}/pay`)
-        .send({}) // Empty body per PayOrderDto
-        .expect(200);
+        .post('/payments')
+        .send({
+          orderId,
+          amount: orderBody.totalAmount.amount,
+          currency: orderBody.totalAmount.currency,
+        })
+        .expect(201);
 
       // Assert
-      const body = response.body as OrderResponseDTO;
-      expect(body).toHaveProperty('id', orderId);
-      expect(body).toHaveProperty('status', 'PAID');
+      const body = response.body as { paymentId: string; status: string; orderId: string };
       expect(body).toHaveProperty('paymentId');
+      expect(body).toHaveProperty('status', 'approved');
+      expect(body).toHaveProperty('orderId', orderId);
       expect(body.paymentId).toMatch(/^PAY-/); // Gateway generates "PAY-{orderId}"
+
+      // Verify order is marked as paid
+      const orderResponse = await request(app.getHttpServer())
+        .get(`/orders/${orderId}`)
+        .expect(200);
+      const updatedOrder = orderResponse.body as OrderResponseDTO;
+      expect(updatedOrder.status).toBe('PAID');
     });
 
-    it('should reject payment with 422 for order with ID ending in 5 (insufficient funds)', async () => {
+    it('should reject payment with 400 for order with ID ending in 5 (insufficient funds)', async () => {
       // Arrange - Create order, then manipulate to get ID ending in 5
       // Note: In real implementation, we'd need to create order with specific ID
       // For now, we test the error handling path
@@ -401,27 +353,30 @@ describe('Order E2E Tests', () => {
         .expect(201);
 
       const orderId = (checkoutResponse.body as OrderResponseDTO).id;
+      const orderBody = checkoutResponse.body as OrderResponseDTO;
 
       // Act - Process payment (may succeed or fail depending on orderId)
       const response = await request(app.getHttpServer())
-        .post(`/orders/${orderId}/pay`)
-        .send({});
+        .post('/payments')
+        .send({
+          orderId,
+          amount: orderBody.totalAmount.amount,
+          currency: orderBody.totalAmount.currency,
+        });
 
-      // Assert - Either succeeds (200) or rejected (422)
+      // Assert - Either succeeds (201) or rejected (400)
       // Note: Conditional expects are intentional here since orderId is random
       /* eslint-disable jest/no-conditional-expect */
       if (orderId.endsWith('5')) {
-        expect(response.status).toBe(422);
-        const body = response.body as { message: string; reason: string };
-        expect(body).toHaveProperty('message', 'Payment declined');
-        expect(body).toHaveProperty('reason', 'Insufficient funds');
+        expect(response.status).toBe(400);
+        const body = response.body as { message: string };
+        expect(body).toHaveProperty('message', 'Insufficient funds');
       } else if (orderId.endsWith('9')) {
-        expect(response.status).toBe(422);
-        const body = response.body as { message: string; reason: string };
-        expect(body).toHaveProperty('message', 'Payment declined');
-        expect(body).toHaveProperty('reason', 'Card declined');
+        expect(response.status).toBe(400);
+        const body = response.body as { message: string };
+        expect(body).toHaveProperty('message', 'Card declined');
       } else {
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(201);
       }
       /* eslint-enable jest/no-conditional-expect */
     });
@@ -443,17 +398,26 @@ describe('Order E2E Tests', () => {
         .expect(201);
 
       const orderId = (checkoutResponse.body as OrderResponseDTO).id;
+      const orderBody = checkoutResponse.body as OrderResponseDTO;
 
       // First payment
       await request(app.getHttpServer())
-        .post(`/orders/${orderId}/pay`)
-        .send({})
-        .expect(200);
+        .post('/payments')
+        .send({
+          orderId,
+          amount: orderBody.totalAmount.amount,
+          currency: orderBody.totalAmount.currency,
+        })
+        .expect(201);
 
       // Act - Try to pay again
       const response = await request(app.getHttpServer())
-        .post(`/orders/${orderId}/pay`)
-        .send({})
+        .post('/payments')
+        .send({
+          orderId,
+          amount: orderBody.totalAmount.amount,
+          currency: orderBody.totalAmount.currency,
+        })
         .expect(409);
 
       // Assert
@@ -480,6 +444,7 @@ describe('Order E2E Tests', () => {
         .expect(201);
 
       const orderId = (checkoutResponse.body as OrderResponseDTO).id;
+      const orderBody = checkoutResponse.body as OrderResponseDTO;
 
       // Cancel order first
       await request(app.getHttpServer())
@@ -489,8 +454,12 @@ describe('Order E2E Tests', () => {
 
       // Act - Try to pay cancelled order
       const response = await request(app.getHttpServer())
-        .post(`/orders/${orderId}/pay`)
-        .send({})
+        .post('/payments')
+        .send({
+          orderId,
+          amount: orderBody.totalAmount.amount,
+          currency: orderBody.totalAmount.currency,
+        })
         .expect(409);
 
       // Assert
@@ -503,8 +472,12 @@ describe('Order E2E Tests', () => {
     it('should return 404 for non-existent order', async () => {
       // Act
       const response = await request(app.getHttpServer())
-        .post('/orders/00000000-0000-0000-0000-000000000000/pay')
-        .send({})
+        .post('/payments')
+        .send({
+          orderId: '00000000-0000-0000-0000-000000000000',
+          amount: 100,
+          currency: 'USD',
+        })
         .expect(404);
 
       // Assert
@@ -512,7 +485,7 @@ describe('Order E2E Tests', () => {
       expect(body).toHaveProperty('message');
     });
 
-    it('should handle payment gateway timeout gracefully', async () => {
+    it('should handle payment gateway latency gracefully', async () => {
       // Arrange - Create order
       const checkoutResponse = await request(app.getHttpServer())
         .post('/orders/checkout')
@@ -529,20 +502,26 @@ describe('Order E2E Tests', () => {
         .expect(201);
 
       const orderId = (checkoutResponse.body as OrderResponseDTO).id;
+      const orderBody = checkoutResponse.body as OrderResponseDTO;
 
       // Act - Process payment (stubbed gateway simulates 500ms-2s latency)
       const startTime = Date.now();
       const response = await request(app.getHttpServer())
-        .post(`/orders/${orderId}/pay`)
-        .send({});
+        .post('/payments')
+        .send({
+          orderId,
+          amount: orderBody.totalAmount.amount,
+          currency: orderBody.totalAmount.currency,
+        });
       const endTime = Date.now();
 
       // Assert - Should complete within reasonable time
       const duration = endTime - startTime;
       expect(duration).toBeLessThan(3000); // Should be less than 3 seconds
-      expect([200, 422]).toContain(response.status); // Either success or declined
+      expect([201, 400]).toContain(response.status); // Either success or declined
     });
-  });
+  },
+  );
 
   describe('POST /orders/:id/cancel', () => {
     it('should cancel order from AwaitingPayment state', async () => {
@@ -580,11 +559,28 @@ describe('Order E2E Tests', () => {
     });
 
     it('should cancel order from Paid state (refund scenario)', async () => {
-      // Arrange - Create and mark order as paid
+      // Arrange - Create a fresh cart for this test
+      const createCartResponse = await request(app.getHttpServer())
+        .post('/carts')
+        .send({ customerId: 'customer-123' })
+        .expect(201);
+
+      const testCartId = (createCartResponse.body as CartResponseDto).cartId;
+
+      // Add item to cart
+      await request(app.getHttpServer())
+        .post(`/carts/${testCartId}/items`)
+        .send({
+          productId: 'COFFEE-COL-001',
+          quantity: 2,
+        })
+        .expect(200);
+
+      // Create order through checkout
       const checkoutResponse = await request(app.getHttpServer())
         .post('/orders/checkout')
         .send({
-          cartId: createdCartId,
+          cartId: testCartId,
           shippingAddress: {
             street: '123 Main St',
             city: 'Springfield',
@@ -596,11 +592,23 @@ describe('Order E2E Tests', () => {
         .expect(201);
 
       const orderId = (checkoutResponse.body as OrderResponseDTO).id;
+      const orderBody = checkoutResponse.body as OrderResponseDTO;
 
-      await request(app.getHttpServer())
-        .post(`/orders/${orderId}/mark-paid`)
-        .send({ paymentId: 'pay_123' })
-        .expect(200);
+      // Pay for order (automatic or manual depending on ENABLE_AUTOMATIC_PAYMENT)
+      if (process.env.ENABLE_AUTOMATIC_PAYMENT === 'false') {
+        // Manual payment flow
+        await request(app.getHttpServer())
+          .post('/payments')
+          .send({
+            orderId,
+            amount: orderBody.totalAmount.amount,
+            currency: orderBody.totalAmount.currency,
+          })
+          .expect(201);
+      } else {
+        // Wait for automatic payment (happens ~10ms after checkout)
+        await new Promise((resolve) => setTimeout(resolve, 25));
+      }
 
       // Act - Cancel paid order
       const response = await request(app.getHttpServer())
