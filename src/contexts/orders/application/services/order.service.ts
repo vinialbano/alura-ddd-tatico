@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { OrderId } from '../../../../shared/value-objects/order-id';
 import { Order } from '../../domain/order/order';
 import type { OrderRepository } from '../../domain/order/order.repository';
-import { ORDER_REPOSITORY } from '../../order.tokens';
+import { ORDER_REPOSITORY } from '../../orders.tokens';
 import {
   MoneyDTO,
   OrderItemDTO,

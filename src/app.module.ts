@@ -1,15 +1,14 @@
 import { Logger, Module, OnModuleInit } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
-import { CartModule } from './contexts/orders/cart.module';
 import { PaymentsConsumer } from './contexts/orders/infrastructure/events/consumers/payments-consumer';
 import { DomainExceptionFilter } from './contexts/orders/infrastructure/filters/domain-exception.filter';
-import { OrderModule } from './contexts/orders/order.module';
+import { OrdersModule } from './contexts/orders/orders.module';
 import { OrdersConsumer } from './contexts/payments/infrastructure/orders-consumer';
 import { PaymentModule } from './contexts/payments/payment.module';
 import { SharedModule } from './shared/shared.module';
 
 @Module({
-  imports: [SharedModule, CartModule, OrderModule, PaymentModule],
+  imports: [SharedModule, OrdersModule, PaymentModule],
   providers: [
     {
       provide: APP_FILTER,

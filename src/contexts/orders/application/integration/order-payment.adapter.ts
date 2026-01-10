@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   IOrderPaymentContract,
   MarkOrderAsPaidRequest,
-} from '../../../shared-kernel/integration-contracts/order-payment.contract';
+} from './order-payment.contract';
 import { OrderService } from '../services/order.service';
 
 /**

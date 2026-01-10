@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ORDER_PAYMENT_CONTRACT } from '../../shared-kernel/integration-contracts/order-payment.contract';
-import type { IOrderPaymentContract } from '../../shared-kernel/integration-contracts/order-payment.contract';
+import { ORDER_PAYMENT_CONTRACT } from '../../orders/application/integration/order-payment.contract';
+import type { IOrderPaymentContract } from '../../orders/application/integration/order-payment.contract';
 import { OrderGateway } from '../application/order-gateway.interface';
 
 /**

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { SHOPPING_CART_REPOSITORY } from '../../cart.tokens';
+import { SHOPPING_CART_REPOSITORY } from '../../orders.tokens';
 import { CustomerId } from '../../domain/shared/value-objects/customer-id';
 import { ProductId } from '../../domain/shared/value-objects/product-id';
 import { Quantity } from '../../domain/shared/value-objects/quantity';

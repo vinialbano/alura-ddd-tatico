@@ -6,7 +6,7 @@ import { AppModule } from '../src/app.module';
 import { CartResponseDto } from '../src/contexts/orders/application/dtos/cart-response.dto';
 import { OrderResponseDTO } from '../src/contexts/orders/application/dtos/order-response.dto';
 import { OrderRepository } from '../src/contexts/orders/domain/order/order.repository';
-import { ORDER_REPOSITORY } from '../src/contexts/orders/order.module';
+import { ORDER_REPOSITORY } from '../src/contexts/orders/orders.module';
 import { OrderId } from '../src/shared/value-objects/order-id';
 
 /**

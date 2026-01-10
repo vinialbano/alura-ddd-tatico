@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DomainEventPublisher } from '../../../../shared/events/domain-event-publisher';
-import { SHOPPING_CART_REPOSITORY } from '../../cart.tokens';
+import { SHOPPING_CART_REPOSITORY, ORDER_REPOSITORY } from '../../orders.tokens';
 import { Order } from '../../domain/order/order';
 import type { OrderRepository } from '../../domain/order/order.repository';
 import { OrderCreationService } from '../../domain/order/services/order-creation.service';
@@ -9,7 +9,6 @@ import { ShippingAddress } from '../../domain/order/value-objects/shipping-addre
 import { CartId } from '../../domain/shopping-cart/cart-id';
 import { EmptyCartError } from '../../domain/shopping-cart/exceptions/empty-cart.error';
 import type { ShoppingCartRepository } from '../../domain/shopping-cart/shopping-cart.repository';
-import { ORDER_REPOSITORY } from '../../order.tokens';
 import { CheckoutDTO, ShippingAddressDTO } from '../dtos/checkout.dto';
 import {
   MoneyDTO,
