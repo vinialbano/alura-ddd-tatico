@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { DomainEventPublisher } from '../../../../shared/events/domain-event-publisher';
 import { SHOPPING_CART_REPOSITORY, ORDER_REPOSITORY } from '../../orders.tokens';
 import { Order } from '../../domain/order/order';
@@ -15,7 +15,6 @@ import {
   OrderResponseDTO,
   ShippingAddressResponseDTO,
 } from '../dtos/order-response.dto';
-import { CartNotFoundException } from '../exceptions/cart-not-found.exception';
 
 /**
  * CheckoutService
@@ -47,7 +46,7 @@ export class CheckoutService {
     // 1. Load cart (repository interaction)
     const cart = await this.cartRepository.findById(cartId);
     if (!cart) {
-      throw new CartNotFoundException(cartId);
+      throw new NotFoundException(`Cart ${cartId.getValue()} not found`);
     }
 
     // 2. Validate cart is not empty (fail fast before external calls)

@@ -5,8 +5,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { CartNotFoundException } from '../../application/exceptions/cart-not-found.exception';
-import { OrderNotFoundException } from '../../application/exceptions/order-not-found.exception';
 import { InvalidCartOperationError } from '../../domain/shopping-cart/exceptions/invalid-cart-operation.error';
 import { EmptyCartError } from '../../domain/shopping-cart/exceptions/empty-cart.error';
 import { InvalidOrderStateTransitionError } from '../../domain/order/exceptions/invalid-order-state-transition.error';
@@ -17,8 +15,6 @@ import { InvalidOrderStateTransitionError } from '../../domain/order/exceptions/
  * to appropriate HTTP status codes
  */
 @Catch(
-  CartNotFoundException,
-  OrderNotFoundException,
   InvalidCartOperationError,
   EmptyCartError,
   InvalidOrderStateTransitionError,
@@ -42,17 +38,6 @@ export class DomainExceptionFilter implements ExceptionFilter {
     status: number;
     error: string;
   } {
-    // 404 Not Found - Resource doesn't exist
-    if (
-      exception instanceof CartNotFoundException ||
-      exception instanceof OrderNotFoundException
-    ) {
-      return {
-        status: HttpStatus.NOT_FOUND,
-        error: 'Not Found',
-      };
-    }
-
     // 409 Conflict - Attempting operation on incompatible state
     if (exception instanceof InvalidOrderStateTransitionError) {
       return {

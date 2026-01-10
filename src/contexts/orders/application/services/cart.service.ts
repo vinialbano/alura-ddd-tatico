@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { SHOPPING_CART_REPOSITORY } from '../../orders.tokens';
 import { CustomerId } from '../../domain/shared/value-objects/customer-id';
 import { ProductId } from '../../domain/shared/value-objects/product-id';
@@ -12,7 +12,6 @@ import {
   CartResponseDto,
 } from '../dtos/cart-response.dto';
 import { CreateCartDto } from '../dtos/create-cart.dto';
-import { CartNotFoundException } from '../exceptions/cart-not-found.exception';
 
 /**
  * CartService
@@ -43,7 +42,7 @@ export class CartService {
     const cart = await this.repository.findById(cartId);
 
     if (!cart) {
-      throw new CartNotFoundException(cartId);
+      throw new NotFoundException(`Cart ${cartId.getValue()} not found`);
     }
 
     const productId = ProductId.fromString(dto.productId);
@@ -61,7 +60,7 @@ export class CartService {
     const cart = await this.repository.findById(cartId);
 
     if (!cart) {
-      throw new CartNotFoundException(cartId);
+      throw new NotFoundException(`Cart ${cartId.getValue()} not found`);
     }
 
     return this.mapToDto(cart);

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { OrderId } from '../../../../shared/value-objects/order-id';
 import { Order } from '../../domain/order/order';
 import type { OrderRepository } from '../../domain/order/order.repository';
@@ -8,7 +8,6 @@ import {
   OrderResponseDTO,
   ShippingAddressResponseDTO,
 } from '../dtos/order-response.dto';
-import { OrderNotFoundException } from '../exceptions/order-not-found.exception';
 
 /**
  * OrderService
@@ -32,7 +31,7 @@ export class OrderService {
     const order = await this.orderRepository.findById(orderIdVO);
 
     if (!order) {
-      throw new OrderNotFoundException(orderIdVO);
+      throw new NotFoundException(`Order ${orderIdVO.getValue()} not found`);
     }
 
     order.markAsPaid(paymentId);
@@ -46,7 +45,7 @@ export class OrderService {
     const order = await this.orderRepository.findById(orderIdVO);
 
     if (!order) {
-      throw new OrderNotFoundException(orderIdVO);
+      throw new NotFoundException(`Order ${orderIdVO.getValue()} not found`);
     }
 
     return this.mapToDto(order);
