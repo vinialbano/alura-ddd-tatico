@@ -1,10 +1,10 @@
-import { CartItem } from './cart-item';
-import { CartId } from './value-objects/cart-id';
 import { CustomerId } from '../shared/value-objects/customer-id';
 import { ProductId } from '../shared/value-objects/product-id';
 import { Quantity } from '../shared/value-objects/quantity';
-import { InvalidCartOperationError } from './exceptions/invalid-cart-operation.error';
+import { CartId } from './cart-id';
+import { CartItem } from './cart-item';
 import { EmptyCartError } from './exceptions/empty-cart.error';
+import { InvalidCartOperationError } from './exceptions/invalid-cart-operation.error';
 
 export type ShoppingCartParams = {
   cartId: CartId;

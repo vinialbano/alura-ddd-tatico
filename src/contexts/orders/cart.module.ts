@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { CartController } from '../controllers/cart.controller';
-import { CartService } from '../../application/services/cart.service';
-import { InMemoryShoppingCartRepository } from '../repositories/in-memory-shopping-cart.repository';
+import { CartService } from './application/services/cart.service';
+import { SHOPPING_CART_REPOSITORY } from './cart.tokens';
+import { CartController } from './infrastructure/controllers/cart.controller';
+import { InMemoryShoppingCartRepository } from './infrastructure/repositories/in-memory-shopping-cart.repository';
 
-// Injection token for ShoppingCartRepository interface
-export const SHOPPING_CART_REPOSITORY = 'ShoppingCartRepository';
+// Re-export token for backward compatibility
+export { SHOPPING_CART_REPOSITORY };
 
 /**
  * CartModule

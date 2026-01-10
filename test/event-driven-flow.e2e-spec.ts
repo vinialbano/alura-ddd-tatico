@@ -1,17 +1,17 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Server } from 'net';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import {
-  MESSAGE_BUS,
-  IMessageBus,
-} from '../src/shared/message-bus/message-bus.interface';
-import { OrderRepository } from '../src/contexts/orders/domain/order/order.repository';
-import { OrderId } from '../src/shared/value-objects/order-id';
-import { ORDER_REPOSITORY } from '../src/contexts/orders/infrastructure/modules/order.module';
 import { CartResponseDto } from '../src/contexts/orders/application/dtos/cart-response.dto';
 import { OrderResponseDTO } from '../src/contexts/orders/application/dtos/order-response.dto';
-import { Server } from 'net';
+import { OrderRepository } from '../src/contexts/orders/domain/order/order.repository';
+import { ORDER_REPOSITORY } from '../src/contexts/orders/order.module';
+import {
+  IMessageBus,
+  MESSAGE_BUS,
+} from '../src/shared/message-bus/message-bus.interface';
+import { OrderId } from '../src/shared/value-objects/order-id';
 
 /**
  * Event-Driven Integration Flow E2E Tests

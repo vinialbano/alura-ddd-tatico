@@ -1,4 +1,4 @@
-import { StringId } from '../base/string-id.base';
+import { StringId } from '../../../../../shared/value-objects/string-id.base';
 
 /**
  * ProductId Value Object

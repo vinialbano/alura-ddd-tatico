@@ -1,10 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { SHOPPING_CART_REPOSITORY } from '../../cart.tokens';
 import { CustomerId } from '../../domain/shared/value-objects/customer-id';
 import { ProductId } from '../../domain/shared/value-objects/product-id';
 import { Quantity } from '../../domain/shared/value-objects/quantity';
+import { CartId } from '../../domain/shopping-cart/cart-id';
 import { ShoppingCart } from '../../domain/shopping-cart/shopping-cart';
 import type { ShoppingCartRepository } from '../../domain/shopping-cart/shopping-cart.repository';
-import { CartId } from '../../domain/shopping-cart/value-objects/cart-id';
 import { AddItemDto } from '../dtos/add-item.dto';
 import {
   CartItemResponseDto,
@@ -13,7 +14,6 @@ import {
 import { CreateCartDto } from '../dtos/create-cart.dto';
 import { UpdateQuantityDto } from '../dtos/update-quantity.dto';
 import { CartNotFoundException } from '../exceptions/cart-not-found.exception';
-import { SHOPPING_CART_REPOSITORY } from '../../infrastructure/modules/cart.module';
 
 /**
  * CartService
@@ -139,28 +139,6 @@ export class CartService {
     const productId = ProductId.fromString(productIdStr);
 
     cart.removeItem(productId);
-
-    await this.repository.save(cart);
-
-    return this.mapToDto(cart);
-  }
-
-  /**
-   * Converts cart to order (marks as converted)
-   * Once converted, cart becomes immutable
-   * @param cartIdStr - Cart identifier as string
-   * @returns CartResponseDto with converted cart
-   * @throws CartNotFoundException if cart not found
-   */
-  async convertCart(cartIdStr: string): Promise<CartResponseDto> {
-    const cartId = CartId.fromString(cartIdStr);
-    const cart = await this.repository.findById(cartId);
-
-    if (!cart) {
-      throw new CartNotFoundException(cartId);
-    }
-
-    cart.markAsConverted();
 
     await this.repository.save(cart);
 

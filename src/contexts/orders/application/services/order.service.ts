@@ -1,16 +1,16 @@
-import { Injectable, Inject } from '@nestjs/common';
-import type { OrderRepository } from '../../domain/order/order.repository';
+import { Inject, Injectable } from '@nestjs/common';
 import { OrderId } from '../../../../shared/value-objects/order-id';
-import { OrderNotFoundException } from '../exceptions/order-not-found.exception';
-import { ORDER_REPOSITORY } from '../../infrastructure/modules/order.module';
+import { Order } from '../../domain/order/order';
+import type { OrderRepository } from '../../domain/order/order.repository';
+import { ORDER_REPOSITORY } from '../../order.tokens';
 import {
-  OrderResponseDTO,
-  OrderItemDTO,
-  ProductSnapshotDTO,
   MoneyDTO,
+  OrderItemDTO,
+  OrderResponseDTO,
+  ProductSnapshotDTO,
   ShippingAddressResponseDTO,
 } from '../dtos/order-response.dto';
-import { Order } from '../../domain/order/order';
+import { OrderNotFoundException } from '../exceptions/order-not-found.exception';
 
 /**
  * OrderService

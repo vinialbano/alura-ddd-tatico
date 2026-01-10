@@ -24,7 +24,7 @@ export interface IntegrationMessage<T> {
   payload: T;
 
   /**
-   * Correlation ID for tracing across bounded contexts (typically orderId)
+   * Correlation ID for tracing across bounded contexts
    */
   correlationId: string;
 }

@@ -1,3 +1,4 @@
+import { Money } from '../../../../../../shared/value-objects/money';
 import {
   CatalogGateway,
   ProductData,
@@ -9,7 +10,6 @@ import {
 import { ProductId } from '../../../shared/value-objects/product-id';
 import { Quantity } from '../../../shared/value-objects/quantity';
 import { CartItem } from '../../../shopping-cart/cart-item';
-import { Money } from '../../../../../../shared/value-objects/money';
 import { OrderPricingService } from '../order-pricing.service';
 
 describe('OrderPricingService', () => {

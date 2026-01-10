@@ -1,15 +1,15 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
-import type { IMessageBus } from '../../../../shared/message-bus/message-bus.interface';
-import { MESSAGE_BUS } from '../../../../shared/message-bus/message-bus.interface';
-import { DomainEvent } from '../../domain/shared/domain-event';
-import { OrderPlaced } from '../../domain/order/events/order-placed.event';
-import { OrderPaid } from '../../domain/order/events/order-paid.event';
-import { OrderCancelled } from '../../domain/order/events/order-cancelled.event';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { OrderCancelled } from '../../contexts/orders/domain/order/events/order-cancelled.event';
+import { OrderPaid } from '../../contexts/orders/domain/order/events/order-paid.event';
+import { OrderPlaced } from '../../contexts/orders/domain/order/events/order-placed.event';
+import { DomainEvent } from '../../contexts/orders/domain/shared/domain-event';
+import type { IMessageBus } from '../message-bus/message-bus.interface';
+import { MESSAGE_BUS } from '../message-bus/message-bus.interface';
 import {
-  OrderPlacedPayload,
-  OrderPaidPayload,
   OrderCancelledPayload,
-} from '../../../../shared/events/integration-message';
+  OrderPaidPayload,
+  OrderPlacedPayload,
+} from './integration-message';
 
 /**
  * Domain Event Publisher

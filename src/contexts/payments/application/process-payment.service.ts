@@ -1,14 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Money } from '../../../../shared/value-objects/money';
-import type { IOrderGateway } from '../gateways/order-gateway.interface';
-import { ORDER_GATEWAY } from '../gateways/order-gateway.interface';
-import { PaymentResult } from './payment-result';
+import { Money } from '../../../shared/value-objects/money';
+import type { OrderGateway } from './order-gateway.interface';
+import { ORDER_GATEWAY } from './order-gateway.interface';
+
+export type PaymentResult =
+  | { success: true; paymentId: string }
+  | { success: false; reason: string };
 
 @Injectable()
 export class ProcessPaymentService {
   constructor(
     @Inject(ORDER_GATEWAY)
-    private readonly orderGateway: IOrderGateway,
+    private readonly orderGateway: OrderGateway,
   ) {}
 
   async execute(orderId: string, amount: Money): Promise<PaymentResult> {

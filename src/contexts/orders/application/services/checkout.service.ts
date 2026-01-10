@@ -1,15 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { DomainEventPublisher } from '../../../../shared/events/domain-event-publisher';
+import { SHOPPING_CART_REPOSITORY } from '../../cart.tokens';
 import { Order } from '../../domain/order/order';
 import type { OrderRepository } from '../../domain/order/order.repository';
 import { OrderCreationService } from '../../domain/order/services/order-creation.service';
 import { OrderPricingService } from '../../domain/order/services/order-pricing.service';
 import { ShippingAddress } from '../../domain/order/value-objects/shipping-address';
+import { CartId } from '../../domain/shopping-cart/cart-id';
+import { EmptyCartError } from '../../domain/shopping-cart/exceptions/empty-cart.error';
 import type { ShoppingCartRepository } from '../../domain/shopping-cart/shopping-cart.repository';
-import { CartId } from '../../domain/shopping-cart/value-objects/cart-id';
-import { SHOPPING_CART_REPOSITORY } from '../../infrastructure/modules/cart.module';
-import { ORDER_REPOSITORY } from '../../infrastructure/modules/order.module';
+import { ORDER_REPOSITORY } from '../../order.tokens';
 import { CheckoutDTO, ShippingAddressDTO } from '../dtos/checkout.dto';
-import { DomainEventPublisher } from '../../infrastructure/events/domain-event-publisher';
 import {
   MoneyDTO,
   OrderItemDTO,
@@ -18,7 +19,6 @@ import {
   ShippingAddressResponseDTO,
 } from '../dtos/order-response.dto';
 import { CartNotFoundException } from '../exceptions/cart-not-found.exception';
-import { EmptyCartError } from '../../domain/shopping-cart/exceptions/empty-cart.error';
 
 /**
  * CheckoutService

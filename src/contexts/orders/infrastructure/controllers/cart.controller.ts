@@ -63,16 +63,6 @@ export class CartController {
   }
 
   /**
-   * POST /carts/:id/convert
-   * Converts cart to order (marks as immutable)
-   */
-  @Post(':id/convert')
-  @HttpCode(HttpStatus.OK)
-  async convertCart(@Param('id') cartId: string): Promise<CartResponseDto> {
-    return await this.cartService.convertCart(cartId);
-  }
-
-  /**
    * PUT /carts/:id/items/:productId
    * Updates quantity of an item in the cart
    */

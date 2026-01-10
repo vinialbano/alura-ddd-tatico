@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import type { OrderRepository } from '../../../domain/order/order.repository';
-import { OrderId } from '../../../../../shared/value-objects/order-id';
-import { DomainEventPublisher } from '../../../infrastructure/events/domain-event-publisher';
-import { ORDER_REPOSITORY } from '../../../infrastructure/modules/order.module';
-import { PaymentApprovedPayload } from '../../../../../shared/events/integration-message';
+import { DomainEventPublisher } from '../../../../shared/events/domain-event-publisher';
+import { PaymentApprovedPayload } from '../../../../shared/events/integration-message';
+import { OrderId } from '../../../../shared/value-objects/order-id';
+import type { OrderRepository } from '../../domain/order/order.repository';
+import { ORDER_REPOSITORY } from '../../order.tokens';
 
 /**
  * PaymentApprovedHandler

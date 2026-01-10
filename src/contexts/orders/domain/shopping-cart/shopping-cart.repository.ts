@@ -1,6 +1,6 @@
 import { CustomerId } from '../shared/value-objects/customer-id';
+import { CartId } from './cart-id';
 import { ShoppingCart } from './shopping-cart';
-import { CartId } from './value-objects/cart-id';
 
 /**
  * ShoppingCartRepository Interface

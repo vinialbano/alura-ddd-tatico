@@ -25,6 +25,10 @@ import { Money } from '../../../../shared/value-objects/money';
 @Injectable()
 export class StubPricingGateway implements PricingGateway {
   private readonly unitPrices = new Map<string, number>([
+    // Generic test products
+    ['product-1', 10.0],
+    ['product-2', 20.0],
+    // Demo products
     ['COFFEE-COL-001', 24.99],
     ['TEA-EARL-001', 12.99],
     ['MUG-CERAMIC-001', 15.99],

@@ -1,4 +1,4 @@
-import { StringId } from '../../contexts/orders/domain/shared/base/string-id.base';
+import { StringId } from './string-id.base';
 
 /**
  * Value Object: PaymentId

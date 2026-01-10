@@ -19,6 +19,24 @@ import { ProductId } from '../../domain/shared/value-objects/product-id';
 @Injectable()
 export class StubCatalogGateway implements CatalogGateway {
   private readonly products = new Map<string, ProductData>([
+    // Generic test products
+    [
+      'product-1',
+      {
+        name: 'Test Product 1',
+        description: 'Generic test product for e2e tests',
+        sku: 'product-1',
+      },
+    ],
+    [
+      'product-2',
+      {
+        name: 'Test Product 2',
+        description: 'Generic test product for e2e tests',
+        sku: 'product-2',
+      },
+    ],
+    // Demo products
     [
       'COFFEE-COL-001',
       {

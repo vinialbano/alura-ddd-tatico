@@ -1,8 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { PaymentApprovedPayload } from '../../../../../shared/events/integration-message';
 import type { IMessageBus } from '../../../../../shared/message-bus/message-bus.interface';
 import { MESSAGE_BUS } from '../../../../../shared/message-bus/message-bus.interface';
-import { PaymentApprovedPayload } from '../../../../../shared/events/integration-message';
-import { PaymentApprovedHandler } from '../../../application/events/handlers/payment-approved.handler';
+import { PaymentApprovedHandler } from '../../../application/events/payment-approved.handler';
 
 /**
  * PaymentsConsumer (in Orders BC)

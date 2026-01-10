@@ -1,16 +1,16 @@
-import { OrderId } from '../../../../shared/value-objects/order-id';
-import { CartId } from '../shopping-cart/value-objects/cart-id';
-import { CustomerId } from '../shared/value-objects/customer-id';
-import { OrderStatus } from './value-objects/order-status';
 import { Money } from '../../../../shared/value-objects/money';
-import { ShippingAddress } from './value-objects/shipping-address';
-import { OrderItem } from './order-item';
-import { InvalidOrderStateTransitionError } from './exceptions/invalid-order-state-transition.error';
+import { OrderId } from '../../../../shared/value-objects/order-id';
 import { DomainEvent } from '../shared/domain-event';
-import { OrderPaid } from './events/order-paid.event';
-import { OrderCancelled } from './events/order-cancelled.event';
-import { OrderPlaced } from './events/order-placed.event';
+import { CustomerId } from '../shared/value-objects/customer-id';
 import { EventId } from '../shared/value-objects/event-id';
+import { CartId } from '../shopping-cart/cart-id';
+import { OrderCancelled } from './events/order-cancelled.event';
+import { OrderPaid } from './events/order-paid.event';
+import { OrderPlaced } from './events/order-placed.event';
+import { InvalidOrderStateTransitionError } from './exceptions/invalid-order-state-transition.error';
+import { OrderItem } from './order-item';
+import { OrderStatus } from './value-objects/order-status';
+import { ShippingAddress } from './value-objects/shipping-address';
 
 // Order Aggregate Root - manages order lifecycle through state machine
 // State transitions: AwaitingPayment → Paid → Cancelled

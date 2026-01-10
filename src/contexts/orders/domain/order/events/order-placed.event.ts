@@ -1,10 +1,10 @@
-import { DomainEvent } from '../../shared/domain-event';
-import { EventId } from '../../shared/value-objects/event-id';
-import { OrderId } from '../../../../../shared/value-objects/order-id';
-import { CustomerId } from '../../shared/value-objects/customer-id';
-import { CartId } from '../../shopping-cart/value-objects/cart-id';
-import { OrderItem } from '../order-item';
 import { Money } from '../../../../../shared/value-objects/money';
+import { OrderId } from '../../../../../shared/value-objects/order-id';
+import { DomainEvent } from '../../shared/domain-event';
+import { CustomerId } from '../../shared/value-objects/customer-id';
+import { EventId } from '../../shared/value-objects/event-id';
+import { CartId } from '../../shopping-cart/cart-id';
+import { OrderItem } from '../order-item';
 import { ShippingAddress } from '../value-objects/shipping-address';
 
 /**

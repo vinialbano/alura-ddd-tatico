@@ -1,9 +1,9 @@
-import { ShoppingCart } from '../shopping-cart';
-import { CartItem } from '../cart-item';
-import { CartId } from '../value-objects/cart-id';
 import { CustomerId } from '../../shared/value-objects/customer-id';
 import { ProductId } from '../../shared/value-objects/product-id';
 import { Quantity } from '../../shared/value-objects/quantity';
+import { CartId } from '../cart-id';
+import { CartItem } from '../cart-item';
+import { ShoppingCart } from '../shopping-cart';
 
 describe('ShoppingCart', () => {
   describe('create', () => {

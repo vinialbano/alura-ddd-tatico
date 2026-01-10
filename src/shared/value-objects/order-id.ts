@@ -1,4 +1,4 @@
-import { UuidId } from '../../contexts/orders/domain/shared/base/uuid-id.base';
+import { UuidId } from './uuid-id.base';
 
 export class OrderId extends UuidId {
   constructor(value: string) {

@@ -1,25 +1,31 @@
 import { Module } from '@nestjs/common';
-import { CatalogGateway } from '../../application/gateways/catalog.gateway.interface';
-import { PricingGateway } from '../../application/gateways/pricing.gateway.interface';
-import { OrderRepository } from '../../domain/order/order.repository';
-import { ShoppingCartRepository } from '../../domain/shopping-cart/shopping-cart.repository';
-import { CheckoutService } from '../../application/services/checkout.service';
-import { OrderService } from '../../application/services/order.service';
-import { OrderCreationService } from '../../domain/order/services/order-creation.service';
-import { OrderPricingService } from '../../domain/order/services/order-pricing.service';
-import { OrderController } from '../controllers/order.controller';
-import { DomainEventPublisher } from '../events/domain-event-publisher';
-import { StubCatalogGateway } from '../gateways/stub-catalog.gateway';
-import { StubPricingGateway } from '../gateways/stub-pricing.gateway';
-import { InMemoryOrderRepository } from '../repositories/in-memory-order.repository';
+import { DomainEventPublisher } from '../../shared/events/domain-event-publisher';
+import { ORDER_PAYMENT_CONTRACT } from '../shared-kernel/integration-contracts/order-payment.contract';
+import { SharedKernelModule } from '../shared-kernel/shared-kernel.module';
+import { PaymentApprovedHandler } from './application/events/payment-approved.handler';
+import { CatalogGateway } from './application/gateways/catalog.gateway.interface';
+import { PricingGateway } from './application/gateways/pricing.gateway.interface';
+import { OrderPaymentAdapter } from './application/integration/order-payment.adapter';
+import { CheckoutService } from './application/services/checkout.service';
+import { OrderService } from './application/services/order.service';
 import { CartModule, SHOPPING_CART_REPOSITORY } from './cart.module';
-import { PaymentApprovedHandler } from '../../application/events/handlers/payment-approved.handler';
-import { PaymentsConsumer } from '../events/consumers/payments-consumer';
+import { OrderRepository } from './domain/order/order.repository';
+import { OrderCreationService } from './domain/order/services/order-creation.service';
+import { OrderPricingService } from './domain/order/services/order-pricing.service';
+import { ShoppingCartRepository } from './domain/shopping-cart/shopping-cart.repository';
+import { OrderController } from './infrastructure/controllers/order.controller';
+import { PaymentsConsumer } from './infrastructure/events/consumers/payments-consumer';
+import { StubCatalogGateway } from './infrastructure/gateways/stub-catalog.gateway';
+import { StubPricingGateway } from './infrastructure/gateways/stub-pricing.gateway';
+import { InMemoryOrderRepository } from './infrastructure/repositories/in-memory-order.repository';
+import {
+  CATALOG_GATEWAY,
+  ORDER_REPOSITORY,
+  PRICING_GATEWAY,
+} from './order.tokens';
 
-// Injection tokens for interfaces
-export const ORDER_REPOSITORY = 'OrderRepository';
-export const CATALOG_GATEWAY = 'CatalogGateway';
-export const PRICING_GATEWAY = 'PricingGateway';
+// Re-export tokens for backward compatibility
+export { ORDER_REPOSITORY, CATALOG_GATEWAY, PRICING_GATEWAY };
 
 /**
  * OrderModule
@@ -29,6 +35,7 @@ export const PRICING_GATEWAY = 'PricingGateway';
  */
 @Module({
   imports: [
+    SharedKernelModule, // Import SharedKernelModule for contract definitions
     CartModule, // Import CartModule for ShoppingCartRepository
   ],
   controllers: [OrderController],
@@ -102,24 +109,23 @@ export const PRICING_GATEWAY = 'PricingGateway';
       inject: [ORDER_REPOSITORY],
     },
 
-    // Event Handlers
-    {
-      provide: PaymentApprovedHandler,
-      useFactory: (
-        orderRepository: OrderRepository,
-        eventPublisher: DomainEventPublisher,
-      ) => {
-        return new PaymentApprovedHandler(orderRepository, eventPublisher);
-      },
-      inject: [ORDER_REPOSITORY, DomainEventPublisher],
-    },
+    // Event Handlers (using NestJS automatic DI since they're @Injectable)
+    PaymentApprovedHandler,
 
     // Event Consumers
     PaymentsConsumer,
+
+    // Shared Kernel Contract Implementation
+    // Provides synchronous integration API for Payments BC
+    OrderPaymentAdapter,
+    {
+      provide: ORDER_PAYMENT_CONTRACT,
+      useExisting: OrderPaymentAdapter,
+    },
   ],
   exports: [
     ORDER_REPOSITORY, // Export for potential use in other modules
-    PaymentApprovedHandler, // Export for Payments BC
+    ORDER_PAYMENT_CONTRACT, // Export Shared Kernel contract for Payments BC (sync integration)
     PaymentsConsumer, // Export for AppModule initialization
   ],
 })
