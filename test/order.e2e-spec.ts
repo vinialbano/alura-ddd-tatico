@@ -85,8 +85,8 @@ describe('Order E2E Tests', () => {
       expect(body.items).toHaveLength(1);
       expect(body.items[0]).toHaveProperty('productId', 'COFFEE-COL-001');
       expect(body).toHaveProperty('totalAmount');
-      expect(body.totalAmount).toHaveProperty('amount');
-      expect(body.totalAmount).toHaveProperty('currency', 'USD');
+      expect(typeof body.totalAmount).toBe('number');
+      expect(body).toHaveProperty('currency', 'USD');
       expect(body).toHaveProperty('shippingAddress');
       expect(body.shippingAddress).toHaveProperty('street', '123 Main St');
     });
@@ -310,8 +310,8 @@ describe('Order E2E Tests', () => {
         .post('/payments')
         .send({
           orderId,
-          amount: orderBody.totalAmount.amount,
-          currency: orderBody.totalAmount.currency,
+          amount: orderBody.totalAmount,
+          currency: orderBody.currency,
         })
         .expect(201);
 
@@ -356,8 +356,8 @@ describe('Order E2E Tests', () => {
         .post('/payments')
         .send({
           orderId,
-          amount: orderBody.totalAmount.amount,
-          currency: orderBody.totalAmount.currency,
+          amount: orderBody.totalAmount,
+          currency: orderBody.currency,
         });
 
       // Assert - Either succeeds (201) or rejected (400)
@@ -401,8 +401,8 @@ describe('Order E2E Tests', () => {
         .post('/payments')
         .send({
           orderId,
-          amount: orderBody.totalAmount.amount,
-          currency: orderBody.totalAmount.currency,
+          amount: orderBody.totalAmount,
+          currency: orderBody.currency,
         })
         .expect(201);
 
@@ -411,8 +411,8 @@ describe('Order E2E Tests', () => {
         .post('/payments')
         .send({
           orderId,
-          amount: orderBody.totalAmount.amount,
-          currency: orderBody.totalAmount.currency,
+          amount: orderBody.totalAmount,
+          currency: orderBody.currency,
         })
         .expect(409);
 
@@ -464,8 +464,8 @@ describe('Order E2E Tests', () => {
         .post('/payments')
         .send({
           orderId,
-          amount: orderBody.totalAmount.amount,
-          currency: orderBody.totalAmount.currency,
+          amount: orderBody.totalAmount,
+          currency: orderBody.currency,
         });
       const endTime = Date.now();
 

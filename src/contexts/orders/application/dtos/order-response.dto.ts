@@ -1,36 +1,22 @@
 /**
- * MoneyDTO
- *
- * Data Transfer Object for Money value object representation in HTTP responses
- */
-export class MoneyDTO {
-  amount!: number;
-  currency!: string;
-
-  constructor(amount: number, currency: string) {
-    this.amount = amount;
-    this.currency = currency;
-  }
-}
-
-/**
  * OrderItemDTO
  *
- * Data Transfer Object for OrderItem entity in HTTP responses
+ * Flattened data transfer object for OrderItem entity in HTTP responses
+ * Money amounts are represented as simple numbers with currency at order level
  */
 export class OrderItemDTO {
   productId!: string;
   quantity!: number;
-  unitPrice!: MoneyDTO;
-  itemDiscount!: MoneyDTO;
-  lineTotal!: MoneyDTO;
+  unitPrice!: number;
+  itemDiscount!: number;
+  lineTotal!: number;
 
   constructor(
     productId: string,
     quantity: number,
-    unitPrice: MoneyDTO,
-    itemDiscount: MoneyDTO,
-    lineTotal: MoneyDTO,
+    unitPrice: number,
+    itemDiscount: number,
+    lineTotal: number,
   ) {
     this.productId = productId;
     this.quantity = quantity;
@@ -76,18 +62,30 @@ export class ShippingAddressResponseDTO {
 /**
  * OrderResponseDTO
  *
- * Complete order representation for HTTP responses
+ * Order representation for HTTP responses with flattened Money amounts
  * Used for GET /orders/:id and POST /orders/checkout responses
+ *
+ * Money amounts are flattened to simple numbers with a single currency field
+ * Shipping address remains as a nested object for clarity
  */
 export class OrderResponseDTO {
   id!: string;
   cartId!: string;
   customerId!: string;
-  items!: OrderItemDTO[];
-  shippingAddress!: ShippingAddressResponseDTO;
   status!: string;
-  orderLevelDiscount!: MoneyDTO;
-  totalAmount!: MoneyDTO;
+
+  // Order items
+  items!: OrderItemDTO[];
+
+  // Shipping address (kept as nested object)
+  shippingAddress!: ShippingAddressResponseDTO;
+
+  // Monetary amounts (flattened - all in same currency)
+  currency!: string;
+  orderLevelDiscount!: number;
+  totalAmount!: number;
+
+  // Payment and timestamps
   paymentId!: string | null;
   createdAt!: Date;
 
@@ -95,20 +93,22 @@ export class OrderResponseDTO {
     id: string;
     cartId: string;
     customerId: string;
+    status: string;
     items: OrderItemDTO[];
     shippingAddress: ShippingAddressResponseDTO;
-    status: string;
-    orderLevelDiscount: MoneyDTO;
-    totalAmount: MoneyDTO;
+    currency: string;
+    orderLevelDiscount: number;
+    totalAmount: number;
     paymentId: string | null;
     createdAt: Date;
   }) {
     this.id = data.id;
     this.cartId = data.cartId;
     this.customerId = data.customerId;
+    this.status = data.status;
     this.items = data.items;
     this.shippingAddress = data.shippingAddress;
-    this.status = data.status;
+    this.currency = data.currency;
     this.orderLevelDiscount = data.orderLevelDiscount;
     this.totalAmount = data.totalAmount;
     this.paymentId = data.paymentId;

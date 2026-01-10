@@ -4,7 +4,6 @@ import { Order } from '../../domain/order/order';
 import type { OrderRepository } from '../../domain/order/order.repository';
 import { ORDER_REPOSITORY } from '../../orders.tokens';
 import {
-  MoneyDTO,
   OrderItemDTO,
   OrderResponseDTO,
   ShippingAddressResponseDTO,
@@ -70,7 +69,7 @@ export class OrderService {
   }
 
   /**
-   * Maps Order aggregate to OrderResponseDTO
+   * Maps Order aggregate to flattened OrderResponseDTO
    */
   private mapToDto(order: Order): OrderResponseDTO {
     const items: OrderItemDTO[] = order.items.map((item) => {
@@ -78,37 +77,30 @@ export class OrderService {
       return new OrderItemDTO(
         item.productId.getValue(),
         item.quantity.getValue(),
-        new MoneyDTO(item.unitPrice.amount, item.unitPrice.currency),
-        new MoneyDTO(item.itemDiscount.amount, item.itemDiscount.currency),
-        new MoneyDTO(lineTotal.amount, lineTotal.currency),
+        item.unitPrice.amount,
+        item.itemDiscount.amount,
+        lineTotal.amount,
       );
-    });
-
-    const shippingAddress = new ShippingAddressResponseDTO({
-      street: order.shippingAddress.street,
-      addressLine2: order.shippingAddress.addressLine2,
-      city: order.shippingAddress.city,
-      stateOrProvince: order.shippingAddress.stateOrProvince,
-      postalCode: order.shippingAddress.postalCode,
-      country: order.shippingAddress.country,
-      deliveryInstructions: order.shippingAddress.deliveryInstructions,
     });
 
     return new OrderResponseDTO({
       id: order.id.getValue(),
       cartId: order.cartId.getValue(),
       customerId: order.customerId.getValue(),
-      items,
-      shippingAddress,
       status: order.status.toString(),
-      orderLevelDiscount: new MoneyDTO(
-        order.orderLevelDiscount.amount,
-        order.orderLevelDiscount.currency,
-      ),
-      totalAmount: new MoneyDTO(
-        order.totalAmount.amount,
-        order.totalAmount.currency,
-      ),
+      items,
+      shippingAddress: new ShippingAddressResponseDTO({
+        street: order.shippingAddress.street,
+        addressLine2: order.shippingAddress.addressLine2,
+        city: order.shippingAddress.city,
+        stateOrProvince: order.shippingAddress.stateOrProvince,
+        postalCode: order.shippingAddress.postalCode,
+        country: order.shippingAddress.country,
+        deliveryInstructions: order.shippingAddress.deliveryInstructions,
+      }),
+      currency: order.totalAmount.currency,
+      orderLevelDiscount: order.orderLevelDiscount.amount,
+      totalAmount: order.totalAmount.amount,
       paymentId: order.paymentId,
       createdAt: order.createdAt,
     });
