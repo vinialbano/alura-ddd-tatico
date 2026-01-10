@@ -1,15 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { OrderCancelled } from '../../contexts/orders/domain/order/events/order-cancelled.event';
-import { OrderPaid } from '../../contexts/orders/domain/order/events/order-paid.event';
 import { OrderPlaced } from '../../contexts/orders/domain/order/events/order-placed.event';
 import { DomainEvent } from '../../contexts/orders/domain/shared/domain-event';
 import type { IMessageBus } from '../message-bus/message-bus.interface';
 import { MESSAGE_BUS } from '../message-bus/message-bus.interface';
-import {
-  OrderCancelledPayload,
-  OrderPaidPayload,
-  OrderPlacedPayload,
-} from './integration-message';
+import { OrderPlacedPayload } from './integration-message';
 
 /**
  * Domain Event Publisher
@@ -22,10 +16,6 @@ export class DomainEventPublisher {
 
   constructor(@Inject(MESSAGE_BUS) private readonly messageBus: IMessageBus) {}
 
-  /**
-   * Publish domain events as integration messages
-   * @param events Array of domain events to publish
-   */
   async publishDomainEvents(events: DomainEvent[]): Promise<void> {
     for (const event of events) {
       await this.publishSingleEvent(event);
@@ -35,10 +25,6 @@ export class DomainEventPublisher {
   private async publishSingleEvent(event: DomainEvent): Promise<void> {
     if (event instanceof OrderPlaced) {
       await this.publishOrderPlaced(event);
-    } else if (event instanceof OrderPaid) {
-      await this.publishOrderPaid(event);
-    } else if (event instanceof OrderCancelled) {
-      await this.publishOrderCancelled(event);
     }
     // Unknown event types are silently ignored
   }
@@ -49,10 +35,9 @@ export class DomainEventPublisher {
       customerId: event.customerId.getValue(),
       cartId: event.cartId.getValue(),
       items: event.items.map((item) => ({
-        productId: item.productSnapshot.sku, // Using SKU as product identifier
-        productName: item.productSnapshot.name,
+        productId: item.productId.getValue(),
         quantity: item.quantity.getValue(),
-        unitPrice: item.unitPrice.amount, // unitPrice is on OrderItem, not ProductSnapshot
+        unitPrice: item.unitPrice.amount,
       })),
       totalAmount: event.totalAmount.amount,
       currency: event.totalAmount.currency,
@@ -70,34 +55,5 @@ export class DomainEventPublisher {
       `Publishing order.placed for order ${payload.orderId} (${payload.items.length} items, ${payload.totalAmount} ${payload.currency})`,
     );
     await this.messageBus.publish('order.placed', payload);
-  }
-
-  private async publishOrderPaid(event: OrderPaid): Promise<void> {
-    const payload: OrderPaidPayload = {
-      orderId: event.aggregateId,
-      paymentId: event.paymentId,
-      amount: 0, // Will be populated when we have access to order amount
-      currency: 'BRL',
-      timestamp: event.occurredAt.toISOString(),
-    };
-
-    this.logger.log(
-      `Publishing order.paid for order ${payload.orderId} with payment ${payload.paymentId}`,
-    );
-    await this.messageBus.publish('order.paid', payload);
-  }
-
-  private async publishOrderCancelled(event: OrderCancelled): Promise<void> {
-    const payload: OrderCancelledPayload = {
-      orderId: event.aggregateId,
-      reason: event.cancellationReason,
-      previousStatus: event.previousState,
-      timestamp: event.occurredAt.toISOString(),
-    };
-
-    this.logger.log(
-      `Publishing order.cancelled for order ${payload.orderId} (was ${payload.previousStatus}, reason: ${payload.reason})`,
-    );
-    await this.messageBus.publish('order.cancelled', payload);
   }
 }

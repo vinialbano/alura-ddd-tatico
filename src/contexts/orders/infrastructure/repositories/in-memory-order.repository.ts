@@ -19,34 +19,18 @@ import { CartId } from '../../domain/shopping-cart/cart-id';
 export class InMemoryOrderRepository implements OrderRepository {
   private readonly orders = new Map<string, Order>();
 
-  /**
-   * Persist an order (create or update)
-   *
-   * @param order - Order aggregate to save
-   */
   async save(order: Order): Promise<void> {
     this.orders.set(order.id.getValue(), order);
     return Promise.resolve();
   }
 
-  /**
-   * Find an order by its unique identifier
-   *
-   * @param id - Order identifier
-   * @returns Order if found, null otherwise
-   */
   async findById(id: OrderId): Promise<Order | null> {
     const order = this.orders.get(id.getValue());
     return Promise.resolve(order ?? null);
   }
 
   /**
-   * Find an order by its source cart identifier
-   *
    * Used to implement idempotent checkout (prevent duplicate orders from same cart)
-   *
-   * @param cartId - Cart identifier
-   * @returns Order if found, null otherwise
    */
   async findByCartId(cartId: CartId): Promise<Order | null> {
     for (const order of this.orders.values()) {
@@ -57,16 +41,10 @@ export class InMemoryOrderRepository implements OrderRepository {
     return Promise.resolve(null);
   }
 
-  /**
-   * Clear all orders (for testing purposes)
-   */
   clear(): void {
     this.orders.clear();
   }
 
-  /**
-   * Get all orders (for debugging/testing purposes)
-   */
   findAll(): Order[] {
     return Array.from(this.orders.values());
   }

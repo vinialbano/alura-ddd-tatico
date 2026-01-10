@@ -2,7 +2,6 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import {
   IntegrationMessage,
-  OrderCancelledPayload,
   OrderPlacedPayload,
   PaymentApprovedPayload,
 } from '../../../shared/events/integration-message';
@@ -17,9 +16,8 @@ import { MESSAGE_BUS } from '../../../shared/message-bus/message-bus.interface';
  *
  * Responsibilities:
  * 1. Subscribe to "order.placed" topic - process payments
- * 2. Subscribe to "order.cancelled" topic - trigger refunds
- * 3. Simulate payment processing (10ms delay)
- * 4. Publish "payment.approved" message back to message bus
+ * 2. Simulate payment processing (10ms delay)
+ * 3. Publish "payment.approved" message back to message bus
  *
  * This consumer demonstrates eventual consistency and async integration patterns.
  */
@@ -33,9 +31,6 @@ export class OrdersConsumer {
   ) {}
 
   /**
-   * Initialize subscriptions
-   * Should be called during application startup (OnModuleInit)
-   *
    * Can be controlled via ENABLE_AUTOMATIC_PAYMENT environment variable:
    * - 'true' (default): Automatic payment processing (event-driven flow)
    * - 'false': Manual payment via POST /payments (synchronous flow)
@@ -55,21 +50,11 @@ export class OrdersConsumer {
       'order.placed',
       this.handleOrderPlaced.bind(this),
     );
-    this.messageBus.subscribe<OrderCancelledPayload>(
-      'order.cancelled',
-      this.handleOrderCancelled.bind(this),
-    );
     this.logger.log(
-      'OrdersConsumer (Payments BC) subscribed to order.placed and order.cancelled topics',
+      'OrdersConsumer (Payments BC) subscribed to order.placed topic',
     );
   }
 
-  /**
-   * Handle order.placed integration message
-   * Simulates payment processing and publishes payment.approved
-   *
-   * @param message - Integration message with order details
-   */
   private async handleOrderPlaced(
     message: IntegrationMessage<OrderPlacedPayload>,
   ): Promise<void> {
@@ -103,36 +88,5 @@ export class OrdersConsumer {
     this.logger.log(
       `[PAYMENTS BC] Published payment.approved message for order ${orderId} with payment ${paymentId}`,
     );
-  }
-
-  /**
-   * Handle order.cancelled integration message
-   * Simulates refund processing for cancelled orders
-   *
-   * @param message - Integration message with order cancellation details
-   */
-  private handleOrderCancelled(
-    message: IntegrationMessage<OrderCancelledPayload>,
-  ): void {
-    const { payload, messageId } = message;
-    const { orderId, reason, previousStatus } = payload;
-
-    this.logger.log(
-      `[PAYMENTS BC] Received order.cancelled message ${messageId} for order ${orderId}`,
-    );
-
-    // Determine if refund is needed based on previous state
-    if (previousStatus === 'PAID') {
-      this.logger.log(
-        `[PAYMENTS BC] REFUND triggered for order ${orderId} (was ${previousStatus}, reason: ${reason})`,
-      );
-      // In a real system, this would call a refund API
-      // await this.paymentGateway.refund(orderId, paymentId);
-    } else {
-      this.logger.log(
-        `[PAYMENTS BC] No refund needed for order ${orderId} (was ${previousStatus}, reason: ${reason})`,
-      );
-      // Order was cancelled before payment - no refund needed
-    }
   }
 }

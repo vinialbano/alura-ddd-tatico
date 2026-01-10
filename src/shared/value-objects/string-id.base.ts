@@ -18,33 +18,18 @@ export abstract class StringId {
     this.value = value.trim();
   }
 
-  /**
-   * Returns the underlying string value
-   */
   getValue(): string {
     return this.value;
   }
 
-  /**
-   * Checks equality with another StringId by value
-   * @param other - Another StringId instance to compare
-   */
   equals(other: StringId): boolean {
     return this.value === other.value;
   }
 
-  /**
-   * Returns the string representation of the ID
-   */
   toString(): string {
     return this.value;
   }
 
-  /**
-   * Validates that the value is not null, undefined, empty, or whitespace-only
-   * @param value - The value to validate
-   * @throws Error if validation fails
-   */
   private validateNonEmpty(value: string): void {
     if (!value || value.trim().length === 0) {
       throw new Error('ID cannot be empty');

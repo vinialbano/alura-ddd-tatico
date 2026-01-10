@@ -1,9 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { DomainEventPublisher } from '../../../../shared/events/domain-event-publisher';
 import { PaymentApprovedPayload } from '../../../../shared/events/integration-message';
 import { OrderId } from '../../../../shared/value-objects/order-id';
 import type { OrderRepository } from '../../domain/order/order.repository';
-import { ORDER_REPOSITORY } from '../../order.tokens';
+import { ORDER_REPOSITORY } from '../../orders.tokens';
 
 /**
  * PaymentApprovedHandler
@@ -16,7 +15,6 @@ import { ORDER_REPOSITORY } from '../../order.tokens';
  * 2. Load Order aggregate by orderId
  * 3. Call Order.markAsPaid() with paymentId (idempotent operation)
  * 4. Persist updated Order
- * 5. Publish OrderPaid domain event (via DomainEventPublisher)
  *
  * This handler bridges the integration layer (message bus) with the domain layer,
  * translating external payment events into domain commands.
@@ -28,14 +26,8 @@ export class PaymentApprovedHandler {
   constructor(
     @Inject(ORDER_REPOSITORY)
     private readonly orderRepository: OrderRepository,
-    private readonly eventPublisher: DomainEventPublisher,
   ) {}
 
-  /**
-   * Handle payment.approved payload
-   *
-   * @param payload - payment approval details
-   */
   async handle(payload: PaymentApprovedPayload): Promise<void> {
     const { orderId, paymentId, approvedAmount, currency } = payload;
 
@@ -71,11 +63,6 @@ export class PaymentApprovedHandler {
     // 3. Persist updated order
     await this.orderRepository.save(order);
 
-    // 4. Publish OrderPaid domain event to message bus
-    await this.eventPublisher.publishDomainEvents([...order.getDomainEvents()]);
-
-    this.logger.log(
-      `Order ${orderId} payment processing complete, OrderPaid event emitted`,
-    );
+    this.logger.log(`Order ${orderId} payment processing complete`);
   }
 }

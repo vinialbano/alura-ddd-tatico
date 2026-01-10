@@ -1,6 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { DomainEventPublisher } from '../../../../shared/events/domain-event-publisher';
-import { SHOPPING_CART_REPOSITORY } from '../../cart.tokens';
+import { SHOPPING_CART_REPOSITORY, ORDER_REPOSITORY } from '../../orders.tokens';
 import { Order } from '../../domain/order/order';
 import type { OrderRepository } from '../../domain/order/order.repository';
 import { OrderCreationService } from '../../domain/order/services/order-creation.service';
@@ -9,16 +9,12 @@ import { ShippingAddress } from '../../domain/order/value-objects/shipping-addre
 import { CartId } from '../../domain/shopping-cart/cart-id';
 import { EmptyCartError } from '../../domain/shopping-cart/exceptions/empty-cart.error';
 import type { ShoppingCartRepository } from '../../domain/shopping-cart/shopping-cart.repository';
-import { ORDER_REPOSITORY } from '../../order.tokens';
 import { CheckoutDTO, ShippingAddressDTO } from '../dtos/checkout.dto';
 import {
-  MoneyDTO,
   OrderItemDTO,
   OrderResponseDTO,
-  ProductSnapshotDTO,
   ShippingAddressResponseDTO,
 } from '../dtos/order-response.dto';
-import { CartNotFoundException } from '../exceptions/cart-not-found.exception';
 
 /**
  * CheckoutService
@@ -42,15 +38,6 @@ export class CheckoutService {
     private readonly eventPublisher: DomainEventPublisher,
   ) {}
 
-  /**
-   * Checkout a shopping cart to create an order
-   *
-   * @param dto - CheckoutDTO with cart ID and shipping address
-   * @returns OrderResponseDTO with created order details
-   * @throws CartNotFoundException if cart does not exist
-   * @throws EmptyCartError if cart is empty (thrown by OrderCreationService)
-   * @throws Error if product data unavailable or pricing calculation fails
-   */
   async checkout(dto: CheckoutDTO): Promise<OrderResponseDTO> {
     // Convert DTO to domain value objects
     const cartId = CartId.fromString(dto.cartId);
@@ -59,7 +46,7 @@ export class CheckoutService {
     // 1. Load cart (repository interaction)
     const cart = await this.cartRepository.findById(cartId);
     if (!cart) {
-      throw new CartNotFoundException(cartId);
+      throw new NotFoundException(`Cart ${cartId.getValue()} not found`);
     }
 
     // 2. Validate cart is not empty (fail fast before external calls)
@@ -112,51 +99,39 @@ export class CheckoutService {
   }
 
   /**
-   * Maps Order aggregate to OrderResponseDTO
+   * Maps Order aggregate to flattened OrderResponseDTO
    */
   private mapToDto(order: Order): OrderResponseDTO {
     const items: OrderItemDTO[] = order.items.map((item) => {
       const lineTotal = item.getLineTotal();
       return new OrderItemDTO(
-        new ProductSnapshotDTO(
-          item.productSnapshot.name,
-          item.productSnapshot.description,
-          item.productSnapshot.sku,
-        ),
+        item.productId.getValue(),
         item.quantity.getValue(),
-        new MoneyDTO(item.unitPrice.amount, item.unitPrice.currency),
-        new MoneyDTO(item.itemDiscount.amount, item.itemDiscount.currency),
-        new MoneyDTO(lineTotal.amount, lineTotal.currency),
+        item.unitPrice.amount,
+        item.itemDiscount.amount,
+        lineTotal.amount,
       );
-    });
-
-    const shippingAddress = new ShippingAddressResponseDTO({
-      street: order.shippingAddress.street,
-      addressLine2: order.shippingAddress.addressLine2,
-      city: order.shippingAddress.city,
-      stateOrProvince: order.shippingAddress.stateOrProvince,
-      postalCode: order.shippingAddress.postalCode,
-      country: order.shippingAddress.country,
-      deliveryInstructions: order.shippingAddress.deliveryInstructions,
     });
 
     return new OrderResponseDTO({
       id: order.id.getValue(),
       cartId: order.cartId.getValue(),
       customerId: order.customerId.getValue(),
-      items,
-      shippingAddress,
       status: order.status.toString(),
-      orderLevelDiscount: new MoneyDTO(
-        order.orderLevelDiscount.amount,
-        order.orderLevelDiscount.currency,
-      ),
-      totalAmount: new MoneyDTO(
-        order.totalAmount.amount,
-        order.totalAmount.currency,
-      ),
+      items,
+      shippingAddress: new ShippingAddressResponseDTO({
+        street: order.shippingAddress.street,
+        addressLine2: order.shippingAddress.addressLine2,
+        city: order.shippingAddress.city,
+        stateOrProvince: order.shippingAddress.stateOrProvince,
+        postalCode: order.shippingAddress.postalCode,
+        country: order.shippingAddress.country,
+        deliveryInstructions: order.shippingAddress.deliveryInstructions,
+      }),
+      currency: order.totalAmount.currency,
+      orderLevelDiscount: order.orderLevelDiscount.amount,
+      totalAmount: order.totalAmount.amount,
       paymentId: order.paymentId,
-      cancellationReason: order.cancellationReason,
       createdAt: order.createdAt,
     });
   }

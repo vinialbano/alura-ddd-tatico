@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { OrderModule } from '../orders/order.module';
-import { SharedKernelModule } from '../shared-kernel/shared-kernel.module';
+import { OrdersModule } from '../orders/orders.module';
 import { ORDER_GATEWAY } from './application/order-gateway.interface';
 import { ProcessPaymentService } from './application/process-payment.service';
 import { InProcessOrderGateway } from './infrastructure/in-process-order.gateway';
@@ -9,8 +8,7 @@ import { PaymentController } from './infrastructure/payment.controller';
 
 @Module({
   imports: [
-    SharedKernelModule, // Import SharedKernelModule for contract definitions
-    OrderModule, // Import OrderModule for ORDER_PAYMENT_CONTRACT implementation (no forwardRef needed)
+    OrdersModule, // Import OrdersModule for ORDER_PAYMENT_CONTRACT implementation
   ],
   controllers: [PaymentController],
   providers: [

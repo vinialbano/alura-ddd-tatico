@@ -28,7 +28,6 @@ export class ShoppingCart {
     this.validate();
   }
 
-  // Creates empty active cart
   static create(cartId: CartId, customerId: CustomerId): ShoppingCart {
     return new ShoppingCart({
       cartId,
@@ -38,7 +37,6 @@ export class ShoppingCart {
     });
   }
 
-  // Adds item or consolidates quantity if exists (max 10 per product)
   addItem(productId: ProductId, quantity: Quantity): void {
     this.ensureNotConverted();
 
@@ -82,39 +80,7 @@ export class ShoppingCart {
     return this.conversionStatus;
   }
 
-  // Replaces quantity for existing item
-  updateItemQuantity(productId: ProductId, quantity: Quantity): void {
-    this.ensureNotConverted();
-
-    const productKey = productId.getValue();
-    const existingItem = this.items.get(productKey);
-
-    if (!existingItem) {
-      throw new InvalidCartOperationError(
-        `Product ${productId.getValue()} is not in the cart`,
-      );
-    }
-
-    existingItem.updateQuantity(quantity);
-  }
-
-  // Removes item from cart
-  removeItem(productId: ProductId): void {
-    this.ensureNotConverted();
-
-    const productKey = productId.getValue();
-    const existingItem = this.items.get(productKey);
-
-    if (!existingItem) {
-      throw new InvalidCartOperationError(
-        `Product ${productId.getValue()} is not in the cart`,
-      );
-    }
-
-    this.items.delete(productKey);
-  }
-
-  // Converts cart to order - becomes immutable
+  // Invariant: Cart must have at least 1 item to be converted
   markAsConverted(): void {
     if (this.items.size === 0) {
       throw new EmptyCartError();

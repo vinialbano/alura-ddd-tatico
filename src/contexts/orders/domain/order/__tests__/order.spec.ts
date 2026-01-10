@@ -2,16 +2,14 @@ import { Money } from '../../../../../shared/value-objects/money';
 import { OrderId } from '../../../../../shared/value-objects/order-id';
 import { CustomerId } from '../../shared/value-objects/customer-id';
 import { EventId } from '../../shared/value-objects/event-id';
+import { ProductId } from '../../shared/value-objects/product-id';
 import { Quantity } from '../../shared/value-objects/quantity';
 import { CartId } from '../../shopping-cart/cart-id';
-import { OrderCancelled } from '../events/order-cancelled.event';
-import { OrderPaid } from '../events/order-paid.event';
 import { OrderPlaced } from '../events/order-placed.event';
 import { InvalidOrderStateTransitionError } from '../exceptions/invalid-order-state-transition.error';
 import { Order } from '../order';
 import { OrderItem } from '../order-item';
 import { OrderStatus } from '../value-objects/order-status';
-import { ProductSnapshot } from '../value-objects/product-snapshot';
 import { ShippingAddress } from '../value-objects/shipping-address';
 
 // Test helper functions for inline test data creation
@@ -25,17 +23,13 @@ const createTestShippingAddress = () =>
   });
 
 const createTestOrderItem = (overrides?: {
-  name?: string;
+  productId?: string;
   quantity?: number;
   unitPrice?: Money;
   itemDiscount?: Money;
 }) =>
   OrderItem.create(
-    new ProductSnapshot({
-      name: overrides?.name || 'Test Product',
-      description: 'Test product description',
-      sku: 'TEST-SKU-001',
-    }),
+    ProductId.fromString(overrides?.productId || 'TEST-SKU-001'),
     Quantity.of(overrides?.quantity || 1),
     overrides?.unitPrice || new Money(100.0, 'USD'),
     overrides?.itemDiscount || new Money(0, 'USD'),
@@ -82,7 +76,6 @@ describe('Order Aggregate', () => {
       expect(order.orderLevelDiscount).toBe(orderLevelDiscount);
       expect(order.totalAmount).toBe(totalAmount);
       expect(order.paymentId).toBeNull();
-      expect(order.cancellationReason).toBeNull();
       expect(order.createdAt).toBeInstanceOf(Date);
     });
 
@@ -113,17 +106,17 @@ describe('Order Aggregate', () => {
       const customerId = CustomerId.fromString('customer-123');
       const items = [
         createTestOrderItem({
-          name: 'Product A',
+          productId: 'PRODUCT-A-001',
           quantity: 2,
           unitPrice: new Money(50.0, 'USD'),
         }),
         createTestOrderItem({
-          name: 'Product B',
+          productId: 'PRODUCT-B-001',
           quantity: 1,
           unitPrice: new Money(30.0, 'USD'),
         }),
         createTestOrderItem({
-          name: 'Product C',
+          productId: 'PRODUCT-C-001',
           quantity: 3,
           unitPrice: new Money(20.0, 'USD'),
           itemDiscount: new Money(5.0, 'USD'),
@@ -143,9 +136,9 @@ describe('Order Aggregate', () => {
       );
 
       expect(order.items).toHaveLength(3);
-      expect(order.items[0].productSnapshot.name).toBe('Product A');
-      expect(order.items[1].productSnapshot.name).toBe('Product B');
-      expect(order.items[2].productSnapshot.name).toBe('Product C');
+      expect(order.items[0].productId.getValue()).toBe('PRODUCT-A-001');
+      expect(order.items[1].productId.getValue()).toBe('PRODUCT-B-001');
+      expect(order.items[2].productId.getValue()).toBe('PRODUCT-C-001');
     });
   });
 
@@ -213,13 +206,13 @@ describe('Order Aggregate', () => {
       const customerId = CustomerId.fromString('customer-123');
       const items = [
         createTestOrderItem({
-          name: 'Product A',
+          productId: 'PRODUCT-A-001',
           quantity: 2,
           unitPrice: new Money(50.0, 'USD'),
           itemDiscount: new Money(5.0, 'USD'),
         }),
         createTestOrderItem({
-          name: 'Product B',
+          productId: 'PRODUCT-B-001',
           quantity: 1,
           unitPrice: new Money(30.0, 'USD'),
         }),
@@ -319,7 +312,7 @@ describe('Order Aggregate', () => {
       // Arrange
       const items = [
         createTestOrderItem({
-          name: 'Product',
+          productId: 'TEST-PRODUCT-001',
           quantity: 1,
           unitPrice: new Money(100.0, 'USD'),
         }),
@@ -371,59 +364,6 @@ describe('Order Aggregate', () => {
       }).toThrow(InvalidOrderStateTransitionError);
     });
 
-    it('should throw error when marking cancelled order as paid', () => {
-      const order = createTestOrder();
-
-      order.cancel('Customer requested cancellation');
-
-      expect(() => {
-        order.markAsPaid('pay_789');
-      }).toThrow(InvalidOrderStateTransitionError);
-    });
-
-    it('should preserve order state when markAsPaid fails', () => {
-      const order = createTestOrder();
-
-      order.cancel('Test cancellation');
-      const statusBeforeAttempt = order.status;
-      const paymentIdBeforeAttempt = order.paymentId;
-
-      try {
-        order.markAsPaid('pay_999');
-      } catch {
-        // Expected to fail
-      }
-
-      expect(order.status).toBe(statusBeforeAttempt);
-      expect(order.paymentId).toBe(paymentIdBeforeAttempt);
-    });
-
-    it('should raise OrderPaid domain event when marking as paid', () => {
-      const orderId = OrderId.generate();
-      const items = [createTestOrderItem()];
-      const order = Order.create(
-        orderId,
-        CartId.create(),
-        CustomerId.fromString('customer-123'),
-        items,
-        createTestShippingAddress(),
-        new Money(0, 'USD'),
-        new Money(100.0, 'USD'),
-      );
-
-      // Clear OrderPlaced event from creation
-      order.clearDomainEvents();
-
-      const paymentId = 'PAY-123456';
-      order.markAsPaid(paymentId);
-
-      const events = order.getDomainEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0]).toBeInstanceOf(OrderPaid);
-      expect((events[0] as OrderPaid).paymentId).toBe(paymentId);
-      expect((events[0] as OrderPaid).aggregateId).toBe(orderId.getValue());
-    });
-
     it('should record payment ID when marking as paid', () => {
       const order = createTestOrder();
 
@@ -432,143 +372,6 @@ describe('Order Aggregate', () => {
 
       expect(order.paymentId).toBe(paymentId);
       expect(order.status.equals(OrderStatus.Paid)).toBe(true);
-    });
-  });
-
-  describe('State Machine: cancel', () => {
-    it('should transition from AwaitingPayment to Cancelled with reason', () => {
-      const order = createTestOrder();
-
-      const cancellationReason = 'Customer requested cancellation';
-      order.cancel(cancellationReason);
-
-      expect(order.status).toBe(OrderStatus.Cancelled);
-      expect(order.cancellationReason).toBe(cancellationReason);
-    });
-
-    it('should transition from Paid to Cancelled with reason (refund scenario)', () => {
-      const order = createTestOrder();
-
-      order.markAsPaid('pay_123');
-      const cancellationReason = 'Product defect - customer requested refund';
-      order.cancel(cancellationReason);
-
-      expect(order.status).toBe(OrderStatus.Cancelled);
-      expect(order.cancellationReason).toBe(cancellationReason);
-      expect(order.paymentId).toBe('pay_123'); // Payment ID preserved
-    });
-
-    it('should raise OrderCancelled event when cancelling from AwaitingPayment (T037)', () => {
-      const orderId = OrderId.generate();
-      const items = [createTestOrderItem()];
-      const order = Order.create(
-        orderId,
-        CartId.create(),
-        CustomerId.fromString('customer-123'),
-        items,
-        createTestShippingAddress(),
-        new Money(0, 'USD'),
-        new Money(100.0, 'USD'),
-      );
-
-      // Clear OrderPlaced event from creation
-      order.clearDomainEvents();
-
-      const cancellationReason = 'Customer changed mind';
-      order.cancel(cancellationReason);
-
-      const events = order.getDomainEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0]).toBeInstanceOf(OrderCancelled);
-
-      const cancelledEvent = events[0] as OrderCancelled;
-      expect(cancelledEvent.aggregateId).toBe(orderId.getValue());
-      expect(cancelledEvent.cancellationReason).toBe(cancellationReason);
-      expect(cancelledEvent.previousState).toBe('AWAITING_PAYMENT');
-      expect(cancelledEvent.occurredAt).toBeInstanceOf(Date);
-    });
-
-    it('should raise OrderCancelled event when cancelling from Paid (T050)', () => {
-      const orderId = OrderId.generate();
-      const items = [createTestOrderItem()];
-      const order = Order.create(
-        orderId,
-        CartId.create(),
-        CustomerId.fromString('customer-123'),
-        items,
-        createTestShippingAddress(),
-        new Money(0, 'USD'),
-        new Money(100.0, 'USD'),
-      );
-
-      // Mark as paid first
-      order.markAsPaid('pay_123');
-
-      // Clear domain events from markAsPaid
-      order.clearDomainEvents();
-
-      // Now cancel (refund scenario)
-      const cancellationReason = 'Refund requested';
-      order.cancel(cancellationReason);
-
-      const events = order.getDomainEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0]).toBeInstanceOf(OrderCancelled);
-
-      const cancelledEvent = events[0] as OrderCancelled;
-      expect(cancelledEvent.aggregateId).toBe(orderId.getValue());
-      expect(cancelledEvent.cancellationReason).toBe(cancellationReason);
-      expect(cancelledEvent.previousState).toBe('PAID');
-      expect(cancelledEvent.occurredAt).toBeInstanceOf(Date);
-    });
-
-    it('should throw error when cancelling already cancelled order', () => {
-      const order = createTestOrder();
-
-      order.cancel('First cancellation');
-
-      expect(() => {
-        order.cancel('Second cancellation attempt');
-      }).toThrow(InvalidOrderStateTransitionError);
-    });
-
-    it('should throw error when cancelling with empty reason (T039)', () => {
-      const order = createTestOrder();
-
-      // Test empty string
-      expect(() => {
-        order.cancel('');
-      }).toThrow('Cancellation reason cannot be empty');
-
-      // Test whitespace-only string
-      expect(() => {
-        order.cancel('   ');
-      }).toThrow('Cancellation reason cannot be empty');
-
-      // Test tab/newline characters
-      expect(() => {
-        order.cancel('\t\n');
-      }).toThrow('Cancellation reason cannot be empty');
-
-      // Verify order remained in AwaitingPayment
-      expect(order.status).toBe(OrderStatus.AwaitingPayment);
-    });
-
-    it('should preserve order state when cancel fails', () => {
-      const order = createTestOrder();
-
-      order.cancel('First cancellation');
-      const statusBeforeAttempt = order.status;
-      const reasonBeforeAttempt = order.cancellationReason;
-
-      try {
-        order.cancel('Second cancellation');
-      } catch {
-        // Expected to fail
-      }
-
-      expect(order.status).toBe(statusBeforeAttempt);
-      expect(order.cancellationReason).toBe(reasonBeforeAttempt);
     });
   });
 
@@ -586,36 +389,6 @@ describe('Order Aggregate', () => {
 
       expect(order.canBePaid()).toBe(false);
     });
-
-    it('canBePaid should return false for Cancelled status', () => {
-      const order = createTestOrder();
-
-      order.cancel('Test cancellation');
-
-      expect(order.canBePaid()).toBe(false);
-    });
-
-    it('canBeCancelled should return true for AwaitingPayment status', () => {
-      const order = createTestOrder();
-
-      expect(order.canBeCancelled()).toBe(true);
-    });
-
-    it('canBeCancelled should return true for Paid status', () => {
-      const order = createTestOrder();
-
-      order.markAsPaid('pay_123');
-
-      expect(order.canBeCancelled()).toBe(true);
-    });
-
-    it('canBeCancelled should return false for Cancelled status', () => {
-      const order = createTestOrder();
-
-      order.cancel('Test cancellation');
-
-      expect(order.canBeCancelled()).toBe(false);
-    });
   });
 
   describe('Invariants and Validation', () => {
@@ -625,7 +398,6 @@ describe('Order Aggregate', () => {
       // Future enhancement: Add invariant validation in Order.create()
       const items = [
         createTestOrderItem({
-          name: 'Product A',
           quantity: 2,
           unitPrice: new Money(50.0, 'USD'),
         }),

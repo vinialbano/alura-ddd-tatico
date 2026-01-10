@@ -23,16 +23,10 @@ export class PaymentsConsumer {
     private readonly paymentApprovedHandler: PaymentApprovedHandler,
   ) {}
 
-  /**
-   * Initialize subscriptions to integration events
-   */
   initialize(): void {
     this.subscribeToPaymentApproved();
   }
 
-  /**
-   * Subscribe to payment.approved events from Payment BC
-   */
   private subscribeToPaymentApproved(): void {
     this.messageBus.subscribe<PaymentApprovedPayload>(
       'payment.approved',

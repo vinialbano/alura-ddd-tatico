@@ -1,6 +1,6 @@
 import { Money } from '../../../../shared/value-objects/money';
+import { ProductId } from '../shared/value-objects/product-id';
 import { Quantity } from '../shared/value-objects/quantity';
-import { ProductSnapshot } from './value-objects/product-snapshot';
 
 /**
  * OrderItem Entity
@@ -9,7 +9,7 @@ import { ProductSnapshot } from './value-objects/product-snapshot';
  * Lifecycle is completely managed by the parent Order aggregate.
  *
  * The OrderItem captures:
- * - Product snapshot (immutable product data at checkout time)
+ * - Product identifier
  * - Quantity ordered
  * - Unit price at time of order
  * - Item-level discount applied
@@ -23,7 +23,7 @@ import { ProductSnapshot } from './value-objects/product-snapshot';
  */
 export class OrderItem {
   private constructor(
-    public readonly productSnapshot: ProductSnapshot,
+    public readonly productId: ProductId,
     public readonly quantity: Quantity,
     public readonly unitPrice: Money,
     public readonly itemDiscount: Money,
@@ -32,23 +32,13 @@ export class OrderItem {
     this.validateDiscount();
   }
 
-  /**
-   * Factory method to create an OrderItem
-   *
-   * @param productSnapshot - Captured product information
-   * @param quantity - Number of units ordered
-   * @param unitPrice - Price per unit at time of order
-   * @param itemDiscount - Product-level discount applied
-   * @returns New OrderItem instance
-   * @throws Error if currencies are inconsistent or discount is excessive
-   */
   static create(
-    productSnapshot: ProductSnapshot,
+    productId: ProductId,
     quantity: Quantity,
     unitPrice: Money,
     itemDiscount: Money,
   ): OrderItem {
-    return new OrderItem(productSnapshot, quantity, unitPrice, itemDiscount);
+    return new OrderItem(productId, quantity, unitPrice, itemDiscount);
   }
 
   /**
@@ -64,11 +54,6 @@ export class OrderItem {
     return subtotal.subtract(this.itemDiscount);
   }
 
-  /**
-   * Validate that unitPrice and itemDiscount use the same currency
-   *
-   * @throws Error if currencies differ
-   */
   private validateCurrencyConsistency(): void {
     if (this.unitPrice.currency !== this.itemDiscount.currency) {
       throw new Error(

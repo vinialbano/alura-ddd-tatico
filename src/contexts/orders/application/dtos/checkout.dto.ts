@@ -7,11 +7,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-/**
- * ShippingAddressDTO
- *
- * Data Transfer Object for shipping address in checkout request
- */
 export class ShippingAddressDTO {
   @IsString()
   @IsNotEmpty()
@@ -42,12 +37,6 @@ export class ShippingAddressDTO {
   deliveryInstructions?: string;
 }
 
-/**
- * CheckoutDTO
- *
- * Request DTO for POST /orders/checkout endpoint
- * Initiates order creation from an existing shopping cart
- */
 export class CheckoutDTO {
   @IsUUID()
   @IsNotEmpty()

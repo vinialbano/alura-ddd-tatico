@@ -17,36 +17,20 @@ export class Quantity {
     this.value = value;
   }
 
-  /**
-   * Creates a Quantity with validation
-   * @param value - Numeric quantity value
-   * @throws InvalidCartOperationError if value is < 1, > 10, or not an integer
-   */
   static of(value: number): Quantity {
     return new Quantity(value);
   }
 
-  /**
-   * Returns the numeric quantity value
-   */
   getValue(): number {
     return this.value;
   }
 
-  /**
-   * Adds another quantity and returns a new Quantity
-   * @param other - Quantity to add
-   * @throws InvalidCartOperationError if the sum exceeds MAX_VALUE (10)
-   */
   add(other: Quantity): Quantity {
     const sum = this.value + other.value;
     return Quantity.of(sum);
   }
 
-  /**
-   * Checks equality with another Quantity by value
-   * @param other - Another Quantity to compare
-   */
+  // Value Object equality by value
   equals(other: Quantity): boolean {
     return this.value === other.value;
   }

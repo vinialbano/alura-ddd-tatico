@@ -1,10 +1,10 @@
 /**
- * Injection tokens for OrderModule
+ * Injection tokens for OrdersModule
  *
- * Separated from order.module.ts to avoid circular dependencies
+ * Separated from orders.module.ts to avoid circular dependencies
  * when application layer classes need to reference these tokens.
  */
 
+export const SHOPPING_CART_REPOSITORY = 'ShoppingCartRepository';
 export const ORDER_REPOSITORY = 'OrderRepository';
-export const CATALOG_GATEWAY = 'CatalogGateway';
 export const PRICING_GATEWAY = 'PricingGateway';

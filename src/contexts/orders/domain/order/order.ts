@@ -4,8 +4,6 @@ import { DomainEvent } from '../shared/domain-event';
 import { CustomerId } from '../shared/value-objects/customer-id';
 import { EventId } from '../shared/value-objects/event-id';
 import { CartId } from '../shopping-cart/cart-id';
-import { OrderCancelled } from './events/order-cancelled.event';
-import { OrderPaid } from './events/order-paid.event';
 import { OrderPlaced } from './events/order-placed.event';
 import { InvalidOrderStateTransitionError } from './exceptions/invalid-order-state-transition.error';
 import { OrderItem } from './order-item';
@@ -13,7 +11,7 @@ import { OrderStatus } from './value-objects/order-status';
 import { ShippingAddress } from './value-objects/shipping-address';
 
 // Order Aggregate Root - manages order lifecycle through state machine
-// State transitions: AwaitingPayment → Paid → Cancelled
+// State transitions: AwaitingPayment → Paid
 // Invariants: min 1 item, currency consistency, valid state transitions
 export class Order {
   private readonly _domainEvents: DomainEvent[] = [];
@@ -28,13 +26,11 @@ export class Order {
     private readonly _orderLevelDiscount: Money,
     private readonly _totalAmount: Money,
     private _paymentId: string | null,
-    private _cancellationReason: string | null,
     private readonly _createdAt: Date,
   ) {
     this.validateInvariants();
   }
 
-  // Creates new order in AwaitingPayment status
   static create(
     id: OrderId,
     cartId: CartId,
@@ -55,7 +51,6 @@ export class Order {
       orderLevelDiscount,
       totalAmount,
       null, // paymentId
-      null, // cancellationReason
       createdAt,
     );
 
@@ -76,7 +71,7 @@ export class Order {
     return order;
   }
 
-  // Marks order as paid
+  // State transition: AwaitingPayment → Paid
   markAsPaid(paymentId: string): void {
     if (!this.canBePaid()) {
       throw new InvalidOrderStateTransitionError(
@@ -86,16 +81,6 @@ export class Order {
 
     this._status = OrderStatus.Paid;
     this._paymentId = paymentId;
-
-    // Raise domain event
-    this._domainEvents.push(
-      new OrderPaid(
-        EventId.generate(),
-        this._id.getValue(),
-        new Date(),
-        paymentId,
-      ),
-    );
   }
 
   // TODO: Student exercise - implement stock reservation
@@ -106,46 +91,8 @@ export class Order {
   //   // Raise StockReserved domain event if needed
   // }
 
-  // Cancels order - from AwaitingPayment (no refund) or Paid (refund needed)
-  cancel(reason: string): void {
-    if (!this.canBeCancelled()) {
-      throw new InvalidOrderStateTransitionError(
-        `Cannot cancel order: order is in ${this._status.toString()} state`,
-      );
-    }
-
-    // Validate reason is not empty or whitespace-only
-    if (!reason || reason.trim().length === 0) {
-      throw new Error('Cancellation reason cannot be empty');
-    }
-
-    // Capture previous state before transitioning
-    const previousState = this._status.toString();
-
-    this._status = OrderStatus.Cancelled;
-    this._cancellationReason = reason;
-
-    // Raise domain event
-    this._domainEvents.push(
-      new OrderCancelled(
-        EventId.generate(),
-        this._id.getValue(),
-        new Date(),
-        reason,
-        previousState,
-      ),
-    );
-  }
-
   canBePaid(): boolean {
     return this._status.equals(OrderStatus.AwaitingPayment);
-  }
-
-  canBeCancelled(): boolean {
-    return (
-      this._status.equals(OrderStatus.AwaitingPayment) ||
-      this._status.equals(OrderStatus.Paid)
-    );
   }
 
   private validateInvariants(): void {
@@ -173,8 +120,6 @@ export class Order {
       );
     }
   }
-
-  // Getters for aggregate root properties
 
   get id(): OrderId {
     return this._id;
@@ -210,10 +155,6 @@ export class Order {
 
   get paymentId(): string | null {
     return this._paymentId;
-  }
-
-  get cancellationReason(): string | null {
-    return this._cancellationReason;
   }
 
   get createdAt(): Date {
