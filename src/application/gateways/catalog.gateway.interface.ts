@@ -20,7 +20,7 @@ export interface ProductData {
  *
  * Contract Requirements:
  * - Must complete within 2-second timeout
- * - Must throw ProductDataUnavailableError on failure or timeout
+ * - Must throw Error on failure or timeout
  * - Must translate external catalog structure to ProductData DTO
  */
 export interface CatalogGateway {
@@ -29,7 +29,7 @@ export interface CatalogGateway {
    *
    * @param productId - Product identifier
    * @returns ProductData containing name, description, and SKU
-   * @throws ProductDataUnavailableError if product not found, timeout, or service unavailable
+   * @throws Error if product not found, timeout, or service unavailable
    */
   getProductData(productId: ProductId): Promise<ProductData>;
 }

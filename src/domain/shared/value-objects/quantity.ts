@@ -1,4 +1,4 @@
-import { InvalidQuantityError } from '../../shopping-cart/exceptions/invalid-quantity.error';
+import { InvalidCartOperationError } from '../../shopping-cart/exceptions/invalid-cart-operation.error';
 
 /**
  * Quantity Value Object
@@ -20,7 +20,7 @@ export class Quantity {
   /**
    * Creates a Quantity with validation
    * @param value - Numeric quantity value
-   * @throws InvalidQuantityError if value is < 1, > 10, or not an integer
+   * @throws InvalidCartOperationError if value is < 1, > 10, or not an integer
    */
   static of(value: number): Quantity {
     return new Quantity(value);
@@ -36,7 +36,7 @@ export class Quantity {
   /**
    * Adds another quantity and returns a new Quantity
    * @param other - Quantity to add
-   * @throws InvalidQuantityError if the sum exceeds MAX_VALUE (10)
+   * @throws InvalidCartOperationError if the sum exceeds MAX_VALUE (10)
    */
   add(other: Quantity): Quantity {
     const sum = this.value + other.value;
@@ -53,11 +53,15 @@ export class Quantity {
 
   private validateQuantity(value: number): void {
     if (!Number.isInteger(value)) {
-      throw new InvalidQuantityError();
+      throw new InvalidCartOperationError(
+        'Quantity must be an integer between 1 and 10',
+      );
     }
 
     if (value < Quantity.MIN_VALUE || value > Quantity.MAX_VALUE) {
-      throw new InvalidQuantityError();
+      throw new InvalidCartOperationError(
+        'Quantity must be an integer between 1 and 10',
+      );
     }
   }
 }

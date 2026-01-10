@@ -9,8 +9,6 @@ import {
 import { ProductId } from '../../../shared/value-objects/product-id';
 import { Quantity } from '../../../shared/value-objects/quantity';
 import { CartItem } from '../../../shopping-cart/cart-item';
-import { ProductDataUnavailableError } from '../../exceptions/product-data-unavailable.error';
-import { ProductPricingFailedError } from '../../exceptions/product-pricing-failed.error';
 import { Money } from '../../value-objects/money';
 import { OrderPricingService } from '../order-pricing.service';
 
@@ -219,7 +217,7 @@ describe('OrderPricingService', () => {
   });
 
   describe('Error Handling: Catalog Failures', () => {
-    it('should throw ProductDataUnavailableError when catalog lookup fails for any product', async () => {
+    it('should throw Error when catalog lookup fails for any product', async () => {
       const cartItems = [
         createCartItem('product-1', 2),
         createCartItem('product-2', 1),
@@ -232,38 +230,38 @@ describe('OrderPricingService', () => {
           sku: 'SKU-1',
         })
         .mockRejectedValueOnce(
-          new ProductDataUnavailableError('Product not found'),
+          new Error('Failed to fetch product data from catalog: Product not found'),
         );
 
       await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        ProductDataUnavailableError,
+        Error,
       );
     });
 
-    it('should throw ProductDataUnavailableError when catalog times out', async () => {
+    it('should throw Error when catalog times out', async () => {
       const cartItems = [createCartItem('product-1', 1)];
 
       mockCatalogGateway.getProductData.mockRejectedValue(
-        new ProductDataUnavailableError('Request timeout'),
+        new Error('Failed to fetch product data from catalog: Request timeout'),
       );
 
       await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        ProductDataUnavailableError,
+        Error,
       );
       await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        'Request timeout',
+        'Failed to fetch product data from catalog',
       );
     });
 
-    it('should throw ProductDataUnavailableError when catalog service is unavailable', async () => {
+    it('should throw Error when catalog service is unavailable', async () => {
       const cartItems = [createCartItem('product-1', 1)];
 
       mockCatalogGateway.getProductData.mockRejectedValue(
-        new ProductDataUnavailableError('Service unavailable'),
+        new Error('Failed to fetch product data from catalog: Service unavailable'),
       );
 
       await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        ProductDataUnavailableError,
+        Error,
       );
     });
 
@@ -271,7 +269,7 @@ describe('OrderPricingService', () => {
       const cartItems = [createCartItem('product-1', 1)];
 
       mockCatalogGateway.getProductData.mockRejectedValue(
-        new ProductDataUnavailableError('Catalog error'),
+        new Error('Failed to fetch product data from catalog: Catalog error'),
       );
 
       await expect(orderPricingService.price(cartItems)).rejects.toThrow();
@@ -282,7 +280,7 @@ describe('OrderPricingService', () => {
   });
 
   describe('Error Handling: Pricing Failures', () => {
-    it('should throw ProductPricingFailedError when pricing calculation fails', async () => {
+    it('should throw Error when pricing calculation fails', async () => {
       const cartItems = [createCartItem('product-1', 2)];
 
       mockCatalogGateway.getProductData.mockResolvedValue({
@@ -292,18 +290,18 @@ describe('OrderPricingService', () => {
       });
 
       mockPricingGateway.calculatePricing.mockRejectedValue(
-        new ProductPricingFailedError('Pricing service unavailable'),
+        new Error('Failed to calculate pricing: Pricing service unavailable'),
       );
 
       await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        ProductPricingFailedError,
+        Error,
       );
       await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        'Pricing service unavailable',
+        'Failed to calculate pricing',
       );
     });
 
-    it('should throw ProductPricingFailedError when pricing times out', async () => {
+    it('should throw Error when pricing times out', async () => {
       const cartItems = [createCartItem('product-1', 1)];
 
       mockCatalogGateway.getProductData.mockResolvedValue({
@@ -313,14 +311,14 @@ describe('OrderPricingService', () => {
       });
 
       mockPricingGateway.calculatePricing.mockRejectedValue(
-        new ProductPricingFailedError('Request timeout'),
+        new Error('Failed to calculate pricing: Request timeout'),
       );
 
       await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        ProductPricingFailedError,
+        Error,
       );
       await expect(orderPricingService.price(cartItems)).rejects.toThrow(
-        'Request timeout',
+        'Failed to calculate pricing',
       );
     });
   });

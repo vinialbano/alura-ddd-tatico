@@ -1,98 +1,189 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# DDD Tactical Patterns - E-commerce Order Management
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Educational NestJS application demonstrating **Tactical DDD patterns** through a complete order management flow.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Course Structure
 
-## Description
+This codebase supports a 4-hour DDD course with four lessons:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Lesson 1: Creating a Cart (Shopping Cart Aggregate)
+- **Concepts**: Aggregates, Value Objects, Entities
+- **Live code**: Value object examples (Money, Quantity), Cart methods
+- **Pre-implemented**: Repository interfaces, controllers, NestJS setup
 
-## Project setup
+### Lesson 2: Converting Cart to Order (Domain Services)
+- **Concepts**: Domain Services, orchestration within bounded context
+- **Live code**: OrderCreationService, checkout flow
+- **Pre-implemented**: Order aggregate, value objects
 
-```bash
-$ npm install
+### Lesson 3: Synchronous Payment (Gateway Pattern)
+- **Concepts**: Cross-context integration, Gateway pattern, Anti-Corruption Layer
+- **Live code**: PaymentGateway interface, markAsPaid(), state transitions
+- **Pre-implemented**: Gateway stubs, OrderStatus states
+
+### Lesson 4: Asynchronous Payment (Event-Driven Architecture)
+- **Concepts**: Domain events, event dispatcher, message bus, eventual consistency
+- **Live code**: Domain events, event handlers, message bus interface
+- **Pre-implemented**: Message bus implementation, payment simulator
+
+## Tech Stack
+
+- **Framework**: NestJS 11.0.1
+- **Language**: TypeScript 5.7.3 (target ES2023)
+- **Testing**: Jest
+- **Storage**: In-memory (educational - no database)
+- **Architecture**: Layered DDD (Domain → Application → Infrastructure)
+
+## Project Structure
+
+```
+src/
+├── domain/              # Domain layer (business logic)
+│   ├── shopping-cart/   # Shopping Cart aggregate
+│   ├── order/          # Order aggregate + domain services
+│   └── shared/         # Shared kernel (value objects, base classes)
+├── application/        # Application layer (use cases)
+│   ├── services/       # Application services
+│   ├── dtos/          # Data transfer objects
+│   ├── gateways/      # Gateway interfaces
+│   └── events/        # Event handlers
+└── infrastructure/     # Infrastructure layer (NestJS)
+    ├── controllers/    # REST controllers
+    ├── repositories/   # In-memory repositories
+    ├── gateways/      # Gateway implementations (stubs)
+    ├── events/        # Message bus implementation
+    └── modules/       # NestJS modules
 ```
 
-## Compile and run the project
+## Setup Instructions
+
+### Prerequisites
+
+- Node.js 18+
+- npm 9+
+
+### Installation
 
 ```bash
-# development
-$ npm run start
+# Install dependencies
+npm install
 
-# watch mode
-$ npm run start:dev
+# Run tests
+npm test
 
-# production mode
-$ npm run start:prod
+# Run e2e tests
+npm run test:e2e
+
+# Start development server
+npm run start:dev
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
 ```
 
-## Run tests
+## API Endpoints
+
+### Cart Operations
+- `POST /cart` - Create cart
+- `POST /cart/:cartId/items` - Add item to cart
+- `PATCH /cart/:cartId/items/:productId` - Update quantity
+- `POST /cart/:cartId/checkout` - Checkout (convert to order)
+
+### Order Operations
+- `GET /orders/:orderId` - Get order details
+- `POST /orders/:orderId/pay` - Mark order as paid (sync)
+- `POST /orders/:orderId/cancel` - Cancel order
+
+## Key DDD Concepts Demonstrated
+
+### Aggregates
+- **ShoppingCart**: Manages cart lifecycle, enforces cart invariants
+- **Order**: Manages order state machine, enforces order invariants
+
+### Value Objects
+- **Money**: Encapsulates currency and amount
+- **Quantity**: Validates product quantities
+- **ProductId, CartId, OrderId**: Typed identifiers
+
+### Domain Services
+- **OrderCreationService**: Orchestrates order creation from cart
+- **OrderPricingService**: Calculates order pricing
+
+### Domain Events
+- **OrderPlaced**: Published when order created
+- **OrderPaid**: Published when payment confirmed
+- **OrderCancelled**: Published when order cancelled
+
+### Gateways (Anti-Corruption Layer)
+- **CatalogGateway**: Fetches product information
+- **PricingGateway**: Calculates pricing
+- **PaymentGateway**: Processes payments
+
+### Repository Pattern
+- **ShoppingCartRepository**: Persists shopping carts
+- **OrderRepository**: Persists orders
+
+## Student Exercises
+
+### Homework: Stock Reservation Flow
+
+Implement the stock reservation feature by completing TODOs in:
+
+1. **Domain Layer** (`src/domain/order/order.ts`):
+   - Implement `applyStockReserved()` method
+   - Handle state transition: Paid → StockReserved
+
+2. **Application Layer**:
+   - Create `StockReservedHandler`
+   - Subscribe to `stock.reserved` events
+
+3. **Infrastructure Layer**:
+   - Register event handler in module
+   - Update message bus subscriptions
+
+See TODO comments in code for guidance.
+
+## Testing Approach
 
 ```bash
-# unit tests
-$ npm run test
+# Run all tests
+npm test
 
-# e2e tests
-$ npm run test:e2e
+# Run specific test suite
+npm test src/domain/shopping-cart/__tests__/shopping-cart.spec.ts
 
-# test coverage
-$ npm run test:cov
+# Run e2e tests
+npm run test:e2e
+
+# Run tests in watch mode
+npm run test:watch
 ```
 
-## Deployment
+### Test Coverage
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- **Domain tests**: Business rule validation (aggregates, value objects, domain services)
+- **E2E tests**: Complete flows (cart → checkout → payment)
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Design Decisions
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+### Why In-Memory Storage?
+Focus on DDD patterns, not infrastructure complexity. Production apps would use PostgreSQL, MongoDB, etc.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Why Stubbed External Services?
+Demonstrates Gateway pattern and ACL without external dependencies. Production would integrate real services.
 
-## Resources
+### Why Simple Error Handling?
+Educational clarity over production robustness. Production would have comprehensive error handling.
 
-Check out a few resources that may come in handy when working with NestJS:
+## Learning Resources
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- **Domain-Driven Design** by Eric Evans
+- **Implementing Domain-Driven Design** by Vaughn Vernon
+- **NestJS Documentation**: https://docs.nestjs.com
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT - Educational purposes

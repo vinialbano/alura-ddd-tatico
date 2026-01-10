@@ -113,29 +113,6 @@ describe('ShoppingCart', () => {
   });
 
   describe('restore - invariant validation', () => {
-    it('should reject restoring cart with more than 20 products', () => {
-      const cartId = CartId.create();
-      const customerId = CustomerId.fromString('customer-1');
-      const items = new Map<string, CartItem>();
-
-      // Add 21 products
-      for (let i = 1; i <= 21; i++) {
-        const productId = ProductId.fromString(`product-${i}`);
-        const item = CartItem.create(productId, Quantity.of(1));
-        items.set(productId.getValue(), item);
-      }
-
-      expect(
-        () =>
-          new ShoppingCart({
-            cartId,
-            customerId,
-            items,
-            conversionStatus: 'active',
-          }),
-      ).toThrow('Cart cannot contain more than 20 unique products');
-    });
-
     it('should reject restoring empty cart with converted status', () => {
       const cartId = CartId.create();
       const customerId = CustomerId.fromString('customer-1');
@@ -246,25 +223,6 @@ describe('ShoppingCart', () => {
       expect(() => Quantity.of(0)).toThrow();
       expect(() => Quantity.of(-1)).toThrow();
       expect(() => Quantity.of(11)).toThrow();
-    });
-
-    it('should throw MaxProductsExceededError when adding 21st product', () => {
-      const cart = ShoppingCart.create(
-        CartId.create(),
-        CustomerId.fromString('customer-1'),
-      );
-
-      // Add 20 unique products
-      for (let i = 1; i <= 20; i++) {
-        cart.addItem(ProductId.fromString(`product-${i}`), Quantity.of(1));
-      }
-
-      expect(cart.getItemCount()).toBe(20);
-
-      // Attempt to add 21st product
-      expect(() =>
-        cart.addItem(ProductId.fromString('product-21'), Quantity.of(1)),
-      ).toThrow('Cart cannot contain more than 20 unique products');
     });
 
     it('should throw when consolidation exceeds 10', () => {

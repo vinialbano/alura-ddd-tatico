@@ -46,7 +46,7 @@ export interface PricingResult {
  *
  * Contract Requirements:
  * - Must complete within 2-second timeout
- * - Must throw ProductPricingFailedError on failure or timeout
+ * - Must throw Error on failure or timeout
  * - Must return pricing for all input items
  * - All Money values must use consistent currency
  * - Must calculate: lineTotal = (unitPrice × quantity) - itemDiscount
@@ -58,7 +58,7 @@ export interface PricingGateway {
    *
    * @param items - Array of products with quantities to price
    * @returns PricingResult with per-item and order-level pricing
-   * @throws ProductPricingFailedError if pricing fails, timeout, or service unavailable
+   * @throws Error if pricing fails, timeout, or service unavailable
    */
   calculatePricing(items: PricingInput[]): Promise<PricingResult>;
 }

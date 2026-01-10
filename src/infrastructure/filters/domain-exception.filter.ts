@@ -7,13 +7,8 @@ import {
 import { Response } from 'express';
 import { CartNotFoundException } from '../../application/exceptions/cart-not-found.exception';
 import { OrderNotFoundException } from '../../application/exceptions/order-not-found.exception';
-import { CartAlreadyConvertedError } from '../../domain/shopping-cart/exceptions/cart-already-converted.error';
-import { MaxProductsExceededError } from '../../domain/shopping-cart/exceptions/max-products-exceeded.error';
-import { InvalidQuantityError } from '../../domain/shopping-cart/exceptions/invalid-quantity.error';
-import { ProductNotInCartError } from '../../domain/shopping-cart/exceptions/product-not-in-cart.error';
+import { InvalidCartOperationError } from '../../domain/shopping-cart/exceptions/invalid-cart-operation.error';
 import { EmptyCartError } from '../../domain/shopping-cart/exceptions/empty-cart.error';
-import { ProductDataUnavailableError } from '../../domain/order/exceptions/product-data-unavailable.error';
-import { ProductPricingFailedError } from '../../domain/order/exceptions/product-pricing-failed.error';
 import { InvalidOrderStateTransitionError } from '../../domain/order/exceptions/invalid-order-state-transition.error';
 
 /**
@@ -24,13 +19,8 @@ import { InvalidOrderStateTransitionError } from '../../domain/order/exceptions/
 @Catch(
   CartNotFoundException,
   OrderNotFoundException,
-  CartAlreadyConvertedError,
-  MaxProductsExceededError,
-  InvalidQuantityError,
-  ProductNotInCartError,
+  InvalidCartOperationError,
   EmptyCartError,
-  ProductDataUnavailableError,
-  ProductPricingFailedError,
   InvalidOrderStateTransitionError,
 )
 export class DomainExceptionFilter implements ExceptionFilter {
@@ -64,9 +54,17 @@ export class DomainExceptionFilter implements ExceptionFilter {
     }
 
     // 409 Conflict - Attempting operation on incompatible state
+    if (exception instanceof InvalidOrderStateTransitionError) {
+      return {
+        status: HttpStatus.CONFLICT,
+        error: 'Conflict',
+      };
+    }
+
+    // 409 Conflict - Cart already converted (detect by message)
     if (
-      exception instanceof CartAlreadyConvertedError ||
-      exception instanceof InvalidOrderStateTransitionError
+      exception instanceof InvalidCartOperationError &&
+      exception.message.includes('already been converted')
     ) {
       return {
         status: HttpStatus.CONFLICT,
@@ -76,21 +74,8 @@ export class DomainExceptionFilter implements ExceptionFilter {
 
     // 400 Bad Request - Invalid input or business rule violation
     if (
-      exception instanceof MaxProductsExceededError ||
-      exception instanceof InvalidQuantityError ||
-      exception instanceof ProductNotInCartError ||
+      exception instanceof InvalidCartOperationError ||
       exception instanceof EmptyCartError
-    ) {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        error: 'Bad Request',
-      };
-    }
-
-    // 400 Bad Request - Gateway/external service failures during checkout
-    if (
-      exception instanceof ProductDataUnavailableError ||
-      exception instanceof ProductPricingFailedError
     ) {
       return {
         status: HttpStatus.BAD_REQUEST,

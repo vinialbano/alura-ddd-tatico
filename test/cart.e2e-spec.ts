@@ -90,32 +90,8 @@ describe('CartController (e2e)', () => {
         });
     });
 
-    it('should reject adding 21st product', async () => {
-      const createResponse = await request(app.getHttpServer())
-        .post('/carts')
-        .send({ customerId: 'customer-1' });
-
-      const cartId = (createResponse.body as CartResponseDto).cartId;
-
-      // Add 20 products
-      for (let i = 1; i <= 20; i++) {
-        await request(app.getHttpServer())
-          .post(`/carts/${cartId}/items`)
-          .send({ productId: `product-${i}`, quantity: 1 });
-      }
-
-      // Attempt 21st
-      return request(app.getHttpServer())
-        .post(`/carts/${cartId}/items`)
-        .send({ productId: 'product-21', quantity: 1 })
-        .expect(400)
-        .expect((res) => {
-          const body = res.body as ErrorResponse;
-          expect(body.message).toContain(
-            'Cart cannot contain more than 20 unique products',
-          );
-        });
-    });
+    // Test removed: MAX_PRODUCTS constraint was removed in minimization phase
+    // Cart no longer enforces a limit on unique products
 
     it('should reject invalid quantity', async () => {
       const createResponse = await request(app.getHttpServer())

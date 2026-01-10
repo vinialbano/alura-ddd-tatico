@@ -35,8 +35,8 @@ export interface PricedOrderData {
  * 5. Return complete PricedOrderData for Order creation
  *
  * Error Handling:
- * - Throws ProductDataUnavailableError if catalog lookup fails
- * - Throws ProductPricingFailedError if pricing calculation fails
+ * - Throws Error if catalog lookup fails
+ * - Throws Error if pricing calculation fails
  * - Enforces 2-second timeout on external calls (via gateway implementations)
  */
 export class OrderPricingService {
@@ -56,8 +56,7 @@ export class OrderPricingService {
    *
    * @param cartItems - Array of cart items to price
    * @returns PricedOrderData ready for Order.create()
-   * @throws ProductDataUnavailableError if catalog lookup fails
-   * @throws ProductPricingFailedError if pricing calculation fails
+   * @throws Error if catalog lookup fails or pricing calculation fails
    */
   async price(cartItems: CartItem[]): Promise<PricedOrderData> {
     // Handle empty cart
@@ -121,7 +120,7 @@ export class OrderPricingService {
    *
    * @param cartItems - Cart items to fetch product data for
    * @returns Map of productId -> ProductSnapshot
-   * @throws ProductDataUnavailableError if any product lookup fails
+   * @throws Error if any product lookup fails
    */
   private async retrieveProductSnapshots(
     cartItems: CartItem[],

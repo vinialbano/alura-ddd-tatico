@@ -66,19 +66,6 @@ export interface PaymentApprovedPayload {
 }
 
 /**
- * stock.reserved integration message payload
- */
-export interface StockReservedPayload {
-  orderId: string;
-  reservationId: string;
-  items: Array<{
-    productId: string;
-    quantity: number;
-  }>;
-  timestamp: string;
-}
-
-/**
  * order.paid integration message payload
  */
 export interface OrderPaidPayload {

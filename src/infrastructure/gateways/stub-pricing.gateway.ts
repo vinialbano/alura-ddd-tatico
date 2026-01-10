@@ -6,7 +6,6 @@ import {
   ItemPricing,
 } from '../../application/gateways/pricing.gateway.interface';
 import { Money } from '../../domain/order/value-objects/money';
-import { ProductPricingFailedError } from '../../domain/order/exceptions/product-pricing-failed.error';
 
 /**
  * StubPricingGateway
@@ -45,15 +44,15 @@ export class StubPricingGateway implements PricingGateway {
     await this.delay(150);
 
     if (items.length === 0) {
-      throw new ProductPricingFailedError('Cannot price empty cart');
+      throw new Error('Failed to calculate pricing: Cannot price empty cart');
     }
 
     // Calculate pricing for each item
     const itemPricings: ItemPricing[] = items.map((item) => {
       const unitPriceAmount = this.unitPrices.get(item.productId.getValue());
       if (unitPriceAmount === undefined) {
-        throw new ProductPricingFailedError(
-          `No price found for product ${item.productId.getValue()}`,
+        throw new Error(
+          `Failed to calculate pricing: No price found for product ${item.productId.getValue()}`,
         );
       }
 
