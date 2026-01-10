@@ -4,7 +4,6 @@ import { DomainEvent } from '../shared/domain-event';
 import { CustomerId } from '../shared/value-objects/customer-id';
 import { EventId } from '../shared/value-objects/event-id';
 import { CartId } from '../shopping-cart/cart-id';
-import { OrderPaid } from './events/order-paid.event';
 import { OrderPlaced } from './events/order-placed.event';
 import { InvalidOrderStateTransitionError } from './exceptions/invalid-order-state-transition.error';
 import { OrderItem } from './order-item';
@@ -83,16 +82,6 @@ export class Order {
 
     this._status = OrderStatus.Paid;
     this._paymentId = paymentId;
-
-    // Raise domain event
-    this._domainEvents.push(
-      new OrderPaid(
-        EventId.generate(),
-        this._id.getValue(),
-        new Date(),
-        paymentId,
-      ),
-    );
   }
 
   // TODO: Student exercise - implement stock reservation

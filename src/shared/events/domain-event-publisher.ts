@@ -1,13 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { OrderPaid } from '../../contexts/orders/domain/order/events/order-paid.event';
 import { OrderPlaced } from '../../contexts/orders/domain/order/events/order-placed.event';
 import { DomainEvent } from '../../contexts/orders/domain/shared/domain-event';
 import type { IMessageBus } from '../message-bus/message-bus.interface';
 import { MESSAGE_BUS } from '../message-bus/message-bus.interface';
-import {
-  OrderPaidPayload,
-  OrderPlacedPayload,
-} from './integration-message';
+import { OrderPlacedPayload } from './integration-message';
 
 /**
  * Domain Event Publisher
@@ -33,8 +29,6 @@ export class DomainEventPublisher {
   private async publishSingleEvent(event: DomainEvent): Promise<void> {
     if (event instanceof OrderPlaced) {
       await this.publishOrderPlaced(event);
-    } else if (event instanceof OrderPaid) {
-      await this.publishOrderPaid(event);
     }
     // Unknown event types are silently ignored
   }
@@ -65,20 +59,5 @@ export class DomainEventPublisher {
       `Publishing order.placed for order ${payload.orderId} (${payload.items.length} items, ${payload.totalAmount} ${payload.currency})`,
     );
     await this.messageBus.publish('order.placed', payload);
-  }
-
-  private async publishOrderPaid(event: OrderPaid): Promise<void> {
-    const payload: OrderPaidPayload = {
-      orderId: event.aggregateId,
-      paymentId: event.paymentId,
-      amount: 0, // Will be populated when we have access to order amount
-      currency: 'BRL',
-      timestamp: event.occurredAt.toISOString(),
-    };
-
-    this.logger.log(
-      `Publishing order.paid for order ${payload.orderId} with payment ${payload.paymentId}`,
-    );
-    await this.messageBus.publish('order.paid', payload);
   }
 }

@@ -63,14 +63,3 @@ export interface PaymentApprovedPayload {
   currency: string;
   timestamp: string;
 }
-
-/**
- * order.paid integration message payload
- */
-export interface OrderPaidPayload {
-  orderId: string;
-  paymentId: string;
-  amount: number;
-  currency: string;
-  timestamp: string;
-}

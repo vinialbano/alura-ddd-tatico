@@ -5,7 +5,6 @@ import { EventId } from '../../shared/value-objects/event-id';
 import { ProductId } from '../../shared/value-objects/product-id';
 import { Quantity } from '../../shared/value-objects/quantity';
 import { CartId } from '../../shopping-cart/cart-id';
-import { OrderPaid } from '../events/order-paid.event';
 import { OrderPlaced } from '../events/order-placed.event';
 import { InvalidOrderStateTransitionError } from '../exceptions/invalid-order-state-transition.error';
 import { Order } from '../order';
@@ -365,32 +364,6 @@ describe('Order Aggregate', () => {
       }).toThrow(InvalidOrderStateTransitionError);
     });
 
-    it('should raise OrderPaid domain event when marking as paid', () => {
-      const orderId = OrderId.generate();
-      const items = [createTestOrderItem()];
-      const order = Order.create(
-        orderId,
-        CartId.create(),
-        CustomerId.fromString('customer-123'),
-        items,
-        createTestShippingAddress(),
-        new Money(0, 'USD'),
-        new Money(100.0, 'USD'),
-      );
-
-      // Clear OrderPlaced event from creation
-      order.clearDomainEvents();
-
-      const paymentId = 'PAY-123456';
-      order.markAsPaid(paymentId);
-
-      const events = order.getDomainEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0]).toBeInstanceOf(OrderPaid);
-      expect((events[0] as OrderPaid).paymentId).toBe(paymentId);
-      expect((events[0] as OrderPaid).aggregateId).toBe(orderId.getValue());
-    });
-
     it('should record payment ID when marking as paid', () => {
       const order = createTestOrder();
 
@@ -425,7 +398,6 @@ describe('Order Aggregate', () => {
       // Future enhancement: Add invariant validation in Order.create()
       const items = [
         createTestOrderItem({
-          name: 'Product A',
           quantity: 2,
           unitPrice: new Money(50.0, 'USD'),
         }),
