@@ -7,7 +7,6 @@ import {
   MoneyDTO,
   OrderItemDTO,
   OrderResponseDTO,
-  ProductSnapshotDTO,
   ShippingAddressResponseDTO,
 } from '../dtos/order-response.dto';
 import { OrderNotFoundException } from '../exceptions/order-not-found.exception';
@@ -77,11 +76,7 @@ export class OrderService {
     const items: OrderItemDTO[] = order.items.map((item) => {
       const lineTotal = item.getLineTotal();
       return new OrderItemDTO(
-        new ProductSnapshotDTO(
-          item.productSnapshot.name,
-          item.productSnapshot.description,
-          item.productSnapshot.sku,
-        ),
+        item.productId.getValue(),
         item.quantity.getValue(),
         new MoneyDTO(item.unitPrice.amount, item.unitPrice.currency),
         new MoneyDTO(item.itemDiscount.amount, item.itemDiscount.currency),

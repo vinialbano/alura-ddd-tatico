@@ -1,15 +1,11 @@
 import { Money } from '../../../../../shared/value-objects/money';
+import { ProductId } from '../../shared/value-objects/product-id';
 import { Quantity } from '../../shared/value-objects/quantity';
 import { OrderItem } from '../order-item';
-import { ProductSnapshot } from '../value-objects/product-snapshot';
 
 describe('OrderItem Entity', () => {
-  const createValidProductSnapshot = (): ProductSnapshot => {
-    return new ProductSnapshot({
-      name: 'Premium Coffee Beans',
-      description: 'Single-origin Arabica beans from Colombia, medium roast',
-      sku: 'COFFEE-COL-001',
-    });
+  const createValidProductId = (): ProductId => {
+    return ProductId.fromString('COFFEE-COL-001');
   };
 
   const createValidQuantity = (): Quantity => {
@@ -26,33 +22,33 @@ describe('OrderItem Entity', () => {
 
   describe('Factory Method: create', () => {
     it('should create an OrderItem with valid parameters', () => {
-      const productSnapshot = createValidProductSnapshot();
+      const productId = createValidProductId();
       const quantity = createValidQuantity();
       const unitPrice = createValidUnitPrice();
       const itemDiscount = createValidItemDiscount();
 
       const orderItem = OrderItem.create(
-        productSnapshot,
+        productId,
         quantity,
         unitPrice,
         itemDiscount,
       );
 
       expect(orderItem).toBeDefined();
-      expect(orderItem.productSnapshot).toBe(productSnapshot);
+      expect(orderItem.productId).toBe(productId);
       expect(orderItem.quantity).toBe(quantity);
       expect(orderItem.unitPrice).toBe(unitPrice);
       expect(orderItem.itemDiscount).toBe(itemDiscount);
     });
 
     it('should create an OrderItem with zero discount', () => {
-      const productSnapshot = createValidProductSnapshot();
+      const productId = createValidProductId();
       const quantity = createValidQuantity();
       const unitPrice = createValidUnitPrice();
       const zeroDiscount = new Money(0, 'USD');
 
       const orderItem = OrderItem.create(
-        productSnapshot,
+        productId,
         quantity,
         unitPrice,
         zeroDiscount,
@@ -65,13 +61,13 @@ describe('OrderItem Entity', () => {
 
   describe('Line Total Calculation', () => {
     it('should calculate line total correctly: (unitPrice × quantity) - itemDiscount', () => {
-      const productSnapshot = createValidProductSnapshot();
+      const productId = createValidProductId();
       const quantity = Quantity.of(3);
       const unitPrice = new Money(20.0, 'USD');
       const itemDiscount = new Money(5.0, 'USD');
 
       const orderItem = OrderItem.create(
-        productSnapshot,
+        productId,
         quantity,
         unitPrice,
         itemDiscount,
@@ -85,13 +81,13 @@ describe('OrderItem Entity', () => {
     });
 
     it('should calculate line total correctly with zero discount', () => {
-      const productSnapshot = createValidProductSnapshot();
+      const productId = createValidProductId();
       const quantity = Quantity.of(2);
       const unitPrice = new Money(49.99, 'USD');
       const zeroDiscount = new Money(0, 'USD');
 
       const orderItem = OrderItem.create(
-        productSnapshot,
+        productId,
         quantity,
         unitPrice,
         zeroDiscount,
@@ -104,13 +100,13 @@ describe('OrderItem Entity', () => {
     });
 
     it('should calculate line total correctly with quantity of 1', () => {
-      const productSnapshot = createValidProductSnapshot();
+      const productId = createValidProductId();
       const quantity = Quantity.of(1);
       const unitPrice = new Money(100.0, 'USD');
       const itemDiscount = new Money(10.0, 'USD');
 
       const orderItem = OrderItem.create(
-        productSnapshot,
+        productId,
         quantity,
         unitPrice,
         itemDiscount,
@@ -123,13 +119,13 @@ describe('OrderItem Entity', () => {
     });
 
     it('should handle rounding correctly for monetary calculations', () => {
-      const productSnapshot = createValidProductSnapshot();
+      const productId = createValidProductId();
       const quantity = Quantity.of(3);
       const unitPrice = new Money(9.99, 'USD');
       const itemDiscount = new Money(0.5, 'USD');
 
       const orderItem = OrderItem.create(
-        productSnapshot,
+        productId,
         quantity,
         unitPrice,
         itemDiscount,
@@ -144,24 +140,24 @@ describe('OrderItem Entity', () => {
 
   describe('Currency Consistency', () => {
     it('should throw error if unitPrice and itemDiscount have different currencies', () => {
-      const productSnapshot = createValidProductSnapshot();
+      const productId = createValidProductId();
       const quantity = createValidQuantity();
       const unitPriceUSD = new Money(49.99, 'USD');
       const discountEUR = new Money(5.0, 'EUR');
 
       expect(() => {
-        OrderItem.create(productSnapshot, quantity, unitPriceUSD, discountEUR);
+        OrderItem.create(productId, quantity, unitPriceUSD, discountEUR);
       }).toThrow('Cannot perform operation with different currencies');
     });
 
     it('should allow creation when both unitPrice and itemDiscount have same currency', () => {
-      const productSnapshot = createValidProductSnapshot();
+      const productId = createValidProductId();
       const quantity = createValidQuantity();
       const unitPriceEUR = new Money(49.99, 'EUR');
       const discountEUR = new Money(5.0, 'EUR');
 
       const orderItem = OrderItem.create(
-        productSnapshot,
+        productId,
         quantity,
         unitPriceEUR,
         discountEUR,
@@ -175,14 +171,14 @@ describe('OrderItem Entity', () => {
 
   describe('Discount Validation', () => {
     it('should reject discount greater than total price (unitPrice × quantity)', () => {
-      const productSnapshot = createValidProductSnapshot();
+      const productId = createValidProductId();
       const quantity = Quantity.of(2);
       const unitPrice = new Money(10.0, 'USD');
       const excessiveDiscount = new Money(25.0, 'USD'); // Greater than 10 * 2 = 20
 
       expect(() => {
         OrderItem.create(
-          productSnapshot,
+          productId,
           quantity,
           unitPrice,
           excessiveDiscount,
@@ -191,13 +187,13 @@ describe('OrderItem Entity', () => {
     });
 
     it('should allow discount equal to total price (resulting in zero line total)', () => {
-      const productSnapshot = createValidProductSnapshot();
+      const productId = createValidProductId();
       const quantity = Quantity.of(2);
       const unitPrice = new Money(10.0, 'USD');
       const fullDiscount = new Money(20.0, 'USD'); // Equal to 10 * 2 = 20
 
       const orderItem = OrderItem.create(
-        productSnapshot,
+        productId,
         quantity,
         unitPrice,
         fullDiscount,
@@ -211,13 +207,13 @@ describe('OrderItem Entity', () => {
 
   describe('Immutability', () => {
     it('should have readonly properties that cannot be reassigned', () => {
-      const productSnapshot = createValidProductSnapshot();
+      const productId = createValidProductId();
       const quantity = createValidQuantity();
       const unitPrice = createValidUnitPrice();
       const itemDiscount = createValidItemDiscount();
 
       const orderItem = OrderItem.create(
-        productSnapshot,
+        productId,
         quantity,
         unitPrice,
         itemDiscount,
@@ -225,20 +221,20 @@ describe('OrderItem Entity', () => {
 
       // TypeScript compile-time check ensures these are readonly
       // Runtime verification that properties exist
-      expect(orderItem.productSnapshot).toBeDefined();
+      expect(orderItem.productId).toBeDefined();
       expect(orderItem.quantity).toBeDefined();
       expect(orderItem.unitPrice).toBeDefined();
       expect(orderItem.itemDiscount).toBeDefined();
     });
 
     it('should return consistent lineTotal on multiple calls', () => {
-      const productSnapshot = createValidProductSnapshot();
+      const productId = createValidProductId();
       const quantity = createValidQuantity();
       const unitPrice = createValidUnitPrice();
       const itemDiscount = createValidItemDiscount();
 
       const orderItem = OrderItem.create(
-        productSnapshot,
+        productId,
         quantity,
         unitPrice,
         itemDiscount,

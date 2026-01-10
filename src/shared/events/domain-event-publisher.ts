@@ -45,10 +45,9 @@ export class DomainEventPublisher {
       customerId: event.customerId.getValue(),
       cartId: event.cartId.getValue(),
       items: event.items.map((item) => ({
-        productId: item.productSnapshot.sku, // Using SKU as product identifier
-        productName: item.productSnapshot.name,
+        productId: item.productId.getValue(),
         quantity: item.quantity.getValue(),
-        unitPrice: item.unitPrice.amount, // unitPrice is on OrderItem, not ProductSnapshot
+        unitPrice: item.unitPrice.amount,
       })),
       totalAmount: event.totalAmount.amount,
       currency: event.totalAmount.currency,

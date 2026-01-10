@@ -38,7 +38,6 @@ export interface OrderPlacedPayload {
   cartId: string;
   items: Array<{
     productId: string;
-    productName: string;
     quantity: number;
     unitPrice: number;
   }>;

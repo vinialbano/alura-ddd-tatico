@@ -2,6 +2,7 @@ import { Money } from '../../../../../shared/value-objects/money';
 import { OrderId } from '../../../../../shared/value-objects/order-id';
 import { CustomerId } from '../../shared/value-objects/customer-id';
 import { EventId } from '../../shared/value-objects/event-id';
+import { ProductId } from '../../shared/value-objects/product-id';
 import { Quantity } from '../../shared/value-objects/quantity';
 import { CartId } from '../../shopping-cart/cart-id';
 import { OrderPaid } from '../events/order-paid.event';
@@ -10,7 +11,6 @@ import { InvalidOrderStateTransitionError } from '../exceptions/invalid-order-st
 import { Order } from '../order';
 import { OrderItem } from '../order-item';
 import { OrderStatus } from '../value-objects/order-status';
-import { ProductSnapshot } from '../value-objects/product-snapshot';
 import { ShippingAddress } from '../value-objects/shipping-address';
 
 // Test helper functions for inline test data creation
@@ -24,17 +24,13 @@ const createTestShippingAddress = () =>
   });
 
 const createTestOrderItem = (overrides?: {
-  name?: string;
+  productId?: string;
   quantity?: number;
   unitPrice?: Money;
   itemDiscount?: Money;
 }) =>
   OrderItem.create(
-    new ProductSnapshot({
-      name: overrides?.name || 'Test Product',
-      description: 'Test product description',
-      sku: 'TEST-SKU-001',
-    }),
+    ProductId.fromString(overrides?.productId || 'TEST-SKU-001'),
     Quantity.of(overrides?.quantity || 1),
     overrides?.unitPrice || new Money(100.0, 'USD'),
     overrides?.itemDiscount || new Money(0, 'USD'),
@@ -111,17 +107,17 @@ describe('Order Aggregate', () => {
       const customerId = CustomerId.fromString('customer-123');
       const items = [
         createTestOrderItem({
-          name: 'Product A',
+          productId: 'PRODUCT-A-001',
           quantity: 2,
           unitPrice: new Money(50.0, 'USD'),
         }),
         createTestOrderItem({
-          name: 'Product B',
+          productId: 'PRODUCT-B-001',
           quantity: 1,
           unitPrice: new Money(30.0, 'USD'),
         }),
         createTestOrderItem({
-          name: 'Product C',
+          productId: 'PRODUCT-C-001',
           quantity: 3,
           unitPrice: new Money(20.0, 'USD'),
           itemDiscount: new Money(5.0, 'USD'),
@@ -141,9 +137,9 @@ describe('Order Aggregate', () => {
       );
 
       expect(order.items).toHaveLength(3);
-      expect(order.items[0].productSnapshot.name).toBe('Product A');
-      expect(order.items[1].productSnapshot.name).toBe('Product B');
-      expect(order.items[2].productSnapshot.name).toBe('Product C');
+      expect(order.items[0].productId.getValue()).toBe('PRODUCT-A-001');
+      expect(order.items[1].productId.getValue()).toBe('PRODUCT-B-001');
+      expect(order.items[2].productId.getValue()).toBe('PRODUCT-C-001');
     });
   });
 
@@ -211,13 +207,13 @@ describe('Order Aggregate', () => {
       const customerId = CustomerId.fromString('customer-123');
       const items = [
         createTestOrderItem({
-          name: 'Product A',
+          productId: 'PRODUCT-A-001',
           quantity: 2,
           unitPrice: new Money(50.0, 'USD'),
           itemDiscount: new Money(5.0, 'USD'),
         }),
         createTestOrderItem({
-          name: 'Product B',
+          productId: 'PRODUCT-B-001',
           quantity: 1,
           unitPrice: new Money(30.0, 'USD'),
         }),
@@ -317,7 +313,7 @@ describe('Order Aggregate', () => {
       // Arrange
       const items = [
         createTestOrderItem({
-          name: 'Product',
+          productId: 'TEST-PRODUCT-001',
           quantity: 1,
           unitPrice: new Money(100.0, 'USD'),
         }),

@@ -15,7 +15,6 @@ import {
   MoneyDTO,
   OrderItemDTO,
   OrderResponseDTO,
-  ProductSnapshotDTO,
   ShippingAddressResponseDTO,
 } from '../dtos/order-response.dto';
 import { CartNotFoundException } from '../exceptions/cart-not-found.exception';
@@ -118,11 +117,7 @@ export class CheckoutService {
     const items: OrderItemDTO[] = order.items.map((item) => {
       const lineTotal = item.getLineTotal();
       return new OrderItemDTO(
-        new ProductSnapshotDTO(
-          item.productSnapshot.name,
-          item.productSnapshot.description,
-          item.productSnapshot.sku,
-        ),
+        item.productId.getValue(),
         item.quantity.getValue(),
         new MoneyDTO(item.unitPrice.amount, item.unitPrice.currency),
         new MoneyDTO(item.itemDiscount.amount, item.itemDiscount.currency),
@@ -156,7 +151,6 @@ export class CheckoutService {
         order.totalAmount.currency,
       ),
       paymentId: order.paymentId,
-      cancellationReason: order.cancellationReason,
       createdAt: order.createdAt,
     });
   }

@@ -83,11 +83,7 @@ describe('Order E2E Tests', () => {
       expect(body).toHaveProperty('status', 'AWAITING_PAYMENT');
       expect(body).toHaveProperty('items');
       expect(body.items).toHaveLength(1);
-      expect(body.items[0]).toHaveProperty('productSnapshot');
-      expect(body.items[0].productSnapshot).toHaveProperty(
-        'name',
-        'Premium Coffee Beans',
-      );
+      expect(body.items[0]).toHaveProperty('productId', 'COFFEE-COL-001');
       expect(body).toHaveProperty('totalAmount');
       expect(body.totalAmount).toHaveProperty('amount');
       expect(body.totalAmount).toHaveProperty('currency', 'USD');

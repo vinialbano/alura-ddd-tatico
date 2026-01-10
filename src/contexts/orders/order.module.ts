@@ -3,7 +3,6 @@ import { DomainEventPublisher } from '../../shared/events/domain-event-publisher
 import { ORDER_PAYMENT_CONTRACT } from '../shared-kernel/integration-contracts/order-payment.contract';
 import { SharedKernelModule } from '../shared-kernel/shared-kernel.module';
 import { PaymentApprovedHandler } from './application/events/payment-approved.handler';
-import { CatalogGateway } from './application/gateways/catalog.gateway.interface';
 import { PricingGateway } from './application/gateways/pricing.gateway.interface';
 import { OrderPaymentAdapter } from './application/integration/order-payment.adapter';
 import { CheckoutService } from './application/services/checkout.service';
@@ -15,17 +14,12 @@ import { OrderPricingService } from './domain/order/services/order-pricing.servi
 import { ShoppingCartRepository } from './domain/shopping-cart/shopping-cart.repository';
 import { OrderController } from './infrastructure/controllers/order.controller';
 import { PaymentsConsumer } from './infrastructure/events/consumers/payments-consumer';
-import { StubCatalogGateway } from './infrastructure/gateways/stub-catalog.gateway';
 import { StubPricingGateway } from './infrastructure/gateways/stub-pricing.gateway';
 import { InMemoryOrderRepository } from './infrastructure/repositories/in-memory-order.repository';
-import {
-  CATALOG_GATEWAY,
-  ORDER_REPOSITORY,
-  PRICING_GATEWAY,
-} from './order.tokens';
+import { ORDER_REPOSITORY, PRICING_GATEWAY } from './order.tokens';
 
 // Re-export tokens for backward compatibility
-export { ORDER_REPOSITORY, CATALOG_GATEWAY, PRICING_GATEWAY };
+export { ORDER_REPOSITORY, PRICING_GATEWAY };
 
 /**
  * OrderModule
@@ -51,10 +45,6 @@ export { ORDER_REPOSITORY, CATALOG_GATEWAY, PRICING_GATEWAY };
 
     // Gateways (Infrastructure → Application Interface)
     {
-      provide: CATALOG_GATEWAY,
-      useClass: StubCatalogGateway,
-    },
-    {
       provide: PRICING_GATEWAY,
       useClass: StubPricingGateway,
     },
@@ -62,13 +52,10 @@ export { ORDER_REPOSITORY, CATALOG_GATEWAY, PRICING_GATEWAY };
     // Domain Services (using factory to avoid NestJS decorators in domain layer)
     {
       provide: OrderPricingService,
-      useFactory: (
-        catalogGateway: CatalogGateway,
-        pricingGateway: PricingGateway,
-      ) => {
-        return new OrderPricingService(catalogGateway, pricingGateway);
+      useFactory: (pricingGateway: PricingGateway) => {
+        return new OrderPricingService(pricingGateway);
       },
-      inject: [CATALOG_GATEWAY, PRICING_GATEWAY],
+      inject: [PRICING_GATEWAY],
     },
     {
       provide: OrderCreationService,

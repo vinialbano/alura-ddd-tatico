@@ -14,42 +14,25 @@ export class MoneyDTO {
 }
 
 /**
- * ProductSnapshotDTO
- *
- * Data Transfer Object for ProductSnapshot value object in HTTP responses
- */
-export class ProductSnapshotDTO {
-  name!: string;
-  description!: string;
-  sku!: string;
-
-  constructor(name: string, description: string, sku: string) {
-    this.name = name;
-    this.description = description;
-    this.sku = sku;
-  }
-}
-
-/**
  * OrderItemDTO
  *
  * Data Transfer Object for OrderItem entity in HTTP responses
  */
 export class OrderItemDTO {
-  productSnapshot!: ProductSnapshotDTO;
+  productId!: string;
   quantity!: number;
   unitPrice!: MoneyDTO;
   itemDiscount!: MoneyDTO;
   lineTotal!: MoneyDTO;
 
   constructor(
-    productSnapshot: ProductSnapshotDTO,
+    productId: string,
     quantity: number,
     unitPrice: MoneyDTO,
     itemDiscount: MoneyDTO,
     lineTotal: MoneyDTO,
   ) {
-    this.productSnapshot = productSnapshot;
+    this.productId = productId;
     this.quantity = quantity;
     this.unitPrice = unitPrice;
     this.itemDiscount = itemDiscount;
@@ -106,7 +89,6 @@ export class OrderResponseDTO {
   orderLevelDiscount!: MoneyDTO;
   totalAmount!: MoneyDTO;
   paymentId!: string | null;
-  cancellationReason!: string | null;
   createdAt!: Date;
 
   constructor(data: {
@@ -119,7 +101,6 @@ export class OrderResponseDTO {
     orderLevelDiscount: MoneyDTO;
     totalAmount: MoneyDTO;
     paymentId: string | null;
-    cancellationReason: string | null;
     createdAt: Date;
   }) {
     this.id = data.id;
@@ -131,7 +112,6 @@ export class OrderResponseDTO {
     this.orderLevelDiscount = data.orderLevelDiscount;
     this.totalAmount = data.totalAmount;
     this.paymentId = data.paymentId;
-    this.cancellationReason = data.cancellationReason;
     this.createdAt = data.createdAt;
   }
 }
