@@ -10,13 +10,6 @@
  * - occurredAt: Timestamp when the event occurred
  */
 export interface DomainEvent {
-  /**
-   * Identifier of the aggregate instance that raised this event
-   */
   readonly aggregateId: string;
-
-  /**
-   * Timestamp when this event occurred
-   */
   readonly occurredAt: Date;
 }

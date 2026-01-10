@@ -12,9 +12,6 @@
  * - Complements the async event-driven integration via message bus
  */
 
-/**
- * Payload for marking an order as paid
- */
 export interface MarkOrderAsPaidRequest {
   orderId: string;
   paymentId: string;
@@ -28,18 +25,11 @@ export interface MarkOrderAsPaidRequest {
  *
  * Implementation: Provided by Orders BC
  * Consumer: Used by Payments BC for direct calls
+ *
+ * This is a direct call integration pattern, different from
+ * the async event-driven pattern using the message bus.
  */
 export interface IOrderPaymentContract {
-  /**
-   * Mark an order as paid (synchronous operation)
-   *
-   * This is a direct call integration pattern, different from
-   * the async event-driven pattern using the message bus.
-   *
-   * @param request - Payment approval details
-   * @throws {OrderNotFoundError} If order doesn't exist
-   * @throws {InvalidOrderStateError} If order is not in AWAITING_PAYMENT state
-   */
   markOrderAsPaid(request: MarkOrderAsPaidRequest): Promise<void>;
 }
 

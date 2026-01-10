@@ -39,15 +39,6 @@ export class CheckoutService {
     private readonly eventPublisher: DomainEventPublisher,
   ) {}
 
-  /**
-   * Checkout a shopping cart to create an order
-   *
-   * @param dto - CheckoutDTO with cart ID and shipping address
-   * @returns OrderResponseDTO with created order details
-   * @throws CartNotFoundException if cart does not exist
-   * @throws EmptyCartError if cart is empty (thrown by OrderCreationService)
-   * @throws Error if product data unavailable or pricing calculation fails
-   */
   async checkout(dto: CheckoutDTO): Promise<OrderResponseDTO> {
     // Convert DTO to domain value objects
     const cartId = CartId.fromString(dto.cartId);

@@ -32,16 +32,6 @@ export class OrderItem {
     this.validateDiscount();
   }
 
-  /**
-   * Factory method to create an OrderItem
-   *
-   * @param productId - Product identifier
-   * @param quantity - Number of units ordered
-   * @param unitPrice - Price per unit at time of order
-   * @param itemDiscount - Product-level discount applied
-   * @returns New OrderItem instance
-   * @throws Error if currencies are inconsistent or discount is excessive
-   */
   static create(
     productId: ProductId,
     quantity: Quantity,
@@ -64,11 +54,6 @@ export class OrderItem {
     return subtotal.subtract(this.itemDiscount);
   }
 
-  /**
-   * Validate that unitPrice and itemDiscount use the same currency
-   *
-   * @throws Error if currencies differ
-   */
   private validateCurrencyConsistency(): void {
     if (this.unitPrice.currency !== this.itemDiscount.currency) {
       throw new Error(

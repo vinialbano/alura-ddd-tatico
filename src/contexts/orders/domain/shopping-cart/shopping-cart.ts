@@ -28,7 +28,6 @@ export class ShoppingCart {
     this.validate();
   }
 
-  // Creates empty active cart
   static create(cartId: CartId, customerId: CustomerId): ShoppingCart {
     return new ShoppingCart({
       cartId,
@@ -38,7 +37,6 @@ export class ShoppingCart {
     });
   }
 
-  // Adds item or consolidates quantity if exists (max 10 per product)
   addItem(productId: ProductId, quantity: Quantity): void {
     this.ensureNotConverted();
 
@@ -82,7 +80,7 @@ export class ShoppingCart {
     return this.conversionStatus;
   }
 
-  // Converts cart to order - becomes immutable
+  // Invariant: Cart must have at least 1 item to be converted
   markAsConverted(): void {
     if (this.items.size === 0) {
       throw new EmptyCartError();

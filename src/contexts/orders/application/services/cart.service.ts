@@ -27,11 +27,6 @@ export class CartService {
     private readonly repository: ShoppingCartRepository,
   ) {}
 
-  /**
-   * Creates a new shopping cart for a customer
-   * @param dto - CreateCartDto with customer ID
-   * @returns CartResponseDto with new cart details
-   */
   async createCart(dto: CreateCartDto): Promise<CartResponseDto> {
     const cartId = CartId.create();
     const customerId = CustomerId.fromString(dto.customerId);
@@ -43,13 +38,6 @@ export class CartService {
     return this.mapToDto(cart);
   }
 
-  /**
-   * Adds an item to an existing cart
-   * @param cartIdStr - Cart identifier as string
-   * @param dto - AddItemDto with product ID and quantity
-   * @returns CartResponseDto with updated cart
-   * @throws CartNotFoundException if cart not found
-   */
   async addItem(cartIdStr: string, dto: AddItemDto): Promise<CartResponseDto> {
     const cartId = CartId.fromString(cartIdStr);
     const cart = await this.repository.findById(cartId);
@@ -68,12 +56,6 @@ export class CartService {
     return this.mapToDto(cart);
   }
 
-  /**
-   * Retrieves a cart by ID
-   * @param cartIdStr - Cart identifier as string
-   * @returns CartResponseDto with cart details
-   * @throws CartNotFoundException if cart not found
-   */
   async getCart(cartIdStr: string): Promise<CartResponseDto> {
     const cartId = CartId.fromString(cartIdStr);
     const cart = await this.repository.findById(cartId);
@@ -85,11 +67,6 @@ export class CartService {
     return this.mapToDto(cart);
   }
 
-  /**
-   * Maps domain ShoppingCart to CartResponseDto
-   * @param cart - ShoppingCart aggregate
-   * @returns CartResponseDto
-   */
   private mapToDto(cart: ShoppingCart): CartResponseDto {
     const items: CartItemResponseDto[] = cart.getItems().map((item) => ({
       productId: item.getProductId().getValue(),

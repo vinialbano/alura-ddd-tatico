@@ -29,17 +29,7 @@ export interface PricedOrderData {
  * - Order is created in AwaitingPayment state
  */
 export class OrderCreationService {
-  /**
-   * Create an order from a shopping cart
-   *
-   * Business Rule: Cart must not be empty
-   *
-   * @param cart - The shopping cart to convert
-   * @param pricedData - Priced order data from OrderPricingService
-   * @param shippingAddress - Delivery address for the order
-   * @returns Newly created Order aggregate
-   * @throws EmptyCartError if cart has no items
-   */
+  // Business Rule: Cart must not be empty
   createFromCart(
     cart: ShoppingCart,
     pricedData: PricedOrderData,
@@ -62,14 +52,6 @@ export class OrderCreationService {
     );
   }
 
-  /**
-   * Check if cart can be converted to order
-   *
-   * Business rule: Cart must have items and not be already converted
-   *
-   * @param cart - The shopping cart to check
-   * @returns true if cart can be converted, false otherwise
-   */
   canConvertCart(cart: ShoppingCart): boolean {
     return !cart.isEmpty() && !cart.isConverted();
   }

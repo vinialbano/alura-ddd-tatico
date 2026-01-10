@@ -31,7 +31,6 @@ export class Order {
     this.validateInvariants();
   }
 
-  // Creates new order in AwaitingPayment status
   static create(
     id: OrderId,
     cartId: CartId,
@@ -72,7 +71,7 @@ export class Order {
     return order;
   }
 
-  // Marks order as paid
+  // State transition: AwaitingPayment → Paid
   markAsPaid(paymentId: string): void {
     if (!this.canBePaid()) {
       throw new InvalidOrderStateTransitionError(
@@ -121,8 +120,6 @@ export class Order {
       );
     }
   }
-
-  // Getters for aggregate root properties
 
   get id(): OrderId {
     return this._id;

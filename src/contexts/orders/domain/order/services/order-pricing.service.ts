@@ -37,18 +37,6 @@ export interface PricedOrderData {
 export class OrderPricingService {
   constructor(private readonly pricingGateway: PricingGateway) {}
 
-  /**
-   * Price cart items to produce fully priced order data
-   *
-   * Process:
-   * 1. Send all CartItems to pricing gateway → receive unit prices, line totals, discounts
-   * 2. Combine product IDs + pricing data → create OrderItems
-   * 3. Return PricedOrderData with items + order totals
-   *
-   * @param cartItems - Array of cart items to price
-   * @returns PricedOrderData ready for Order.create()
-   * @throws Error if pricing calculation fails
-   */
   async price(cartItems: CartItem[]): Promise<PricedOrderData> {
     // Handle empty cart
     if (cartItems.length === 0) {

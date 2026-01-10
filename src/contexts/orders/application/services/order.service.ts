@@ -24,15 +24,6 @@ export class OrderService {
     private readonly orderRepository: OrderRepository,
   ) {}
 
-  /**
-   * Mark an order as paid
-   *
-   * @param orderId - Order ID
-   * @param paymentId - Payment transaction identifier
-   * @returns OrderResponseDTO
-   * @throws OrderNotFoundException if order does not exist
-   * @throws InvalidOrderStateTransitionError if order cannot be marked as paid
-   */
   async markAsPaid(
     orderId: string,
     paymentId: string,
@@ -50,13 +41,6 @@ export class OrderService {
     return this.mapToDto(order);
   }
 
-  /**
-   * Find an order by ID
-   *
-   * @param orderId - Order ID
-   * @returns OrderResponseDTO
-   * @throws OrderNotFoundException if order does not exist
-   */
   async findById(orderId: string): Promise<OrderResponseDTO> {
     const orderIdVO = OrderId.fromString(orderId);
     const order = await this.orderRepository.findById(orderIdVO);
@@ -68,9 +52,6 @@ export class OrderService {
     return this.mapToDto(order);
   }
 
-  /**
-   * Maps Order aggregate to flattened OrderResponseDTO
-   */
   private mapToDto(order: Order): OrderResponseDTO {
     const items: OrderItemDTO[] = order.items.map((item) => {
       const lineTotal = item.getLineTotal();

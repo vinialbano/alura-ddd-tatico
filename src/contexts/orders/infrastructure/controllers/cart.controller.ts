@@ -25,10 +25,6 @@ import { DomainExceptionFilter } from '../filters/domain-exception.filter';
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  /**
-   * POST /carts
-   * Creates a new shopping cart
-   */
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createCart(
@@ -37,10 +33,6 @@ export class CartController {
     return await this.cartService.createCart(createCartDto);
   }
 
-  /**
-   * POST /carts/:id/items
-   * Adds an item to an existing cart
-   */
   @Post(':id/items')
   @HttpCode(HttpStatus.OK)
   async addItem(
@@ -50,10 +42,6 @@ export class CartController {
     return await this.cartService.addItem(cartId, addItemDto);
   }
 
-  /**
-   * GET /carts/:id
-   * Retrieves a cart by ID
-   */
   @Get(':id')
   async getCart(@Param('id') cartId: string): Promise<CartResponseDto> {
     return await this.cartService.getCart(cartId);

@@ -28,11 +28,6 @@ export class PaymentApprovedHandler {
     private readonly orderRepository: OrderRepository,
   ) {}
 
-  /**
-   * Handle payment.approved payload
-   *
-   * @param payload - payment approval details
-   */
   async handle(payload: PaymentApprovedPayload): Promise<void> {
     const { orderId, paymentId, approvedAmount, currency } = payload;
 

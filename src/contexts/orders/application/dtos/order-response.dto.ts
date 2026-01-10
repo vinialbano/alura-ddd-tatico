@@ -1,7 +1,4 @@
 /**
- * OrderItemDTO
- *
- * Flattened data transfer object for OrderItem entity in HTTP responses
  * Money amounts are represented as simple numbers with currency at order level
  */
 export class OrderItemDTO {
@@ -26,11 +23,6 @@ export class OrderItemDTO {
   }
 }
 
-/**
- * ShippingAddressResponseDTO
- *
- * Data Transfer Object for ShippingAddress value object in HTTP responses
- */
 export class ShippingAddressResponseDTO {
   street!: string;
   addressLine2?: string;
@@ -60,11 +52,6 @@ export class ShippingAddressResponseDTO {
 }
 
 /**
- * OrderResponseDTO
- *
- * Order representation for HTTP responses with flattened Money amounts
- * Used for GET /orders/:id and POST /orders/checkout responses
- *
  * Money amounts are flattened to simple numbers with a single currency field
  * Shipping address remains as a nested object for clarity
  */

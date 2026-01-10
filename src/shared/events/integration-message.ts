@@ -3,35 +3,13 @@
  * Wrapper for messages exchanged between bounded contexts via message bus
  */
 export interface IntegrationMessage<T> {
-  /**
-   * Unique message identifier (UUID)
-   */
   messageId: string;
-
-  /**
-   * Message topic (e.g., "order.placed", "payment.approved")
-   */
   topic: string;
-
-  /**
-   * Timestamp when message was published
-   */
   timestamp: Date;
-
-  /**
-   * Domain-specific payload (JSON-serializable primitives only)
-   */
   payload: T;
-
-  /**
-   * Correlation ID for tracing across bounded contexts
-   */
   correlationId: string;
 }
 
-/**
- * order.placed integration message payload
- */
 export interface OrderPlacedPayload {
   orderId: string;
   customerId: string;
@@ -53,9 +31,6 @@ export interface OrderPlacedPayload {
   timestamp: string;
 }
 
-/**
- * payment.approved integration message payload
- */
 export interface PaymentApprovedPayload {
   orderId: string;
   paymentId: string;

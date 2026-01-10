@@ -16,10 +16,6 @@ export class DomainEventPublisher {
 
   constructor(@Inject(MESSAGE_BUS) private readonly messageBus: IMessageBus) {}
 
-  /**
-   * Publish domain events as integration messages
-   * @param events Array of domain events to publish
-   */
   async publishDomainEvents(events: DomainEvent[]): Promise<void> {
     for (const event of events) {
       await this.publishSingleEvent(event);

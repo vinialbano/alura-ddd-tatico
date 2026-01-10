@@ -37,12 +37,6 @@ export class StubPricingGateway implements PricingGateway {
 
   private readonly currency = 'USD';
 
-  /**
-   * Calculate pricing for cart items
-   *
-   * Simulates 150ms network latency
-   * Applies hardcoded discount rules
-   */
   async calculatePricing(items: PricingInput[]): Promise<PricingResult> {
     // Simulate network latency
     await this.delay(150);

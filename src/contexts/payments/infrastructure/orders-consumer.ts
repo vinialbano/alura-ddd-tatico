@@ -31,9 +31,6 @@ export class OrdersConsumer {
   ) {}
 
   /**
-   * Initialize subscriptions
-   * Should be called during application startup (OnModuleInit)
-   *
    * Can be controlled via ENABLE_AUTOMATIC_PAYMENT environment variable:
    * - 'true' (default): Automatic payment processing (event-driven flow)
    * - 'false': Manual payment via POST /payments (synchronous flow)
@@ -58,12 +55,6 @@ export class OrdersConsumer {
     );
   }
 
-  /**
-   * Handle order.placed integration message
-   * Simulates payment processing and publishes payment.approved
-   *
-   * @param message - Integration message with order details
-   */
   private async handleOrderPlaced(
     message: IntegrationMessage<OrderPlacedPayload>,
   ): Promise<void> {
