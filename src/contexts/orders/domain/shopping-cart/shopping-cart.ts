@@ -82,38 +82,6 @@ export class ShoppingCart {
     return this.conversionStatus;
   }
 
-  // Replaces quantity for existing item
-  updateItemQuantity(productId: ProductId, quantity: Quantity): void {
-    this.ensureNotConverted();
-
-    const productKey = productId.getValue();
-    const existingItem = this.items.get(productKey);
-
-    if (!existingItem) {
-      throw new InvalidCartOperationError(
-        `Product ${productId.getValue()} is not in the cart`,
-      );
-    }
-
-    existingItem.updateQuantity(quantity);
-  }
-
-  // Removes item from cart
-  removeItem(productId: ProductId): void {
-    this.ensureNotConverted();
-
-    const productKey = productId.getValue();
-    const existingItem = this.items.get(productKey);
-
-    if (!existingItem) {
-      throw new InvalidCartOperationError(
-        `Product ${productId.getValue()} is not in the cart`,
-      );
-    }
-
-    this.items.delete(productKey);
-  }
-
   // Converts cart to order - becomes immutable
   markAsConverted(): void {
     if (this.items.size === 0) {
