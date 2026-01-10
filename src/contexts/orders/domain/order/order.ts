@@ -17,7 +17,6 @@ import { ShippingAddress } from './value-objects/shipping-address';
 // Invariants: min 1 item, currency consistency, valid state transitions
 export class Order {
   private readonly _domainEvents: DomainEvent[] = [];
-  private readonly _processedPaymentIds: Set<string> = new Set();
 
   private constructor(
     private readonly _id: OrderId,
@@ -77,13 +76,8 @@ export class Order {
     return order;
   }
 
-  // Marks order as paid - idempotent per paymentId
+  // Marks order as paid
   markAsPaid(paymentId: string): void {
-    // Idempotency check: If we've already processed this payment ID, return early
-    if (this._processedPaymentIds.has(paymentId)) {
-      return;
-    }
-
     if (!this.canBePaid()) {
       throw new InvalidOrderStateTransitionError(
         `Cannot mark order as paid: order is in ${this._status.toString()} state`,
@@ -92,7 +86,6 @@ export class Order {
 
     this._status = OrderStatus.Paid;
     this._paymentId = paymentId;
-    this._processedPaymentIds.add(paymentId);
 
     // Raise domain event
     this._domainEvents.push(
@@ -153,11 +146,6 @@ export class Order {
       this._status.equals(OrderStatus.AwaitingPayment) ||
       this._status.equals(OrderStatus.Paid)
     );
-  }
-
-  // Idempotency check for payment processing
-  hasProcessedPayment(paymentId: string): boolean {
-    return this._processedPaymentIds.has(paymentId);
   }
 
   private validateInvariants(): void {

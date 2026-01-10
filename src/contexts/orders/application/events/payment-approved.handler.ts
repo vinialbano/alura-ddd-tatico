@@ -51,15 +51,7 @@ export class PaymentApprovedHandler {
       return;
     }
 
-    // 2. Check idempotency - if this payment has already been processed, log and return
-    if (order.hasProcessedPayment(paymentId)) {
-      this.logger.log(
-        `Payment ${paymentId} already processed for order ${orderId}, ignoring duplicate message`,
-      );
-      return;
-    }
-
-    // 3. Mark order as paid (idempotent operation)
+    // 2. Mark order as paid
     try {
       order.markAsPaid(paymentId);
       this.logger.log(
@@ -76,10 +68,10 @@ export class PaymentApprovedHandler {
       throw error;
     }
 
-    // 4. Persist updated order
+    // 3. Persist updated order
     await this.orderRepository.save(order);
 
-    // 5. Publish OrderPaid domain event to message bus
+    // 4. Publish OrderPaid domain event to message bus
     await this.eventPublisher.publishDomainEvents([...order.getDomainEvents()]);
 
     this.logger.log(

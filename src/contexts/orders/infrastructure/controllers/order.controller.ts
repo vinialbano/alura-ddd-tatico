@@ -13,7 +13,6 @@ import {
 import { CheckoutService } from '../../application/services/checkout.service';
 import { OrderService } from '../../application/services/order.service';
 import { CheckoutDTO } from '../../application/dtos/checkout.dto';
-import { MarkPaidDTO } from '../../application/dtos/mark-paid.dto';
 import { CancelOrderDTO } from '../../application/dtos/cancel-order.dto';
 import { OrderResponseDTO } from '../../application/dtos/order-response.dto';
 import { DomainExceptionFilter } from '../filters/domain-exception.filter';
@@ -59,24 +58,6 @@ export class OrderController {
   @HttpCode(HttpStatus.OK)
   async getById(@Param('id') id: string): Promise<OrderResponseDTO> {
     return await this.orderService.findById(id);
-  }
-
-  /**
-   * POST /orders/:id/mark-paid
-   *
-   * Mark an order as paid
-   *
-   * @param id - Order ID
-   * @param dto - Mark paid request with payment ID
-   * @returns Order response DTO
-   */
-  @Post(':id/mark-paid')
-  @HttpCode(HttpStatus.OK)
-  async markAsPaid(
-    @Param('id') id: string,
-    @Body() dto: MarkPaidDTO,
-  ): Promise<OrderResponseDTO> {
-    return await this.orderService.markAsPaid(id, dto.paymentId);
   }
 
   /**

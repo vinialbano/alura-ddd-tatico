@@ -35,8 +35,22 @@ export class OrdersConsumer {
   /**
    * Initialize subscriptions
    * Should be called during application startup (OnModuleInit)
+   *
+   * Can be controlled via ENABLE_AUTOMATIC_PAYMENT environment variable:
+   * - 'true' (default): Automatic payment processing (event-driven flow)
+   * - 'false': Manual payment via POST /payments (synchronous flow)
    */
   initialize(): void {
+    const enableAutomaticPayment =
+      process.env.ENABLE_AUTOMATIC_PAYMENT !== 'false';
+
+    if (!enableAutomaticPayment) {
+      this.logger.log(
+        'OrdersConsumer (Payments BC) - Automatic payment DISABLED. Use POST /payments for manual payment processing.',
+      );
+      return;
+    }
+
     this.messageBus.subscribe<OrderPlacedPayload>(
       'order.placed',
       this.handleOrderPlaced.bind(this),
