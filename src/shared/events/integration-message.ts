@@ -75,13 +75,3 @@ export interface OrderPaidPayload {
   currency: string;
   timestamp: string;
 }
-
-/**
- * order.cancelled integration message payload
- */
-export interface OrderCancelledPayload {
-  orderId: string;
-  reason: string;
-  previousStatus: string;
-  timestamp: string;
-}

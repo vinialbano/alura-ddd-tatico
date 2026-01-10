@@ -1,12 +1,10 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { OrderCancelled } from '../../contexts/orders/domain/order/events/order-cancelled.event';
 import { OrderPaid } from '../../contexts/orders/domain/order/events/order-paid.event';
 import { OrderPlaced } from '../../contexts/orders/domain/order/events/order-placed.event';
 import { DomainEvent } from '../../contexts/orders/domain/shared/domain-event';
 import type { IMessageBus } from '../message-bus/message-bus.interface';
 import { MESSAGE_BUS } from '../message-bus/message-bus.interface';
 import {
-  OrderCancelledPayload,
   OrderPaidPayload,
   OrderPlacedPayload,
 } from './integration-message';
@@ -37,8 +35,6 @@ export class DomainEventPublisher {
       await this.publishOrderPlaced(event);
     } else if (event instanceof OrderPaid) {
       await this.publishOrderPaid(event);
-    } else if (event instanceof OrderCancelled) {
-      await this.publishOrderCancelled(event);
     }
     // Unknown event types are silently ignored
   }
@@ -85,19 +81,5 @@ export class DomainEventPublisher {
       `Publishing order.paid for order ${payload.orderId} with payment ${payload.paymentId}`,
     );
     await this.messageBus.publish('order.paid', payload);
-  }
-
-  private async publishOrderCancelled(event: OrderCancelled): Promise<void> {
-    const payload: OrderCancelledPayload = {
-      orderId: event.aggregateId,
-      reason: event.cancellationReason,
-      previousStatus: event.previousState,
-      timestamp: event.occurredAt.toISOString(),
-    };
-
-    this.logger.log(
-      `Publishing order.cancelled for order ${payload.orderId} (was ${payload.previousStatus}, reason: ${payload.reason})`,
-    );
-    await this.messageBus.publish('order.cancelled', payload);
   }
 }

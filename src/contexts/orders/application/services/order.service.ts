@@ -17,7 +17,6 @@ import { OrderNotFoundException } from '../exceptions/order-not-found.exception'
  *
  * Application service for order operations:
  * - Mark order as paid
- * - Cancel order
  * - Find order by ID
  */
 @Injectable()
@@ -48,29 +47,6 @@ export class OrderService {
     }
 
     order.markAsPaid(paymentId);
-    await this.orderRepository.save(order);
-
-    return this.mapToDto(order);
-  }
-
-  /**
-   * Cancel an order
-   *
-   * @param orderId - Order ID
-   * @param reason - Cancellation reason
-   * @returns OrderResponseDTO
-   * @throws OrderNotFoundException if order does not exist
-   * @throws InvalidOrderStateTransitionError if order cannot be cancelled
-   */
-  async cancel(orderId: string, reason: string): Promise<OrderResponseDTO> {
-    const orderIdVO = OrderId.fromString(orderId);
-    const order = await this.orderRepository.findById(orderIdVO);
-
-    if (!order) {
-      throw new OrderNotFoundException(orderIdVO);
-    }
-
-    order.cancel(reason);
     await this.orderRepository.save(order);
 
     return this.mapToDto(order);
@@ -139,7 +115,6 @@ export class OrderService {
         order.totalAmount.currency,
       ),
       paymentId: order.paymentId,
-      cancellationReason: order.cancellationReason,
       createdAt: order.createdAt,
     });
   }

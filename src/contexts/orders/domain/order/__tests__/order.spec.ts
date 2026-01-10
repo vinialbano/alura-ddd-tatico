@@ -4,7 +4,6 @@ import { CustomerId } from '../../shared/value-objects/customer-id';
 import { EventId } from '../../shared/value-objects/event-id';
 import { Quantity } from '../../shared/value-objects/quantity';
 import { CartId } from '../../shopping-cart/cart-id';
-import { OrderCancelled } from '../events/order-cancelled.event';
 import { OrderPaid } from '../events/order-paid.event';
 import { OrderPlaced } from '../events/order-placed.event';
 import { InvalidOrderStateTransitionError } from '../exceptions/invalid-order-state-transition.error';
@@ -82,7 +81,6 @@ describe('Order Aggregate', () => {
       expect(order.orderLevelDiscount).toBe(orderLevelDiscount);
       expect(order.totalAmount).toBe(totalAmount);
       expect(order.paymentId).toBeNull();
-      expect(order.cancellationReason).toBeNull();
       expect(order.createdAt).toBeInstanceOf(Date);
     });
 
@@ -371,33 +369,6 @@ describe('Order Aggregate', () => {
       }).toThrow(InvalidOrderStateTransitionError);
     });
 
-    it('should throw error when marking cancelled order as paid', () => {
-      const order = createTestOrder();
-
-      order.cancel('Customer requested cancellation');
-
-      expect(() => {
-        order.markAsPaid('pay_789');
-      }).toThrow(InvalidOrderStateTransitionError);
-    });
-
-    it('should preserve order state when markAsPaid fails', () => {
-      const order = createTestOrder();
-
-      order.cancel('Test cancellation');
-      const statusBeforeAttempt = order.status;
-      const paymentIdBeforeAttempt = order.paymentId;
-
-      try {
-        order.markAsPaid('pay_999');
-      } catch {
-        // Expected to fail
-      }
-
-      expect(order.status).toBe(statusBeforeAttempt);
-      expect(order.paymentId).toBe(paymentIdBeforeAttempt);
-    });
-
     it('should raise OrderPaid domain event when marking as paid', () => {
       const orderId = OrderId.generate();
       const items = [createTestOrderItem()];
@@ -435,143 +406,6 @@ describe('Order Aggregate', () => {
     });
   });
 
-  describe('State Machine: cancel', () => {
-    it('should transition from AwaitingPayment to Cancelled with reason', () => {
-      const order = createTestOrder();
-
-      const cancellationReason = 'Customer requested cancellation';
-      order.cancel(cancellationReason);
-
-      expect(order.status).toBe(OrderStatus.Cancelled);
-      expect(order.cancellationReason).toBe(cancellationReason);
-    });
-
-    it('should transition from Paid to Cancelled with reason (refund scenario)', () => {
-      const order = createTestOrder();
-
-      order.markAsPaid('pay_123');
-      const cancellationReason = 'Product defect - customer requested refund';
-      order.cancel(cancellationReason);
-
-      expect(order.status).toBe(OrderStatus.Cancelled);
-      expect(order.cancellationReason).toBe(cancellationReason);
-      expect(order.paymentId).toBe('pay_123'); // Payment ID preserved
-    });
-
-    it('should raise OrderCancelled event when cancelling from AwaitingPayment (T037)', () => {
-      const orderId = OrderId.generate();
-      const items = [createTestOrderItem()];
-      const order = Order.create(
-        orderId,
-        CartId.create(),
-        CustomerId.fromString('customer-123'),
-        items,
-        createTestShippingAddress(),
-        new Money(0, 'USD'),
-        new Money(100.0, 'USD'),
-      );
-
-      // Clear OrderPlaced event from creation
-      order.clearDomainEvents();
-
-      const cancellationReason = 'Customer changed mind';
-      order.cancel(cancellationReason);
-
-      const events = order.getDomainEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0]).toBeInstanceOf(OrderCancelled);
-
-      const cancelledEvent = events[0] as OrderCancelled;
-      expect(cancelledEvent.aggregateId).toBe(orderId.getValue());
-      expect(cancelledEvent.cancellationReason).toBe(cancellationReason);
-      expect(cancelledEvent.previousState).toBe('AWAITING_PAYMENT');
-      expect(cancelledEvent.occurredAt).toBeInstanceOf(Date);
-    });
-
-    it('should raise OrderCancelled event when cancelling from Paid (T050)', () => {
-      const orderId = OrderId.generate();
-      const items = [createTestOrderItem()];
-      const order = Order.create(
-        orderId,
-        CartId.create(),
-        CustomerId.fromString('customer-123'),
-        items,
-        createTestShippingAddress(),
-        new Money(0, 'USD'),
-        new Money(100.0, 'USD'),
-      );
-
-      // Mark as paid first
-      order.markAsPaid('pay_123');
-
-      // Clear domain events from markAsPaid
-      order.clearDomainEvents();
-
-      // Now cancel (refund scenario)
-      const cancellationReason = 'Refund requested';
-      order.cancel(cancellationReason);
-
-      const events = order.getDomainEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0]).toBeInstanceOf(OrderCancelled);
-
-      const cancelledEvent = events[0] as OrderCancelled;
-      expect(cancelledEvent.aggregateId).toBe(orderId.getValue());
-      expect(cancelledEvent.cancellationReason).toBe(cancellationReason);
-      expect(cancelledEvent.previousState).toBe('PAID');
-      expect(cancelledEvent.occurredAt).toBeInstanceOf(Date);
-    });
-
-    it('should throw error when cancelling already cancelled order', () => {
-      const order = createTestOrder();
-
-      order.cancel('First cancellation');
-
-      expect(() => {
-        order.cancel('Second cancellation attempt');
-      }).toThrow(InvalidOrderStateTransitionError);
-    });
-
-    it('should throw error when cancelling with empty reason (T039)', () => {
-      const order = createTestOrder();
-
-      // Test empty string
-      expect(() => {
-        order.cancel('');
-      }).toThrow('Cancellation reason cannot be empty');
-
-      // Test whitespace-only string
-      expect(() => {
-        order.cancel('   ');
-      }).toThrow('Cancellation reason cannot be empty');
-
-      // Test tab/newline characters
-      expect(() => {
-        order.cancel('\t\n');
-      }).toThrow('Cancellation reason cannot be empty');
-
-      // Verify order remained in AwaitingPayment
-      expect(order.status).toBe(OrderStatus.AwaitingPayment);
-    });
-
-    it('should preserve order state when cancel fails', () => {
-      const order = createTestOrder();
-
-      order.cancel('First cancellation');
-      const statusBeforeAttempt = order.status;
-      const reasonBeforeAttempt = order.cancellationReason;
-
-      try {
-        order.cancel('Second cancellation');
-      } catch {
-        // Expected to fail
-      }
-
-      expect(order.status).toBe(statusBeforeAttempt);
-      expect(order.cancellationReason).toBe(reasonBeforeAttempt);
-    });
-  });
-
   describe('State Machine Validation Methods', () => {
     it('canBePaid should return true for AwaitingPayment status', () => {
       const order = createTestOrder();
@@ -585,36 +419,6 @@ describe('Order Aggregate', () => {
       order.markAsPaid('pay_123');
 
       expect(order.canBePaid()).toBe(false);
-    });
-
-    it('canBePaid should return false for Cancelled status', () => {
-      const order = createTestOrder();
-
-      order.cancel('Test cancellation');
-
-      expect(order.canBePaid()).toBe(false);
-    });
-
-    it('canBeCancelled should return true for AwaitingPayment status', () => {
-      const order = createTestOrder();
-
-      expect(order.canBeCancelled()).toBe(true);
-    });
-
-    it('canBeCancelled should return true for Paid status', () => {
-      const order = createTestOrder();
-
-      order.markAsPaid('pay_123');
-
-      expect(order.canBeCancelled()).toBe(true);
-    });
-
-    it('canBeCancelled should return false for Cancelled status', () => {
-      const order = createTestOrder();
-
-      order.cancel('Test cancellation');
-
-      expect(order.canBeCancelled()).toBe(false);
     });
   });
 
